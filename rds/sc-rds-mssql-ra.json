@@ -98,6 +98,7 @@
         },
         "DBMasterUserPassword": {
             "Description": "The password for the master user. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".",
+            "NoEcho": true,
             "Type": "String",
             "MinLength": "1",
             "MaxLength": "41",

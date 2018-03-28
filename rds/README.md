@@ -58,31 +58,15 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-rds-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-rds-ra
-laptop:sc-rds-ra islawson$ aws s3 cp s3://islawson-service-catalog-reference-architecture/rds/sc-rds-ra.zip ./ --region us-east-2
-download: s3://islawson-service-catalog-reference-architecture/rds/sc-rds-ra.zip to ./sc-rds-ra.zip
+laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
+laptop:Downloads islawson$ cd ~/Downloads/sc-ra
+laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Unzip contents
-laptop:sc-rds-ra islawson$ unzip sc-rds-ra.zip 
-Archive:  sc-rds-ra.zip
-Archive:  sc-rds-ra.zip
-Archive:  sc-rds-ra-zip.zip
-  inflating: README.md               
-  inflating: sc-rds-mariadb-ra.json  
-  inflating: sc-rds-mariadb-ra.yml   
-  inflating: sc-rds-mssql-ra.json    
-  inflating: sc-rds-mssql-ra.yml     
-  inflating: sc-rds-mysql-ra.json    
-  inflating: sc-rds-mysql-ra.yml     
-  inflating: sc-rds-postgresql-ra.json  
-  inflating: sc-rds-postgresql-ra.yml  
-  inflating: sc-rds-ra-architecture-multi-az.png  
-  inflating: sc-rds-ra-architecture-single-instance.png  
-  inflating: sc-rds-ra-setup.py      
+### Change to EC2 Reference Architecture directory
+laptop:ec2 islawson$ cd rds     
 
 ### View Contents
-laptop:sc-rds-ra islawson$ ls -l 
+laptop:rds islawson$ ls -l 
 total 104
 -rw-r--r--  1 islawson  staff    9285 Mar 13 10:38 README.md
 -rw-r--r--  1 islawson  staff   11487 Mar 13 10:41 sc-rds-mariadb-ra.json
@@ -96,18 +80,17 @@ total 104
 -rw-r--r--  1 islawson  staff  148556 Mar 12 10:48 sc-rds-ra-architecture-multi-az.png
 -rw-r--r--  1 islawson  staff  139535 Mar 12 10:48 sc-rds-ra-architecture-single-instance.png
 -rwxr-xr-x  1 islawson  staff    7770 Mar 13 10:43 sc-rds-ra-setup.py
--rw-r--r--  1 islawson  staff  274567 Mar 13 10:45 sc-rds-ra-zip.zip
 
 ### Set execute permission on python setup script
-laptop:sc-rds-ra islawson$ chmod +x sc-rds-ra-setup.py 
+laptop:rds islawson$ chmod +x sc-rds-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:sc-rds-ra islawson$ cat ~/.aws/config
+laptop:rds islawson$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:sc-rds-ra islawson$ ./sc-rds-ra-setup.py 
+laptop:rds islawson$ ./sc-rds-ra-setup.py 
 STARTED -- Setup of Service Catalog RDS Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog RDS Reference Architecture
@@ -209,4 +192,6 @@ The following AWS team members have provided guidance, code review and other ass
 * Added: sc-rds-mssql-ra.json     
 * Added: sc-rds-mysql-ra.json     
 * Added: sc-rds-postgresql-ra.json 
-* Added: LICENSE.md
+* Added: LICENSE
+* Added: NOTICE
+* Added: COPYING

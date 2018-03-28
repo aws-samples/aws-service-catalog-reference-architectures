@@ -35,7 +35,7 @@ The following prerequisites are required:
     * ./README.md (this file)
     * ./COPYING
     * ./LICENSE
-    * ./NOTICES
+    * ./NOTICE
     * ./sc-emr-ra-setup.py (python script used during setup process)
     * ./sc-emr-ra.yml (EMR Cloudformation Template in YAML)
     * ./sc-emr-ra.json (EMR Cloudformation Template in JSON)
@@ -146,5 +146,5 @@ The following AWS team members have provided guidance, code review and other ass
 * Added: sc-emr-ra-architecture.png   
 * Added: sc-emr-ra-setup.py         
 * Added: COPYING
-* Added: NOTICES
+* Added: NOTICE
 * Added: LICENSE
