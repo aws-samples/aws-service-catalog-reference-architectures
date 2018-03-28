@@ -53,7 +53,7 @@
                     "default": "Core Node Count"
                 },
                 "ReleaseLabel": {
-                    "default": "Release Label"
+                    "default": "Release Configuration"
                 }
             }
         }

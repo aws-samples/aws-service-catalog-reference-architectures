@@ -35,7 +35,7 @@ Metadata:
       CoreNodeCount:
         default: Core Node Count
       ReleaseLabel:
-        default: Release Label
+        default: Release Configuration
 Parameters:
   ClusterName:
     Description: Enter a name for your EMR cluster.

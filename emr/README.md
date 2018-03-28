@@ -48,43 +48,34 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-emr-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-emr-ra
-laptop:sc-emr-ra islawson$ aws s3 cp s3://islawson-service-catalog-reference-architecture/emr/sc-emr-ra.zip ./
-download: s3://islawson-service-catalog-reference-architecture/emr/sc-emr-ra.zip to ./sc-emr-ra.zip
+laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
+laptop:Downloads islawson$ cd ~/Downloads/sc-ra
+laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Unzip contents
-laptop:sc-emr-ra islawson$ unzip sc-emr-ra.zip 
-Archive:  sc-emr-ra.zip
-  inflating: README.md 
-  inflating: COPYING
-  inflating: LICENSE
-  inflating: NOTICES   
-  inflating: sc-emr-ra.yml     
-  inflating: sc-emr-ra.json 
-  inflating: sc-emr-ra-architecture.png    
-  inflating: sc-emr-ra-setup.py        
+### Change to EMR Reference Architecture directory
+laptop:ec2 islawson$ cd emr      
 
 ### View Contents
-laptop:sc-emr-ra islawson$ ls -l
--rw-r--r--  1 islawson  staff  11357 Mar 26 08:54 COPYING
--rw-r--r--  1 islawson  staff  11357 Mar 26 08:54 LICENSE
--rw-r--r--  1 islawson  staff    121 Mar 26 08:54 NOTICES
--rw-r--r--  1 islawson  staff   7469 Mar 27 11:38 README.md
--rwxr-xr-x  1 islawson  staff   3860 Mar 27 11:34 sc-emr-ra-setup.py
--rw-r--r--  1 islawson  staff  10146 Mar 27 11:39 sc-emr-ra.json
--rw-r--r--  1 islawson  staff   5229 Mar 27 11:08 sc-emr-ra.yml
+laptop:emr islawson$ ls -l
+-rw-r--r--  1 islawson  staff   11357 Mar 26 08:54 COPYING
+-rw-r--r--  1 islawson  staff   11357 Mar 26 08:54 LICENSE
+-rw-r--r--  1 islawson  staff     121 Mar 28 14:25 NOTICE
+-rw-r--r--  1 islawson  staff    7076 Mar 28 14:37 README.md
+-rw-r--r--  1 islawson  staff  221092 Mar 28 14:50 sc-emr-ra-architecture.png
+-rwxr-xr-x  1 islawson  staff    3856 Mar 27 11:42 sc-emr-ra-setup.py
+-rw-r--r--  1 islawson  staff   11007 Mar 27 12:12 sc-emr-ra.json
+-rw-r--r--  1 islawson  staff    5765 Mar 28 14:38 sc-emr-ra.yml
 
 ### Set execute permission on python setup script
-laptop:sc-emr-ra islawson$ chmod +x sc-emr-ra-setup.py 
+laptop:emr islawson$ chmod +x sc-emr-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:sc-emr-ra islawson$ cat ~/.aws/config
+laptop:emr islawson$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:sc-emr-ra islawson$ ./sc-emr-ra-setup.py 
+laptop:emr islawson$ ./sc-emr-ra-setup.py 
 
 STARTED -- Setup of Service Catalog EMR Reference Architecture.
 
