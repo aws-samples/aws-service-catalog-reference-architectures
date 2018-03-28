@@ -49,14 +49,6 @@
                         "EC2KeyPair",
                         "BastionSSHCIDR"
                     ]
-                },
-                {
-                    "Label": {
-                        "default": "Tag Parameters"
-                    },
-                    "Parameters": [
-                        "SCRADescriptionTag"
-                    ]
                 }
             ]
         }
@@ -135,11 +127,6 @@
             "Description": "CIDR block to allow access to bastion SSH",
             "Type": "String",
             "Default": "0.0.0.0/0"
-        },
-        "SCRADescriptionTag": {
-            "Description": "Description for the tag to use components created",
-            "Type": "String",
-            "Default": "Service-Catalog-VPC-Reference-Architecture"
         }
     },
     "Conditions": {
@@ -230,14 +217,12 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Ref": "VPCCIDR"
+                            "Fn::Sub": "SC-VPC-RA-${VPCCIDR}"
                         }
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -254,9 +239,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -296,9 +279,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -327,9 +308,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -357,9 +336,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -387,9 +364,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -407,9 +382,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -427,9 +400,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -447,9 +418,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -467,9 +436,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -557,9 +524,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -577,9 +542,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -780,9 +743,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -825,9 +786,7 @@
                     },
                     {
                         "Key": "Description",
-                        "Value": {
-                            "Ref": "SCRADescriptionTag"
-                        }
+                        "Value": "Service-Catalog-VPC-Reference-Architecture"
                     }
                 ]
             }
@@ -996,11 +955,6 @@
                 "Ref": "BastionSSHCIDR"
             },
             "Condition": "CreateBastionResources"
-        },
-        "SCRADescriptionTag": {
-            "Value": {
-                "Ref": "SCRADescriptionTag"
-            }
         }
     }
 }

@@ -30,10 +30,6 @@ Metadata:
       - BastionInstanceType
       - EC2KeyPair
       - BastionSSHCIDR
-    - Label:
-        default: 'Tag Parameters'
-      Parameters:
-      - SCRADescriptionTag
 Parameters:
   RegionAZ1Name:
     Description: Availability Zone 1 Name in Region
@@ -96,10 +92,6 @@ Parameters:
     Description: CIDR block to allow access to bastion SSH
     Type: String
     Default: 0.0.0.0/0
-  SCRADescriptionTag:
-    Description: 'Description for the tag to use components created'
-    Type: String
-    Default: "Service-Catalog-VPC-Reference-Architecture"
 Conditions: 
   CreateBastionResources: !Equals [ !Ref CreateBastionInstance, true ]
   HasKeyName: !Not
@@ -150,9 +142,9 @@ Resources:
       InstanceTenancy: default
       Tags:
       - Key: Name
-        Value: !Ref VPCCIDR
+        Value: !Sub SC-VPC-RA-${VPCCIDR}
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   InternetGateway:
     Type: 'AWS::EC2::InternetGateway'
     Properties:
@@ -160,7 +152,7 @@ Resources:
       - Key: Name
         Value: !Ref VPCCIDR
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   VPCGatewayAttachment:
     Type: 'AWS::EC2::VPCGatewayAttachment'
     Properties:
@@ -179,7 +171,7 @@ Resources:
       - Key: Reach
         Value: public
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   SubnetBPublic:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -193,7 +185,7 @@ Resources:
       - Key: Reach
         Value: public
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   SubnetAPrivate:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -206,7 +198,7 @@ Resources:
       - Key: Reach
         Value: private
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   SubnetBPrivate:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -219,7 +211,7 @@ Resources:
       - Key: Reach
         Value: private
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   RouteTableAPublic:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -228,7 +220,7 @@ Resources:
       - Key: Name
         Value: 'A Public - sc-vpc-ra'
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   RouteTableBPublic:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -237,7 +229,7 @@ Resources:
       - Key: Name
         Value: 'B Public - sc-vpc-ra'
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   RouteTableAPrivate:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -246,7 +238,7 @@ Resources:
       - Key: Name
         Value: 'A Private - sc-vpc-ra'
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   RouteTableBPrivate:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -255,7 +247,7 @@ Resources:
       - Key: Name
         Value: 'B Private - sc-vpc-ra'
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   RouteTableAssociationAPublic:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
@@ -298,7 +290,7 @@ Resources:
       - Key: Name
         Value: Public - sc-vpc-ra
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   NetworkAclPrivate:
     Type: 'AWS::EC2::NetworkAcl'
     Properties:
@@ -307,7 +299,7 @@ Resources:
       - Key: Name
         Value: Private - sc-vpc-ra
       - Key: Description
-        Value: !Ref SCRADescriptionTag
+        Value: 'Service-Catalog-VPC-Reference-Architecture'
   SubnetNetworkAclAssociationAPublic:
     Type: 'AWS::EC2::SubnetNetworkAclAssociation'
     Properties:
@@ -416,7 +408,7 @@ Resources:
         - Key: Name
           Value: nat-gateway-Aside
         - Key: Description
-          Value: !Ref SCRADescriptionTag
+          Value: 'Service-Catalog-VPC-Reference-Architecture'
   NATGatewayAEIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -443,7 +435,7 @@ Resources:
         - Key: Name
           Value: nat-gateway-Bside
         - Key: Description
-          Value: !Ref SCRADescriptionTag
+          Value: 'Service-Catalog-VPC-Reference-Architecture'
   NATGatewayBEIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -520,5 +512,3 @@ Outputs:
   BastionSSHCIDR:
     Value: !Ref BastionSSHCIDR
     Condition: CreateBastionResources
-  SCRADescriptionTag:
-    Value: !Ref SCRADescriptionTag

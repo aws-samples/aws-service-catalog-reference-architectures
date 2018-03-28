@@ -30,7 +30,7 @@ The following prerequisites are required:
 
 ### Installion Overview
 
-1. Download the reference architecture zip file from Github and expand its content into a folder.
+1. Clone the reference architecture from Github and expand its content into a folder.
 2. Contents will include:
     * ./README.md (this file)
     * ./sc-vpc-ra-setup.py (python script used during setup process)
@@ -45,22 +45,15 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-vpc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-vpc-ra
-laptop:sc-vpc-ra islawson$ aws s3 cp s3://islawson-service-catalog-reference-architecture/vpc/sc-vpc-ra.zip ./
-download: s3://islawson-service-catalog-reference-architecture/vpc/sc-vps-ra.zip to ./sc-vpc-ra.zip
+laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
+laptop:Downloads islawson$ cd ~/Downloads/sc-ra
+laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Unzip contents
-laptop:sc-vpc-ra islawson$ unzip sc-vpc-ra.zip 
-Archive:  sc-vpc-ra.zip
-  inflating: README.md    
-  inflating: sc-vpc-ra.yml     
-  inflating: sc-vpc-ra.json 
-  inflating: sc-vpc-ra-architecture-multi-az.png    
-  inflating: sc-vpc-ra-setup.py        
+### Change to EC2 Reference Architecture directory
+laptop:ec2 islawson$ cd vpc      
 
 ### View Contents
-laptop:sc-vpc-vpc islawson$ ls -l
+laptop:vpc islawson$ ls -l
 -rw-r--r--  1 islawson  staff   7873 Mar 12 16:07 README.md
 -rwxr-xr-x  1 islawson  staff   3358 Mar 12 15:19 sc-vpc-ra-setup.py
 -rw-r--r--  1 islawson  staff  31408 Mar 12 16:10 sc-vpc-ra.json
@@ -68,15 +61,15 @@ laptop:sc-vpc-vpc islawson$ ls -l
 -rw-r--r--  1 islawson  staff 360954 Mar 12 17:53 sc-vpc-ra-architecture-multi-az.png
 
 ### Set execute permission on python setup script
-laptop:sc-vpc-ra islawson$ chmod +x sc-vpc-ra-setup.py 
+laptop:vpc islawson$ chmod +x sc-vpc-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:sc-vpc-ra islawson$ cat ~/.aws/config
+laptop:vpc islawson$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:sc-vpc-ra islawson$ ./sc-vpc-ra-setup.py 
+laptop:vpc islawson$ ./sc-vpc-ra-setup.py 
 
 STARTED -- Setup of Service Catalog VPC Reference Architecture.
 
