@@ -30,7 +30,7 @@ The following prerequisites are required:
 
 ### Installion Overview
 
-1. Download the reference architecture zip file from Github and expand its content into a folder.
+1. Clone the reference architecture from Github and expand its content into a folder.
 2. Contents will include:
     * ./README.md (this file)
     * ./COPYING

@@ -35,7 +35,7 @@ The following prerequisites are required:
 
 ### Installion Overview
 
-1. Download the reference architecture zip file from Github and expand its content into a folder.
+1. Clone the reference architecture from Github and expand its content into a folder..
 2. Contents will include:
     * ./README.md (this file)
     * ./COPYING
@@ -61,32 +61,15 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-s3-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-s3-ra
-laptop:sc-s3-ra islawson$ aws s3 cp s3://islawson-service-catalog-reference-architecture/s3/sc-s3-ra.zip ./
-download: s3://islawson-service-catalog-reference-architecture/s3/sc-vps-ra.zip to ./sc-s3-ra.zip
+laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
+laptop:Downloads islawson$ cd ~/Downloads/sc-ra
+laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Unzip contents
-laptop:sc-s3-ra islawson$ unzip sc-s3-ra.zip 
-Archive:  sc-s3-ra.zip
-  inflating: COPYING                 
-  inflating: LICENSE                 
-  inflating: NOTICES                 
-  inflating: README.md               
-  inflating: sc-s3-cidr-ra.json      
-  inflating: sc-s3-cidr-ra.yml       
-  inflating: sc-s3-encrypted-ra.json  
-  inflating: sc-s3-encrypted-ra.yml  
-  inflating: sc-s3-mfa-ra.json       
-  inflating: sc-s3-mfa-ra.yml        
-  inflating: sc-s3-public-ra.json    
-  inflating: sc-s3-public-ra.yml     
-  inflating: sc-s3-ra-setup.py       
-  inflating: sc-s3-transition-ra.json  
-  inflating: sc-s3-transition-ra.yml          
+### Change to EC2 Reference Architecture directory
+laptop:ec2 islawson$ cd s3        
 
 ### View Contents
-laptop:sc-s3-ra islawson$ ls -l
+laptop:s3 islawson$ ls -l
 -rw-r--r--  1 islawson  staff  11357 Mar 22 16:20 COPYING
 -rw-r--r--  1 islawson  staff  11357 Mar 22 16:20 LICENSE
 -rw-r--r--  1 islawson  staff    121 Mar 22 16:20 NOTICES
@@ -104,15 +87,15 @@ laptop:sc-s3-ra islawson$ ls -l
 -rw-r--r--  1 islawson  staff   1952 Mar 23 12:47 sc-s3-transition-ra.yml
 
 ### Set execute permission on python setup script
-laptop:sc-ec2-ra islawson$ chmod +x sc-ec2-ra-setup.py 
+laptop:s3 islawson$ chmod +x sc-ec2-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:sc-ec2-ra islawson$ cat ~/.aws/config
+laptop:s3 islawson$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:sc-ec2-ra islawson$ ./sc-ec2-ra-setup.py 
+laptop:s3 islawson$ ./sc-ec2-ra-setup.py 
 
 STARTED -- Setup of Service Catalog S3 Reference Architecture.
 
