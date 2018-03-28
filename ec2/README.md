@@ -35,7 +35,7 @@ The following prerequisites are required:
     * ./README.md (this file)
     * ./COPYING
     * ./LICENSE
-    * ./NOTICES
+    * ./NOTICE
     * ./sc-ec2-ra-setup.py (python script used during setup process)
     * ./sc-ec2-linux-ra.yml (EC2 Cloudformation Template in YAML)
     * ./sc-ec2-linux-ra.json (EC2 Cloudformation Template in JSON)
@@ -52,22 +52,7 @@ The following prerequisites are required:
 ### Download reference architecture
 laptop:Downloads islawson$ mkdir ~/Downloads/sc-ec2-ra
 laptop:Downloads islawson$ cd ~/Downloads/sc-ec2-ra
-laptop:sc-ec2-ra islawson$ aws s3 cp s3://islawson-service-catalog-reference-architecture/ec2/sc-ec2-ra.zip ./
-download: s3://islawson-service-catalog-reference-architecture/ec2/sc-vps-ra.zip to ./sc-ec2-ra.zip
-
-### Unzip contents
-laptop:sc-ec2-ra islawson$ unzip sc-ec2-ra.zip 
-Archive:  sc-ec2-ra.zip
-  inflating: README.md 
-  inflating: COPYING
-  inflating: LICENSE
-  inflating: NOTICES   
-  inflating: sc-ec2-linux-ra.yml     
-  inflating: sc-ec2-linux-ra.json 
-  inflating: sc-ec2-windows-ra.yml     
-  inflating: sc-ec2-windows-ra.json
-  inflating: sc-ec2-ra-architecture.png    
-  inflating: sc-ec2-ra-setup.py        
+laptop:sc-ec2-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
 ### View Contents
 laptop:sc-ec2-ra islawson$ ls -l
