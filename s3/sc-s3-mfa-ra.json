@@ -1,0 +1,94 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service Catalog: EC2 Reference Architecture: Private bucket with delete actions requiring multi-factor authentication.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "S3 Bucket Policy Configuration"
+                    },
+                    "Parameters": [
+                        "S3UserARN"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "S3UserARN": {
+            "Description": "User ARN allowed to access S3 Bucket",
+            "Type": "String",
+            "Default": "Input user ARN"
+        }
+    },
+    "Resources": {
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "DeletionPolicy": "Delete",
+            "Properties": {
+                "AccessControl": "Private",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "SC-S3-RA-S3-Bucket"
+                    }
+                ]
+            }
+        },
+        "BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "S3Bucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Sid": "DenyDeleteBucketActionsWithoutMFA",
+                            "Action": [
+                                "s3:DeleteBucket"
+                            ],
+                            "Effect": "Deny",
+                            "Resource": {
+                                "Fn::Sub": "arn:aws:s3:::${S3Bucket}"
+                            },
+                            "Condition": {
+                                "BoolIfExists": {
+                                    "aws:MultiFactorAuthPresent": "false"
+                                }
+                            },
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Ref": "S3UserARN"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "BucketName": {
+            "Value": {
+                "Ref": "S3Bucket"
+            }
+        },
+        "S3UserARN": {
+            "Value": {
+                "Ref": "S3UserARN"
+            }
+        },
+        "BucketARN": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "S3Bucket",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

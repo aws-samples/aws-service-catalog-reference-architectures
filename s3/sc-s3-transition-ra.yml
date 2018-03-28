@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Service Catalog: EC2 Reference Architecture: Private restricted access bucket with S3-IA and Glacier transition rules.'
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: 'S3 Bucket Lifecycle Configuration'
+      Parameters:
+      - S3ToS3IADelay
+      - S3ToGlacierDelay
+      - S3ObjectDeletionDelay
+Parameters:
+  S3ToS3IADelay:
+    Description: Number of days of inactivity before an S3 object is transitioned from S3 to S3-IA 
+    Type: Number
+    Default: '30'
+    MinValue: '30'
+    MaxValue: '90'
+    ConstraintDescription: Valid values range from 30 to 90
+  S3ToGlacierDelay:
+    Description: Number of days of inactivity before an S3-IA object is transitioned from S3-IA to Glacier.
+    Type: Number
+    Default: '90'
+    MinValue: '90'
+    MaxValue: '180'
+    ConstraintDescription: Valid values range from 90 to 180
+  S3ObjectDeletionDelay:
+    Description: Number of days before an S3 object permanently deleted.
+    Type: Number
+    Default: '180'
+    MinValue: '180'
+    MaxValue: '360'
+    ConstraintDescription: Valid values range from 180 to 360
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      AccessControl: Private
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            Transitions:
+              - StorageClass: STANDARD_IA
+                TransitionInDays: !Ref S3ToS3IADelay
+              - StorageClass: GLACIER
+                TransitionInDays: !Ref S3ToGlacierDelay
+            ExpirationInDays: !Ref S3ObjectDeletionDelay
+      Tags:
+        - Key: Name
+          Value: SC-S3-RA-S3-Bucket
+Outputs:
+  BucketName:
+    Value: !Ref S3Bucket
+  S3ToS3IADelay:
+    Value: !Ref S3ToS3IADelay
+  S3ToGlacierDelay:
+    Value: !Ref S3ToGlacierDelay
+  S3ObjectDeletionDelay:
+    Value: !Ref S3ObjectDeletionDelay  
+  BucketARN:
+    Value: !GetAtt S3Bucket.Arn

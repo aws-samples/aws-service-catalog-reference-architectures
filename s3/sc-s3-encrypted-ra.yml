@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Service Catalog: S3 Reference Architecture: Private encrypted bucket with retention on object deletion.'
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+    - Label:
+        default: 'S3 Bucket Policy Configuration'
+      Parameters:
+      - S3UserARN
+Parameters:
+  S3UserARN:
+    Description: User ARN allowed to access S3 Bucket
+    Type: String
+    Default: "Input user ARN"
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Name
+          Value: SC-S3-RA-S3-Bucket
+  BucketPolicy:
+    Type: "AWS::S3::BucketPolicy" 
+    Properties:
+      Bucket:
+        Ref: S3Bucket
+      PolicyDocument:
+        Statement:
+          - Sid: DenyIncorrectEncryptionHeader
+            Effect: Deny
+            Principal:
+              AWS:
+                - !Ref S3UserARN
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${S3Bucket}/*
+            Condition:
+              StringNotEquals:
+                s3:x-amz-server-side-encryption: AES256
+          - Sid: DenyUnEncryptedObjectUploads
+            Effect: Deny
+            Principal:
+              AWS:
+                - !Ref S3UserARN
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${S3Bucket}/*
+            Condition:
+              'Null':
+                s3:x-amz-server-side-encryption: 'true'
+Outputs:
+  BucketName:
+    Value: !Ref S3Bucket
+  BucketARN:
+    Value: !GetAtt S3Bucket.Arn
+  S3UserARN:
+    Value: !Ref S3UserARN

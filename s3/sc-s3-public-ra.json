@@ -1,0 +1,35 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service Catalog: S3 Reference Architecture: Public read-only bucket accessible from anywhere.",
+    "Resources": {
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "DeletionPolicy": "Delete",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "SC-S3-RA-S3-Bucket"
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "BucketName": {
+            "Value": {
+                "Ref": "S3Bucket"
+            },
+            "Description": "Name of the Amazon S3 bucket."
+        },
+        "BucketARN": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "S3Bucket",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

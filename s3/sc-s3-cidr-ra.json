@@ -1,0 +1,107 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service Catalog: S3 Reference Architecture: Private restricted access bucket accessible only from specific CIDR block addresses.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "S3 Bucket Policy Configuration"
+                    },
+                    "Parameters": [
+                        "S3UserARN"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "S3 Bucket Configuration"
+                    },
+                    "Parameters": [
+                        "S3AccessCIDR"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "S3AccessCIDR": {
+            "Description": "CIDR block to allow access to S3 bucket",
+            "Type": "String",
+            "Default": "0.0.0.0/0"
+        },
+        "S3UserARN": {
+            "Description": "User ARN allowed to access S3 Bucket",
+            "Type": "String",
+            "Default": "Input user ARN"
+        }
+    },
+    "Resources": {
+        "S3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "DeletionPolicy": "Delete",
+            "Properties": {
+                "AccessControl": "Private",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "SC-S3-RA-S3-Bucket"
+                    }
+                ]
+            }
+        },
+        "BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "S3Bucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Sid": "IPAllow",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    {
+                                        "Ref": "S3UserARN"
+                                    }
+                                ]
+                            },
+                            "Action": "s3:*",
+                            "Resource": {
+                                "Fn::Sub": "arn:aws:s3:::${S3Bucket}"
+                            },
+                            "Condition": {
+                                "IpAddress": {
+                                    "aws:SourceIp": {
+                                        "Ref": "S3AccessCIDR"
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "BucketName": {
+            "Value": {
+                "Ref": "S3Bucket"
+            }
+        },
+        "S3UserARN": {
+            "Value": {
+                "Ref": "S3UserARN"
+            }
+        },
+        "BucketARN": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "S3Bucket",
+                    "Arn"
+                ]
+            }
+        }
+    }
+}

@@ -50,12 +50,15 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ec2-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ec2-ra
-laptop:sc-ec2-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
+laptop:Downloads islawson$ cd ~/Downloads/sc-ra
+laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+
+### Change to EC2 Reference Architecture directory
+laptop:ec2 islawson$ cd ec2
 
 ### View Contents
-laptop:sc-ec2-ra islawson$ ls -l
+laptop:ec2 islawson$ ls -l
 -rw-r--r--  1 islawson  staff   11357 Mar 15 14:48 COPYING
 -rw-r--r--  1 islawson  staff   11357 Mar 15 14:48 LICENSE
 -rw-r--r--  1 islawson  staff     121 Mar 15 14:47 NOTICES
@@ -68,15 +71,15 @@ laptop:sc-ec2-ra islawson$ ls -l
 -rw-r--r--  1 islawson  staff    9126 Mar 27 15:30 sc-ec2-windows-ra.yml
 
 ### Set execute permission on python setup script
-laptop:sc-ec2-ra islawson$ chmod +x sc-ec2-ra-setup.py 
+laptop:ec2 islawson$ chmod +x sc-ec2-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:sc-ec2-ra islawson$ cat ~/.aws/config
+laptop:ec2 islawson$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:sc-ec2-ra islawson$ ./sc-ec2-ra-setup.py 
+laptop:ec2 islawson$ ./sc-ec2-ra-setup.py 
 
 STARTED -- Setup of Service Catalog EC2 Reference Architecture.
 
