@@ -1,0 +1,301 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Service Catalog: EC2 Reference Architecture'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: General Configuration
+        Parameters:
+          - VPC
+          - KeyPair
+          - RemoteAccessCIDR
+      - Label:
+          default: Windows Instance Configuration
+        Parameters:
+          - WindowsInstanceType
+          - WindowsSubnet
+          - WindowsRDPPort
+    ParameterLabels:
+      VPC:
+        default: VPC
+      KeyPair:
+        default: Key Pair
+      RemoteAccessCIDR:
+        default: Remote Access CIDR Block
+      WindowsInstanceType:
+        default: Windows Instance Type
+      WindowsSubnet:
+        default: Windows Subnet
+      WindowsRDPPort:
+        default: Windows RDP Port
+Parameters:
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Select the VPC where the EC2 instances will be created
+    ConstraintDescription: must be an existing VPC
+  WindowsSubnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: Select subnet for Windows Instance
+    ConstraintDescription: must be an existing subnet
+  RemoteAccessCIDR:
+    Description: CIDR block to allow access to windows instances
+    Type: String
+    Default: 0.0.0.0/0
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+  WindowsInstanceType:
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+    Default: t2.micro
+    Description: Amazon EC2 Windows Instance Type
+    Type: String
+  WindowsRDPPort:
+    Description: Windows RDP Port Number
+    Type: Number
+    Default: 3389
+    MinValue: 1025
+    MaxValue: 65535
+    ConstraintDescription: must be a number from 1025 to 65535
+  KeyPair:
+    Description: Name of existing EC2 key pair for Windows Instances
+    Type: AWS::EC2::KeyPair::KeyName
+Mappings:
+  AWSAMIRegionMap:
+    reference-ami:
+      WINDOWSAMI: 'Windows_Server-2016-English-Full-Base-2018.03.06 (ami-cab14db7)'
+    ap-south-1:
+      WINDOWSAMI: ami-bb9cc2d4
+    eu-west-3:
+      WINDOWSAMI: ami-bc68dec1
+    eu-west-2:
+      WINDOWSAMI: ami-8bee09ec
+    eu-west-1:
+      WINDOWSAMI: ami-0284c77b
+    ap-northeast-3:
+      WINDOWSAMI: ami-d12826ac
+    ap-northeast-2:
+      WINDOWSAMI: ami-1d1db073
+    ap-northeast-1:
+      WINDOWSAMI: ami-9b2e62fd
+    sa-east-1:
+      WINDOWSAMI: ami-0a175d66
+    ca-central-1:
+      WINDOWSAMI: ami-4748cf23
+    ap-southeast-1:
+      WINDOWSAMI: ami-e36a3e9f
+    ap-southeast-2:
+      WINDOWSAMI: ami-406fae22
+    eu-central-1:
+      WINDOWSAMI: ami-f91a7496
+    us-east-1:
+      WINDOWSAMI: ami-cab14db7
+    us-east-2:
+      WINDOWSAMI: ami-bc784ed9
+    us-west-1:
+      WINDOWSAMI: ami-aaa2a8ca
+    us-west-2:
+      WINDOWSAMI: ami-ef9a0e97
+Resources:
+  InstancePatchingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+        - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+  PatchingInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref 'InstancePatchingRole'
+  WindowsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enables SSH Access to Windows EC2 Instance
+      VpcId: !Ref 'VPC'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref 'WindowsRDPPort'
+          ToPort: !Ref 'WindowsRDPPort'
+          CidrIp: !Ref 'RemoteAccessCIDR'
+        - IpProtocol: icmp
+          FromPort: '-1'
+          ToPort: '-1'
+          CidrIp: !Ref 'RemoteAccessCIDR'
+  WindowsInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref 'AWS::Region'
+        - WINDOWSAMI
+      InstanceType: !Ref 'WindowsInstanceType'
+      SubnetId: !Ref 'WindowsSubnet'
+      SecurityGroupIds:
+        - !Ref 'WindowsSecurityGroup'
+      KeyName: !Ref 'KeyPair'
+      IamInstanceProfile: !Ref 'PatchingInstanceProfile'
+      Tags:
+        - Key: Name
+          Value: SC-EC2-RA-Windows-Instance
+        - Key: Description
+          Value: 'Service-Catalog-EC2-Reference-Architecture'
+  WindowsPatchBaseline:
+    Type: AWS::SSM::PatchBaseline
+    Properties:
+      OperatingSystem: WINDOWS
+      ApprovalRules:
+        PatchRules:
+          - ApproveAfterDays: 0
+            ComplianceLevel: CRITICAL
+            PatchFilterGroup:
+              PatchFilters:
+                - Key: PRODUCT
+                  Values:
+                    - WindowsServer2016
+                - Key: CLASSIFICATION
+                  Values:
+                    - CriticalUpdates
+                    - DefinitionUpdates
+                    - Drivers
+                    - SecurityUpdates
+                    - ServicePacks
+                    - UpdateRollups
+                    - Updates
+                - Key: MSRC_SEVERITY
+                  Values:
+                    - Critical
+                    - Important
+                    - Moderate
+                    - Low
+                    - Unspecified
+      Description: Service Catalog EC2 Reference Architecture Patch Baseline for Microsoft
+        Windows instace
+      Name: sc-ec2-ra-windows-patch-baseline
+  MaintenanceWindowRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+                - ssm.amazonaws.com
+            Action:
+              - sts:AssumeRole
+  MaintenanceWindow:
+    Type: AWS::SSM::MaintenanceWindow
+    Properties:
+      Description: Maintenance window to allow for patching windows instances
+      AllowUnassociatedTargets: false
+      Cutoff: 2
+      Schedule: cron(* 17 * * ? *)
+      Duration: 6
+      Name: sc-ec2-ra-windows-maintenance-window
+  WindowsMainteanceWindowTarget:
+    Type: AWS::SSM::MaintenanceWindowTarget
+    Properties:
+      OwnerInformation: Service Catalog EC2 Reference Architecture
+      Description: Service Catalog EC2 Reference Architecture Maintenance Window for
+        Microsoft Windows Instances
+      WindowId: !Ref 'MaintenanceWindow'
+      ResourceType: INSTANCE
+      Targets:
+        - Key: InstanceIds
+          Values:
+            - !Ref 'WindowsInstance'
+      Name: sc-ec2-ra-windows-patch-targets
+  WindowsMaintenanceWindowTaskScan:
+    Type: AWS::SSM::MaintenanceWindowTask
+    Properties:
+      MaxErrors: 1
+      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window
+        Task: Scan for update for Microsoft Windows Instance'
+      ServiceRoleArn: !GetAtt 'MaintenanceWindowRole.Arn'
+      Priority: 1
+      MaxConcurrency: 1
+      Targets:
+        - Key: InstanceIds
+          Values:
+            - !Ref 'WindowsInstance'
+      Name: patch-sc-ec2-ra-windows-instances
+      TaskArn: AWS-RunPatchBaseline
+      WindowId: !Ref 'MaintenanceWindow'
+      TaskParameters:
+        Operation:
+          Values:
+            - Scan
+      TaskType: RUN_COMMAND
+  WindowsMaintenanceWindowTask:
+    Type: AWS::SSM::MaintenanceWindowTask
+    Properties:
+      MaxErrors: 1
+      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window
+        Task: Install update for Microsoft Windows Instance'
+      ServiceRoleArn: !GetAtt 'MaintenanceWindowRole.Arn'
+      Priority: 2
+      MaxConcurrency: 1
+      Targets:
+        - Key: InstanceIds
+          Values:
+            - !Ref 'WindowsInstance'
+      Name: patch-sc-ec2-ra-windows-instances
+      TaskArn: AWS-RunPatchBaseline
+      WindowId: !Ref 'MaintenanceWindow'
+      TaskParameters:
+        Operation:
+          Values:
+            - Install
+      TaskType: RUN_COMMAND
+Outputs:
+  TemplateID:
+    Value: service-catalog-reference-architectures/sc-ec2-ra
+  StackName:
+    Value: !Sub '${AWS::StackName}'
+  AWSRegionName:
+    Value: !Ref 'AWS::Region'
+  WindowsInstancePrivateIpAddress:
+    Value: !GetAtt 'WindowsInstance.PrivateIp'
+  WindosInstanceAvailabilityZone:
+    Value: !GetAtt 'WindowsInstance.AvailabilityZone'
+  WindowsInstanceId:
+    Value: !Ref 'WindowsInstance'
+  KeyPair:
+    Value: !Ref 'KeyPair'
+  WindowsSubet:
+    Value: !Ref 'WindowsSubnet'
+  WindowsInstanceType:
+    Value: !Ref 'WindowsInstanceType'
+  WindowsRDPPort:
+    Value: !Ref 'WindowsRDPPort'
+  RemoteAccessCIDR:
+    Value: !Ref 'RemoteAccessCIDR'
+  VPC:
+    Value: !Ref 'VPC'
+  IAMInstancePatchingRole:
+    Value: !Ref 'InstancePatchingRole'
+  IAMPatchingInstanceProfile:
+    Value: !Ref 'PatchingInstanceProfile'
+  SSMMaintenaceWindowRole:
+    Value: !Ref 'MaintenanceWindowRole'
+  SSMWindowsPatchBaseline:
+    Value: !Ref 'WindowsPatchBaseline'
