@@ -6,7 +6,7 @@ This reference architecture demonstrates how an organization can leverage Serivc
 
 When implemented this reference architecture creates a Service Catalog Portfolio called "Service Catalog EC2 Reference Architecture" with two associated products.  The Service Catalog Product references cloudformation templates for the Amazon EC2 Linux and Windows instances which can be lauched by end users through Service Catalog.  The Service Catalog EC2 product creates either an Aamzon Linux or Microsoft Windows EC2 instance in the VPC and Subnets selected by the end user.  A Amazon Simple Systems Manager patch baseline, maintenance window and task are created to allow for automated patching of the Aamzon Linux and Microsoft Windows operating systems.
 
-### Multi-Availability Zone Architecture with Amazon Linux Bastion Instance
+### EC2 Architecture with Amazon Linux and Microsoft Windows instances
 
 ![sc-ec2-ra-architecture.png](sc-ec2-ra-architecture.png)
 
