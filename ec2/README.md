@@ -85,7 +85,7 @@ STARTED -- Setup of Service Catalog EC2 Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog EC2 Reference Architecture
 --id=port-64kr67e4d3yfe
---arn=arn:aws:catalog:us-east-1:384053732253:portfolio/port-64kr67e4d3yfe
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-64kr67e4d3yfe
 
 PRODUCT CREATED: Amazon Elastic Compute Cloud (EC2) Linux
 PRODUCT/PORTFOLIO ASSOCIATED: AWS EC2 Linux

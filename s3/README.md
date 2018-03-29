@@ -117,7 +117,7 @@ STARTED -- Setup of Service Catalog S3 Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog S3 Reference Architecture
 --id=port-lcxjv7k5d6bp2
---arn=arn:aws:catalog:us-east-1:384053732253:portfolio/port-lcxjv7k5d6bp2
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-lcxjv7k5d6bp2
 
 PRODUCT CREATED: Amazon S3 Public Bucket with Read Only Access
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Public Access Read Only Bucket

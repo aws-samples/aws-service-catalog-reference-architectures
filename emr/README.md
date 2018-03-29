@@ -81,7 +81,7 @@ STARTED -- Setup of Service Catalog EMR Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog EMR Reference Architecture
 --id=port-jr6olxti2pbqm
---arn=arn:aws:catalog:us-east-1:384053732253:portfolio/port-jr6olxti2pbqm
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-jr6olxti2pbqm
 
 PRODUCT CREATED: Amazon Elastic MapReduce (EMR)
 PRODUCT/PORTFOLIO ASSOCIATED: AWS EMR

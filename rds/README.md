@@ -95,7 +95,7 @@ STARTED -- Setup of Service Catalog RDS Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog RDS Reference Architecture
 --id=port-xwhgkrlgficaw
---arn=arn:aws:catalog:us-east-2:384053732253:portfolio/port-xwhgkrlgficaw
+--arn=arn:aws:catalog:us-east-2:000000000000:portfolio/port-xwhgkrlgficaw
 
 PRODUCT CREATED: Amazon RDS PostgreSQL Database
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS PostgreSQL Database

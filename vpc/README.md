@@ -75,7 +75,7 @@ STARTED -- Setup of Service Catalog VPC Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog VPC Reference Architecture
 --id=port-nea64toyk55kk
---arn=arn:aws:catalog:us-east-1:384053732253:portfolio/port-nea64toyk55kk
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-nea64toyk55kk
 
 PRODUCT CREATED: Amazon Virtual Private Cloud (VPC)
 PRODUCT/PORTFOLIO ASSOCIATED: AWS VPC
