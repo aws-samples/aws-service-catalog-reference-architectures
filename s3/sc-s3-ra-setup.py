@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/s3/sc-s3-public-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/s3/sc-s3-public-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -150,7 +150,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/s3/sc-s3-cidr-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/s3/sc-s3-cidr-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -197,7 +197,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/s3/sc-s3-encrypted-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/s3/sc-s3-encrypted-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -244,7 +244,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/s3/sc-s3-mfa-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/s3/sc-s3-mfa-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -291,7 +291,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/s3/sc-s3-transition-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/s3/sc-s3-transition-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },

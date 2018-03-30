@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/ec2/sc-ec2-linux-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/ec2/sc-ec2-linux-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -149,7 +149,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/ec2/sc-ec2-windows-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/ec2/sc-ec2-windows-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },

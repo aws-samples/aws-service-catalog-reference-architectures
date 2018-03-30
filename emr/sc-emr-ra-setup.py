@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/emr/sc-emr-ra.json"
+            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/emr/sc-emr-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
