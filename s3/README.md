@@ -77,67 +77,67 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ra
-laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+laptop:Downloads user_name$ mkdir ~/Downloads/sc-ra
+laptop:Downloads user_name$ cd ~/Downloads/sc-ra
+laptop:sc-ra user_name$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
 ### Change to EC2 Reference Architecture directory
-laptop:ec2 islawson$ cd s3        
+laptop:ec2 user_name$ cd s3        
 
 ### View Contents
-laptop:s3 islawson$ ls -l
--rw-r--r--  1 islawson  staff  11357 Mar 22 16:20 COPYING
--rw-r--r--  1 islawson  staff  11357 Mar 22 16:20 LICENSE
--rw-r--r--  1 islawson  staff    121 Mar 22 16:20 NOTICES
--rw-r--r--  1 islawson  staff   8037 Mar 23 08:48 README.md
--rw-r--r--  1 islawson  staff   3259 Mar 23 15:42 sc-s3-cidr-ra.json
--rw-r--r--  1 islawson  staff   1440 Mar 23 13:28 sc-s3-cidr-ra.yml
--rw-r--r--  1 islawson  staff   3992 Mar 23 15:43 sc-s3-encrypted-ra.json
--rw-r--r--  1 islawson  staff   1738 Mar 23 12:49 sc-s3-encrypted-ra.yml
--rw-r--r--  1 islawson  staff   2851 Mar 23 15:42 sc-s3-mfa-ra.json
--rw-r--r--  1 islawson  staff   1280 Mar 23 13:24 sc-s3-mfa-ra.yml
--rw-r--r--  1 islawson  staff    939 Mar 23 15:43 sc-s3-public-ra.json
--rw-r--r--  1 islawson  staff    475 Mar 23 12:47 sc-s3-public-ra.yml
--rwxr-xr-x  1 islawson  staff   8752 Mar 22 17:16 sc-s3-ra-setup.py
--rw-r--r--  1 islawson  staff   3817 Mar 23 15:42 sc-s3-transition-ra.json
--rw-r--r--  1 islawson  staff   1952 Mar 23 12:47 sc-s3-transition-ra.yml
+laptop:s3 user_name$ ls -l
+-rw-r--r--  1 user_name  staff  11357 Mar 22 16:20 COPYING
+-rw-r--r--  1 user_name  staff  11357 Mar 22 16:20 LICENSE
+-rw-r--r--  1 user_name  staff    121 Mar 22 16:20 NOTICES
+-rw-r--r--  1 user_name  staff   8037 Mar 23 08:48 README.md
+-rw-r--r--  1 user_name  staff   3259 Mar 23 15:42 sc-s3-cidr-ra.json
+-rw-r--r--  1 user_name  staff   1440 Mar 23 13:28 sc-s3-cidr-ra.yml
+-rw-r--r--  1 user_name  staff   3992 Mar 23 15:43 sc-s3-encrypted-ra.json
+-rw-r--r--  1 user_name  staff   1738 Mar 23 12:49 sc-s3-encrypted-ra.yml
+-rw-r--r--  1 user_name  staff   2851 Mar 23 15:42 sc-s3-mfa-ra.json
+-rw-r--r--  1 user_name  staff   1280 Mar 23 13:24 sc-s3-mfa-ra.yml
+-rw-r--r--  1 user_name  staff    939 Mar 23 15:43 sc-s3-public-ra.json
+-rw-r--r--  1 user_name  staff    475 Mar 23 12:47 sc-s3-public-ra.yml
+-rwxr-xr-x  1 user_name  staff   8752 Mar 22 17:16 sc-s3-ra-setup.py
+-rw-r--r--  1 user_name  staff   3817 Mar 23 15:42 sc-s3-transition-ra.json
+-rw-r--r--  1 user_name  staff   1952 Mar 23 12:47 sc-s3-transition-ra.yml
 
 ### Set execute permission on python setup script
-laptop:s3 islawson$ chmod +x sc-ec2-ra-setup.py 
+laptop:s3 user_name$ chmod +x sc-ec2-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:s3 islawson$ cat ~/.aws/config
+laptop:s3 user_name$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:s3 islawson$ ./sc-ec2-ra-setup.py 
+laptop:s3 user_name$ ./sc-ec2-ra-setup.py 
 
 STARTED -- Setup of Service Catalog S3 Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog S3 Reference Architecture
---id=port-lcxjv7k5d6bp2
---arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-lcxjv7k5d6bp2
+--id=port-id
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-id
 
 PRODUCT CREATED: Amazon S3 Public Bucket with Read Only Access
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Public Access Read Only Bucket
---id=prod-6wmz3jiis63e4
+--id=prod-id
 
 PRODUCT CREATED: Amazon S3 Private Bucket with CIDR Restricted Access
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Private Bucket with CIDR Restricted Access
---id=prod-qagrnjswuadvg
+--id=prod-id
 
 PRODUCT CREATED: Amazon S3 Private Encrypted Bucket
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Encrypted Bucket
---id=prod-pxxplpa6qybao
+--id=prod-id
 
 PRODUCT CREATED: Amazon S3 Private Bucket with MFA Delete Restrictions
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Private Bucket with MFA Delete Restrictions
---id=prod-t34rnjg7bvfrk
+--id=prod-id
 
 PRODUCT CREATED: Amazon S3 Private Bucket with Transition Ruleset
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon S3 Private Bucket with Transition Ruleset
---id=prod-y4djwkxgf7dus
+--id=prod-id
 
 FINISHED -- Setup of Service Catalog S3 Reference Architecture.
 ```
