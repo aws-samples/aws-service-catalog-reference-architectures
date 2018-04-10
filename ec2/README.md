@@ -50,50 +50,50 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ra
-laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+laptop:Downloads user_name$ mkdir ~/Downloads/sc-ra
+laptop:Downloads user_name$ cd ~/Downloads/sc-ra
+laptop:sc-ra user_name$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
 ### Change to EC2 Reference Architecture directory
-laptop:ec2 islawson$ cd ec2
+laptop:ec2 user_name$ cd ec2
 
 ### View Contents
-laptop:ec2 islawson$ ls -l
--rw-r--r--  1 islawson  staff   11357 Mar 15 14:48 COPYING
--rw-r--r--  1 islawson  staff   11357 Mar 15 14:48 LICENSE
--rw-r--r--  1 islawson  staff     121 Mar 15 14:47 NOTICES
--rw-r--r--  1 islawson  staff    8413 Mar 28 12:58 README.md
--rw-r--r--  1 islawson  staff   17498 Mar 28 13:00 sc-ec2-linux-ra.json
--rw-r--r--  1 islawson  staff    8703 Mar 28 13:00 sc-ec2-linux-ra.yml
--rw-r--r--  1 islawson  staff  627452 Mar 28 13:47 sc-ec2-ra-architecture.png
--rwxr-xr-x  1 islawson  staff    5578 Mar 28 12:49 sc-ec2-ra-setup.py
--rw-r--r--  1 islawson  staff   17908 Mar 28 12:52 sc-ec2-windows-ra.json
--rw-r--r--  1 islawson  staff    9126 Mar 27 15:30 sc-ec2-windows-ra.yml
+laptop:ec2 user_name$ ls -l
+-rw-r--r--  1 user_name  staff   11357 Mar 15 14:48 COPYING
+-rw-r--r--  1 user_name  staff   11357 Mar 15 14:48 LICENSE
+-rw-r--r--  1 user_name  staff     121 Mar 15 14:47 NOTICES
+-rw-r--r--  1 user_name  staff    8413 Mar 28 12:58 README.md
+-rw-r--r--  1 user_name  staff   17498 Mar 28 13:00 sc-ec2-linux-ra.json
+-rw-r--r--  1 user_name  staff    8703 Mar 28 13:00 sc-ec2-linux-ra.yml
+-rw-r--r--  1 user_name  staff  627452 Mar 28 13:47 sc-ec2-ra-architecture.png
+-rwxr-xr-x  1 user_name  staff    5578 Mar 28 12:49 sc-ec2-ra-setup.py
+-rw-r--r--  1 user_name  staff   17908 Mar 28 12:52 sc-ec2-windows-ra.json
+-rw-r--r--  1 user_name  staff    9126 Mar 27 15:30 sc-ec2-windows-ra.yml
 
 ### Set execute permission on python setup script
-laptop:ec2 islawson$ chmod +x sc-ec2-ra-setup.py 
+laptop:ec2 user_name$ chmod +x sc-ec2-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:ec2 islawson$ cat ~/.aws/config
+laptop:ec2 user_name$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:ec2 islawson$ ./sc-ec2-ra-setup.py 
+laptop:ec2 user_name$ ./sc-ec2-ra-setup.py 
 
 STARTED -- Setup of Service Catalog EC2 Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog EC2 Reference Architecture
---id=port-64kr67e4d3yfe
---arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-64kr67e4d3yfe
+--id=port-id
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-id
 
 PRODUCT CREATED: Amazon Elastic Compute Cloud (EC2) Linux
 PRODUCT/PORTFOLIO ASSOCIATED: AWS EC2 Linux
---id=prod-654lfpxbrxd24
+--id=prod-id
 
 PRODUCT CREATED: Amazon Elastic Compute Cloud (EC2) Windows
 PRODUCT/PORTFOLIO ASSOCIATED: AWS EC2
---id=prod-b7qg6c7sn5mtu
+--id=prod-id
 
 FINISHED -- Setup of Service Catalog EC2 Reference Architecture.
 ```
