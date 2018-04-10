@@ -48,44 +48,44 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ra
-laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+laptop:Downloads user_name$ mkdir ~/Downloads/sc-ra
+laptop:Downloads user_name$ cd ~/Downloads/sc-ra
+laptop:sc-ra user_name$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
 ### Change to EMR Reference Architecture directory
-laptop:ec2 islawson$ cd emr      
+laptop:ec2 user_name$ cd emr      
 
 ### View Contents
-laptop:emr islawson$ ls -l
--rw-r--r--  1 islawson  staff   11357 Mar 26 08:54 COPYING
--rw-r--r--  1 islawson  staff   11357 Mar 26 08:54 LICENSE
--rw-r--r--  1 islawson  staff     121 Mar 28 14:25 NOTICE
--rw-r--r--  1 islawson  staff    7076 Mar 28 14:37 README.md
--rw-r--r--  1 islawson  staff  221092 Mar 28 14:50 sc-emr-ra-architecture.png
--rwxr-xr-x  1 islawson  staff    3856 Mar 27 11:42 sc-emr-ra-setup.py
--rw-r--r--  1 islawson  staff   11007 Mar 27 12:12 sc-emr-ra.json
--rw-r--r--  1 islawson  staff    5765 Mar 28 14:38 sc-emr-ra.yml
+laptop:emr user_name$ ls -l
+-rw-r--r--  1 user_name  staff   11357 Mar 26 08:54 COPYING
+-rw-r--r--  1 user_name  staff   11357 Mar 26 08:54 LICENSE
+-rw-r--r--  1 user_name  staff     121 Mar 28 14:25 NOTICE
+-rw-r--r--  1 user_name  staff    7076 Mar 28 14:37 README.md
+-rw-r--r--  1 user_name  staff  221092 Mar 28 14:50 sc-emr-ra-architecture.png
+-rwxr-xr-x  1 user_name  staff    3856 Mar 27 11:42 sc-emr-ra-setup.py
+-rw-r--r--  1 user_name  staff   11007 Mar 27 12:12 sc-emr-ra.json
+-rw-r--r--  1 user_name  staff    5765 Mar 28 14:38 sc-emr-ra.yml
 
 ### Set execute permission on python setup script
-laptop:emr islawson$ chmod +x sc-emr-ra-setup.py 
+laptop:emr user_name$ chmod +x sc-emr-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:emr islawson$ cat ~/.aws/config
+laptop:emr user_name$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:emr islawson$ ./sc-emr-ra-setup.py 
+laptop:emr user_name$ ./sc-emr-ra-setup.py 
 
 STARTED -- Setup of Service Catalog EMR Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog EMR Reference Architecture
---id=port-jr6olxti2pbqm
---arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-jr6olxti2pbqm
+--id=port-id
+--arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-id
 
 PRODUCT CREATED: Amazon Elastic MapReduce (EMR)
 PRODUCT/PORTFOLIO ASSOCIATED: AWS EMR
---id=prod-547auyrzdem5y
+--id=prod-id
 
 FINISHED -- Setup of Service Catalog EMR Reference Architecture.
 ```
