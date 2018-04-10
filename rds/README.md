@@ -32,7 +32,7 @@ The following prerequisites are required:
 * A Service Catalog has been enbaled in the target region.
 * A Service Catalog Admin account has been created and assigned the "**AWSServiceCatalogAdminFullAccess**" IAM permission.
 * A Service Catalog EndUser account has been created and assigned the "**AWSServiceCatalogEndUserFullAccess**" IAM permission.
-* Testing of this reference architecture was conducted against Service Catalog VPC Reference Architecture which includes a VPC, 2 public Subnets, 2 private Subnets, IGW, Managed NAT GW, and an optional Linux bastion host. Additional information about the Service Catalog VPC Reference Architecture can be found here: https://s3.us-east-2.amazonaws.com/islawson-service-catalog-reference-architecture/vpc/README.md
+* Testing of this reference architecture was conducted against Service Catalog VPC Reference Architecture which includes a VPC, 2 public Subnets, 2 private Subnets, IGW, Managed NAT GW, and an optional Linux bastion host. Additional information about the Service Catalog VPC Reference Architecture can be found here: https://s3.us-east-2.amazonaws.com/user_name-service-catalog-reference-architecture/vpc/README.md
 
 ### Installion Overview
 
@@ -58,60 +58,60 @@ The following prerequisites are required:
 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ra
-laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+laptop:Downloads user_name$ mkdir ~/Downloads/sc-ra
+laptop:Downloads user_name$ cd ~/Downloads/sc-ra
+laptop:sc-ra user_name$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
 ### Change to EC2 Reference Architecture directory
-laptop:ec2 islawson$ cd rds     
+laptop:ec2 user_name$ cd rds     
 
 ### View Contents
-laptop:rds islawson$ ls -l 
+laptop:rds user_name$ ls -l 
 total 104
--rw-r--r--  1 islawson  staff    9285 Mar 13 10:38 README.md
--rw-r--r--  1 islawson  staff   11487 Mar 13 10:41 sc-rds-mariadb-ra.json
--rw-r--r--  1 islawson  staff    6558 Mar 12 10:48 sc-rds-mariadb-ra.yml
--rw-r--r--  1 islawson  staff   10681 Mar 13 10:42 sc-rds-mssql-ra.json
--rw-r--r--  1 islawson  staff    6236 Mar 12 10:48 sc-rds-mssql-ra.yml
--rw-r--r--  1 islawson  staff   11567 Mar 13 10:42 sc-rds-mysql-ra.json
--rw-r--r--  1 islawson  staff    6562 Mar 12 10:48 sc-rds-mysql-ra.yml
--rw-r--r--  1 islawson  staff   11804 Mar 13 10:42 sc-rds-postgresql-ra.json
--rw-r--r--  1 islawson  staff    6682 Mar 12 10:48 sc-rds-postgresql-ra.yml
--rw-r--r--  1 islawson  staff  148556 Mar 12 10:48 sc-rds-ra-architecture-multi-az.png
--rw-r--r--  1 islawson  staff  139535 Mar 12 10:48 sc-rds-ra-architecture-single-instance.png
--rwxr-xr-x  1 islawson  staff    7770 Mar 13 10:43 sc-rds-ra-setup.py
+-rw-r--r--  1 user_name  staff    9285 Mar 13 10:38 README.md
+-rw-r--r--  1 user_name  staff   11487 Mar 13 10:41 sc-rds-mariadb-ra.json
+-rw-r--r--  1 user_name  staff    6558 Mar 12 10:48 sc-rds-mariadb-ra.yml
+-rw-r--r--  1 user_name  staff   10681 Mar 13 10:42 sc-rds-mssql-ra.json
+-rw-r--r--  1 user_name  staff    6236 Mar 12 10:48 sc-rds-mssql-ra.yml
+-rw-r--r--  1 user_name  staff   11567 Mar 13 10:42 sc-rds-mysql-ra.json
+-rw-r--r--  1 user_name  staff    6562 Mar 12 10:48 sc-rds-mysql-ra.yml
+-rw-r--r--  1 user_name  staff   11804 Mar 13 10:42 sc-rds-postgresql-ra.json
+-rw-r--r--  1 user_name  staff    6682 Mar 12 10:48 sc-rds-postgresql-ra.yml
+-rw-r--r--  1 user_name  staff  148556 Mar 12 10:48 sc-rds-ra-architecture-multi-az.png
+-rw-r--r--  1 user_name  staff  139535 Mar 12 10:48 sc-rds-ra-architecture-single-instance.png
+-rwxr-xr-x  1 user_name  staff    7770 Mar 13 10:43 sc-rds-ra-setup.py
 
 ### Set execute permission on python setup script
-laptop:rds islawson$ chmod +x sc-rds-ra-setup.py 
+laptop:rds user_name$ chmod +x sc-rds-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:rds islawson$ cat ~/.aws/config
+laptop:rds user_name$ cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:rds islawson$ ./sc-rds-ra-setup.py 
+laptop:rds user_name$ ./sc-rds-ra-setup.py 
 STARTED -- Setup of Service Catalog RDS Reference Architecture.
 
 PORTFOLIO CREATED: Service Catalog RDS Reference Architecture
---id=port-xwhgkrlgficaw
---arn=arn:aws:catalog:us-east-2:000000000000:portfolio/port-xwhgkrlgficaw
+--id=port-id
+--arn=arn:aws:catalog:us-east-2:000000000000:portfolio/port-id
 
 PRODUCT CREATED: Amazon RDS PostgreSQL Database
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS PostgreSQL Database
---id=prod-5ffbtckbmgdko
+--id=prod-id
 
 PRODUCT CREATED: Amazon RDS MySQL Database
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MySQL Database
---id=prod-txb7qjoyomth6
+--id=prod-id
 
 PRODUCT CREATED: Amazon RDS MariaDB Database
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MariaDB Database
---id=prod-fbxefu2bix56a
+--id=prod-id
 
 PRODUCT CREATED: Amazon RDS Microsoft SQL Database
 PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS Microsoft SQL Database
---id=prod-lmjfr255qfkxo
+--id=prod-id
 
 FINISHED -- Setup of Service Catalog RDS Reference Architecture.
 ```
