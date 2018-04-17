@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'VPC: public and private subnets in two availability zones'
+Description: 'VPC: public and private subnets in two availability zones(fdp-1oc5gkoph)'
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -91,7 +91,6 @@ Parameters:
   BastionSSHCIDR:
     Description: CIDR block to allow access to bastion SSH
     Type: String
-    Default: 0.0.0.0/0
 Conditions: 
   CreateBastionResources: !Equals [ !Ref CreateBastionInstance, true ]
   HasKeyName: !Not
