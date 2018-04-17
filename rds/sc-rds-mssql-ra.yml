@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: RDS Microsoft SQL Reference Architecture Template.  
+Description: 'Service Catalog: RDS Microsoft SQL Reference Architecture Template(fdp-1oc5hp7eg).  
   This template builds an Amazon AWS RDS Microsoft SQL master database instance.'
 Metadata: 
   AWS::CloudFormation::Interface: 
