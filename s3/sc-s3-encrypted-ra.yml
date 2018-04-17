@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: S3 Reference Architecture: Private encrypted bucket with retention on object deletion.'
+Description: 'Service Catalog: S3 Reference Architecture: Private encrypted bucket using AES256 with retention on object deletion(fdp-1oc5gsre6).'
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
