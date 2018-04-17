@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Service Catalog: EC2 Reference Architecture: Private restricted access bucket with S3-IA and Glacier transition rules.",
+    "Description": "Service Catalog: EC2 Reference Architecture: Private restricted access bucket with S3-IA and Glacier transition rules. Note - Review transition rules before you distribute this template (fdp-1oc5gsre6)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
