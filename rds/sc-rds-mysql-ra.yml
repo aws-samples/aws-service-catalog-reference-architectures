@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: RDS MySQL Reference Architecture Template.  
+Description: 'Service Catalog: RDS MySQL Reference Architecture Template(fdp-1oc5hp7eg).  
   This template builds an Amazon AWS RDS MySQL master database instance.'
 Metadata: 
   AWS::CloudFormation::Interface: 
