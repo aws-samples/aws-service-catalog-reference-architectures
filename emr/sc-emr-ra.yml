@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
+Description: 'Service Catalog: EC2 Reference Architecture(fdp-1oc5f3ulf)'
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
