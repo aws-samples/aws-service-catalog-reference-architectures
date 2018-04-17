@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Service Catalog: EC2 Reference Architecture: Private bucket with delete actions requiring multi-factor authentication.",
+    "Description": "Service Catalog: EC2 Reference Architecture: Private bucket with delete actions requiring multi-factor authentication.(fdp-1oc5gsre6)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
