@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Service Catalog: S3 Reference Architecture: Public read-only bucket accessible from anywhere.",
+    "Description": "Service Catalog: S3 Reference Architecture: Public read-only bucket accessible from anywhere. Note - Consider alternate options like distributing via CloudFront OAI instead of creating bucket using this CloudFormation template.(fdp-1oc5gsre6)",
     "Resources": {
         "S3Bucket": {
             "Type": "AWS::S3::Bucket",
