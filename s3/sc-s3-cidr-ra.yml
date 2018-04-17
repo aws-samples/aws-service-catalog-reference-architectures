@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: S3 Reference Architecture: Private restricted access bucket accessible only from specific CIDR block addresses.'
+Description: 'Service Catalog: S3 Reference Architecture: Private restricted access bucket accessible only from specific CIDR block addresses(fdp-1oc5gsre6).'
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -15,7 +15,6 @@ Parameters:
   S3AccessCIDR:
     Description: CIDR block to allow access to S3 bucket
     Type: String
-    Default: 0.0.0.0/0
   S3UserARN:
     Description: User ARN allowed to access S3 Bucket
     Type: String
