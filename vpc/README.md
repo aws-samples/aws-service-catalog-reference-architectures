@@ -1,10 +1,10 @@
 # Service Catalog VPC Reference Architecture
 
-This reference architecture demonstrates how an organization can leverage Serivce Catalog to provide Amazon Virtual Private Clouds (VPC) for testing and integration.  
+This reference architecture demonstrates how an organization can leverage AWS Service Catalog to provide Amazon Virtual Private Clouds (VPC) for testing and integration.  
 
 ## Getting Started
 
-When implemented this reference architecture creates a Service Catalog Portfolio called "Service Catalog VPC Reference Architecture" with one associated product.  The Service Catalog Products reference cloudformation templates for the Amazon VPC which can be lauched by end users through Service Catalog.  The Service Catalog VPC product creates a VPC with two public and private subnets across two availability zones.  The VPC includes an Internet Gateway and a managed NAT Gateway in each public subnet as well as VPC Route Tables and Network ACLs that allow for communication between the public and private subnets.  Optionally, an Amazon Linux bastion instance and a Security Group can be deployed into the public subnet to allow for remote connectivity to the bastion instance.
+When implemented this reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog VPC Reference Architecture" containing product.  The Service Catalog Products reference cloudformation templates for the Amazon VPC which can be lauched by end users through Service Catalog.  The product creates a VPC with two public and private subnets across two availability zones.  The VPC includes an Internet Gateway and a managed NAT Gateway in each public subnet as well as VPC Route Tables and Network ACLs that allow for communication between the public and private subnets.  Optionally, an Amazon Linux bastion instance and a Security Group can be deployed into the public subnet to allow for remote connectivity to the bastion instance.
 
 ### Multi-Availability Zone Architecture with Amazon Linux Bastion Instance
 
@@ -18,75 +18,59 @@ The following prerequisites are required:
 
     Instructions on installing and configurating the AWS Command Line Interface can be found on the AWS website at: https://aws.amazon.com/cli/
 
-2. Access to a system with permission to execute a python script. The script utilizes modules for "boto3" and "random".
+2. Access to a system with permission to execute a python script. The script utilizes "boto3" and "random" modules.
 
     Instructions on installing and configuring the boto3 python module can be found in the Boto 3 quickstart documentation at: http://boto3.readthedocs.io/en/latest/guide/quickstart.html
 
 ### Assumptions
 
-* A Service Catalog has been enbaled in the target region.
-* A Service Catalog Admin account has been created and assigned the "**AWSServiceCatalogAdminFullAccess**" IAM permission.
-* A Service Catalog EndUser account has been created and assigned the "**AWSServiceCatalogEndUserFullAccess**" IAM permission.
+* AWS Service Catalog has been enbaled in the target region.
+* An AWS Service Catalog Admin account with attached "**AWSServiceCatalogAdminFullAccess**" managed policy has been created.
+* An AWS Service Catalog Admin account with attached "**AWSServiceCatalogEndUserFullAccess**" managed policy has been created.
 
 ### Installion Overview
 
-1. Clone the reference architecture from Github and expand its content into a folder.
-2. Contents will include:
-    * ./README.md (this file)
-    * ./sc-vpc-ra-setup.py (python script used during setup process)
-    * ./sc-vpc-ra.yml (VPC Cloudformation Template in YAML)
-    * ./sc-vpc-ra.json (VPC Cloudformation Template in JSON)
-    * ./sc-vpc-ra-architecture-multi-az.png
-3. Provide execute permissions to the python script.
-4. Confirm AWS Region for deployment.
+1. Clone the reference architecture from Github into a local directory.
+2. Browse to the correct subdirectory.
+4. Review AWS Region for creating your portfolio.
 5. Execute the python setup script.
 
 ### Installation Step-By-Step
-
+Here is the list of commands to be executed from terminal - 
 ```text
 ### Download reference architecture
-laptop:Downloads islawson$ mkdir ~/Downloads/sc-ra
-laptop:Downloads islawson$ cd ~/Downloads/sc-ra
-laptop:sc-ra islawson$ git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
+mkdir ~/Downloads/sc-ra
+cd ~/Downloads/sc-ra
+git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Change to EC2 Reference Architecture directory
-laptop:ec2 islawson$ cd vpc      
+### Change to appropriate Reference Architecture directory, For this test, choose vpc. However instructions remain same for all modules.
+cd vpc      
 
 ### View Contents
-laptop:vpc islawson$ ls -l
--rw-r--r--  1 islawson  staff   7873 Mar 12 16:07 README.md
--rwxr-xr-x  1 islawson  staff   3358 Mar 12 15:19 sc-vpc-ra-setup.py
--rw-r--r--  1 islawson  staff  31408 Mar 12 16:10 sc-vpc-ra.json
--rw-r--r--  1 islawson  staff  15265 Mar 12 16:00 sc-vpc-ra.yml
--rw-r--r--  1 islawson  staff 360954 Mar 12 17:53 sc-vpc-ra-architecture-multi-az.png
+ls -l
+-rw-r--r--  1 username  staff   7873 Mar 12 16:07 README.md
+-rwxr-xr-x  1 username  staff   3358 Mar 12 15:19 sc-vpc-ra-setup.py
+-rw-r--r--  1 username  staff  31408 Mar 12 16:10 sc-vpc-ra.json
+-rw-r--r--  1 username  staff  15265 Mar 12 16:00 sc-vpc-ra.yml
+-rw-r--r--  1 username  staff 360954 Mar 12 17:53 sc-vpc-ra-architecture-multi-az.png
 
 ### Set execute permission on python setup script
-laptop:vpc islawson$ chmod +x sc-vpc-ra-setup.py 
+chmod +x sc-vpc-ra-setup.py 
 
 ### Verify default AWS Region (this will be used for deployment)
-laptop:vpc islawson$ cat ~/.aws/config
+cat ~/.aws/config
 [default]
 region = us-east-2
 
 ### Execute the setup script 
-laptop:vpc islawson$ ./sc-vpc-ra-setup.py 
+./sc-vpc-ra-setup.py 
+### Log of the execute is printed here.
 
-STARTED -- Setup of Service Catalog VPC Reference Architecture.
-
-PORTFOLIO CREATED: Service Catalog VPC Reference Architecture
---id=port-nea64toyk55kk
---arn=arn:aws:catalog:us-east-1:000000000000:portfolio/port-nea64toyk55kk
-
-PRODUCT CREATED: Amazon Virtual Private Cloud (VPC)
-PRODUCT/PORTFOLIO ASSOCIATED: AWS VPC
---id=prod-5bunya22uxqic
-
-FINISHED -- Setup of Service Catalog VPC Reference Architecture.
 ```
 
 ### Service Catalog Portfolio Access
 
-Once the setup script has completed there will be a new service catalog portfolio with a new VPC product associated in the specified region.  Before these products can be launched access needs to be granted to the portfolio for the service catalog admin and end users.
+Setup script will create an AWS Service Catalog Portfolio with a new VPC product associated in the specified region.  Before these products can be launched access needs to be granted to the portfolio for the service catalog admin and end users.
 
 1. Open the AWS Console in a browser window.
 2. Select the Services dropdown from the upper left and navigate to the Service Catalog to open the Service Catalog management page.
