@@ -10,7 +10,7 @@ When implemented this reference architecture creates a Service Catalog Portfolio
 
 ![sc-ec2-ra-architecture.png](sc-ec2-ra-architecture.png)
 
-### For instructions on how to set up this Service catalog product and portfolio, see ![How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+### For instructions on how to set up this Service catalog product and portfolio, see [How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
 
 ## License
 
