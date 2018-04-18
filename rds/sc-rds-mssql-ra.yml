@@ -1,56 +1,60 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: RDS Microsoft SQL Reference Architecture Template(fdp-1oc5hp7eg).  
-  This template builds an Amazon AWS RDS Microsoft SQL master database instance.'
-Metadata: 
-  AWS::CloudFormation::Interface: 
-    ParameterGroups: 
-      - 
-        Label: 
-          default: "Amazon RDS Microsoft SQL Database Network Configuration"
-        Parameters: 
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Service Catalog: RDS Microsoft SQL Reference Architecture Template. This
+  template builds an Amazon AWS RDS Microsoft SQL master database
+  instance(fdp-1oc5hp7eg).
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: Amazon RDS Microsoft SQL Database Network Configuration
+        Parameters:
           - DBVPC
           - DBSecurityGroupName
           - DBSubnetOne
           - DBSubnetTwo
           - DBSubnetGroupName
-      - 
-        Label: 
-          default: "Amazon RDS Microsoft SQL Database Configuration"
-        Parameters: 
+          - DBInputCIDR
+      - Label:
+          default: Amazon RDS Microsoft SQL Database Configuration
+        Parameters:
           - DBEngine
           - DBEngineVersion
           - DBInstanceClass
           - DBAllocatedStorage
           - DBBackupRetentionPeriod
-      - 
-        Label: 
-          default: "Amazon RDS Microsoft SQL Database Access"
-        Parameters: 
+      - Label:
+          default: Amazon RDS Microsoft SQL Database Access
+        Parameters:
           - DBMasterUsername
           - DBMasterUserPassword
           - DBPortNumber
-      - 
-        Label: 
-          default: "Amazon RDS Microsoft SQL Database High Availability"
-        Parameters: 
+      - Label:
+          default: Amazon RDS Microsoft SQL Database High Availability
+        Parameters:
           - MultiAZ
 Parameters:
   DBVPC:
-    Type: "AWS::EC2::VPC::Id"
+    Type: 'AWS::EC2::VPC::Id'
     Description: Select the VPC where the RDS database will be created
     ConstraintDescription: must be an existing VPC
+  DBInputCIDR:
+    Description: CIDR  to allow access to DB instances
+    Type: String
+    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
   DBSecurityGroupName:
     Description: The name of the security group to be created
     Type: String
-    MinLength: '1'
+    MinLength: '8'
     MaxLength: '255'
     ConstraintDescription: Cannot start with sg-. Up to 255 characters in length.
   DBSubnetOne:
-    Type: "AWS::EC2::Subnet::Id"
+    Type: 'AWS::EC2::Subnet::Id'
     Description: Select one subnet to include in the database subnet group
     ConstraintDescription: must be an existing subnet
   DBSubnetTwo:
-    Type: "AWS::EC2::Subnet::Id"
+    Type: 'AWS::EC2::Subnet::Id'
     Description: Select one subnet to include in the database subnet group
     ConstraintDescription: must be an existing subnet
   DBSubnetGroupName:
@@ -66,26 +70,29 @@ Parameters:
     Default: '1433'
     MinValue: '1433'
     MaxValue: '1433'
-    ConstraintDescription: 1150-65535 except for 1434, 3389, 47001, 49152, and 49152 through 49156
+    ConstraintDescription: '1150-65535 except for 1434, 3389, 47001, 49152, and 49152 through 49156'
   DBMasterUsername:
     Description: The database admin account username
     Type: String
-    MinLength: '1'
+    MinLength: '8'
     MaxLength: '16'
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
   DBMasterUserPassword:
-    Description: The password for the master user. The password can include any printable ASCII character except "/", """, or "@".
+    Description: >-
+      The password for the master user. The password can include any printable
+      ASCII character except "/", """, or "@".
     NoEcho: true
     Type: String
-    MinLength: '1'
+    MinLength: '12'
     MaxLength: '41'
     AllowedPattern: '[a-zA-Z0-9]+'
     ConstraintDescription: must contain only alphanumeric characters.
   DBBackupRetentionPeriod:
-    Description: The number of days for which automated backups are retained. 
-      Setting this parameter to a positive number enables backups. 
-      Setting this parameter to 0 disables automated backups.
+    Description: >-
+      The number of days for which automated backups are retained. Setting this
+      parameter to a positive number enables backups. Setting this parameter to
+      0 disables automated backups.
     Default: '1'
     Type: Number
     MinValue: '0'
@@ -101,69 +108,97 @@ Parameters:
   DBEngineVersion:
     Description: The database engine version
     Type: String
-    Default: '13.00.4451.0.v1'
-    AllowedValues: ['14.00.1000.169.v1', '13.00.4451.0.v1', '13.00.4422.0.v1', '13.00.2164.0.v1']
+    Default: 13.00.4451.0.v1
+    AllowedValues:
+      - 14.00.1000.169.v1
+      - 13.00.4451.0.v1
+      - 13.00.4422.0.v1
+      - 13.00.2164.0.v1
     ConstraintDescription: must select a valid database engine version.
   DBEngine:
     Description: The specific Microsoft SQL Server Engine
     Type: String
-    Default: 'sqlserver-se'
-    AllowedValues: ['sqlserver-se']
+    Default: sqlserver-se
+    AllowedValues:
+      - sqlserver-se
     ConstraintDescription: must select a valid database engine.
   DBInstanceClass:
     Description: The database instance type
     Type: String
-    Default: 'db.m4.large'
-    AllowedValues: ['db.m4.large', 'db.m4.xlarge', 'db.m4.2xlarge', 'db.m4.4xlarge', 'db.m4.16xlarge', 
-      'db.r4.large', 'db.r4.xlarge', 'db.r4.2xlarge', 'db.r4.4xlarge', 'db.r4.8xlarge', 'db.r4.16xlarge']
+    Default: db.m4.large
+    AllowedValues:
+      - db.m4.large
+      - db.m4.xlarge
+      - db.m4.2xlarge
+      - db.m4.4xlarge
+      - db.m4.16xlarge
+      - db.r4.large
+      - db.r4.xlarge
+      - db.r4.2xlarge
+      - db.r4.4xlarge
+      - db.r4.8xlarge
+      - db.r4.16xlarge
     ConstraintDescription: must select a valid database instance type.
   MultiAZ:
     Description: Multi-AZ master database
     Type: String
     Default: 'false'
-    AllowedValues: ['true', 'false']
+    AllowedValues:
+      - 'true'
+      - 'false'
     ConstraintDescription: must be true or false.
 Resources:
-  DBSubnetGroup: 
-    Type: "AWS::RDS::DBSubnetGroup" 
+  DBSubnetGroup:
+    Type: 'AWS::RDS::DBSubnetGroup'
     Properties:
-      DBSubnetGroupName: !Ref DBSubnetGroupName 
-      DBSubnetGroupDescription: "Amazon RDS Microsoft SQL Subnet Group"
-      SubnetIds: 
-        - !Ref 'DBSubnetOne'
-        - !Ref 'DBSubnetTwo'
+      DBSubnetGroupName: !Ref DBSubnetGroupName
+      DBSubnetGroupDescription: Amazon RDS Microsoft SQL Subnet Group
+      SubnetIds:
+        - !Ref DBSubnetOne
+        - !Ref DBSubnetTwo
   DBEC2SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
+    Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupName: !Ref DBSecurityGroupName
       GroupDescription: Open database for access
       VpcId: !Ref DBVPC
       SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: !Ref DBPortNumber
-        ToPort: !Ref 'DBPortNumber'
-        CidrIp: '0.0.0.0/0'
+        - IpProtocol: tcp
+          FromPort: !Ref DBPortNumber
+          ToPort: !Ref DBPortNumber
+          CidrIp: !Ref DBInputCIDR
   MasterDB:
-    Type: AWS::RDS::DBInstance
+    Type: 'AWS::RDS::DBInstance'
     Properties:
-      DBSubnetGroupName: !Ref 'DBSubnetGroupName'
-      AllocatedStorage: !Ref 'DBAllocatedStorage'
-      DBInstanceClass: !Ref 'DBInstanceClass'
-      LicenseModel: 'license-included'
-      Engine: !Ref 'DBEngine'
-      EngineVersion: !Ref 'DBEngineVersion'
-      MasterUsername: !Ref 'DBMasterUsername'
-      MasterUserPassword: !Ref 'DBMasterUserPassword'
-      MultiAZ: !Ref 'MultiAZ'
+      DBSubnetGroupName: !Ref DBSubnetGroupName
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceClass: !Ref DBInstanceClass
+      LicenseModel: license-included
+      Engine: !Ref DBEngine
+      EngineVersion: !Ref DBEngineVersion
+      MasterUsername: !Ref DBMasterUsername
+      MasterUserPassword: !Ref DBMasterUserPassword
+      MultiAZ: !Ref MultiAZ
       BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
       Tags:
-      - Key: Name
-        Value: Microsoft SQL Master Database
-      VPCSecurityGroups: [ { "Fn::GetAtt": [ "DBEC2SecurityGroup", "GroupId" ] } ]
+        - Key: Name
+          Value: Microsoft SQL Master Database
+      VPCSecurityGroups:
+        - !GetAtt 
+          - DBEC2SecurityGroup
+          - GroupId
     DependsOn: DBSubnetGroup
     DeletionPolicy: Delete
 Outputs:
   MasterJDBCConnectionString:
     Description: JDBC connection string for the master database
-    Value: !Join ['', ['jdbc:sqlserver://', !GetAtt [MasterDB, Endpoint.Address], ':',
-        !GetAtt [MasterDB, Endpoint.Port]]]
+    Value: !Join 
+      - ''
+      - - 'jdbc:sqlserver://'
+        - !GetAtt 
+          - MasterDB
+          - Endpoint.Address
+        - ':'
+        - !GetAtt 
+          - MasterDB
+          - Endpoint.Port
