@@ -84,7 +84,7 @@
             "Default": "mysqldb",
             "Description": "The name of the database to create when the DB instance is created. If this parameter is not specified, the default \"mysql\" database is created in the DB instance.",
             "Type": "String",
-            "MinLength": "1",
+            "MinLength": "8",
             "MaxLength": "63",
             "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
             "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
@@ -108,7 +108,7 @@
         "DBMasterUsername": {
             "Description": "The database admin account username",
             "Type": "String",
-            "MinLength": "1",
+            "MinLength": "8",
             "MaxLength": "16",
             "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
             "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
@@ -117,7 +117,7 @@
             "Description": "The password for the master user. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".",
             "NoEcho": true,
             "Type": "String",
-            "MinLength": "1",
+            "MinLength": "12",
             "MaxLength": "41",
             "AllowedPattern": "[a-zA-Z0-9]+",
             "ConstraintDescription": "must contain only alphanumeric characters."
