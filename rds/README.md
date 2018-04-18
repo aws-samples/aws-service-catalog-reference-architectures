@@ -15,7 +15,7 @@ When implemented this reference architecture creates a Service Catalog Portfolio
 
 ![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-single-instance.png)
 
-### For instructions on how to set up this Service catalog product and portfolio, see ![How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+### For instructions on how to set up this Service catalog product and portfolio, see [How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
 
 ## License
 
