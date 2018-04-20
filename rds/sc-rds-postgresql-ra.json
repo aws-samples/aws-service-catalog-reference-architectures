@@ -303,7 +303,7 @@
                 ]
             },
             "DependsOn": "DBSubnetGroup",
-            "DeletionPolicy": "Delete"
+            "DeletionPolicy": "Snapshot"
         }
     },
     "Outputs": {

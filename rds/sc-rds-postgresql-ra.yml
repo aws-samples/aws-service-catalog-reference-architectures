@@ -226,7 +226,7 @@ Resources:
           - DBEC2SecurityGroup
           - GroupId
     DependsOn: DBSubnetGroup
-    DeletionPolicy: Delete
+    DeletionPolicy: Snapshot
 Outputs:
   MasterJDBCConnectionString:
     Description: JDBC connection string for the master database

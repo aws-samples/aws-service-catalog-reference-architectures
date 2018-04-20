@@ -84,7 +84,7 @@
             "Default": "mysqldb",
             "Description": "The name of the database to create when the DB instance is created. If this parameter is not specified, the default \"mysql\" database is created in the DB instance.",
             "Type": "String",
-            "MinLength": "8",
+            "MinLength": "5",
             "MaxLength": "63",
             "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
             "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
@@ -297,7 +297,7 @@
                 ]
             },
             "DependsOn": "DBSubnetGroup",
-            "DeletionPolicy": "Delete"
+            "DeletionPolicy": "Snapshot"
         }
     },
     "Outputs": {

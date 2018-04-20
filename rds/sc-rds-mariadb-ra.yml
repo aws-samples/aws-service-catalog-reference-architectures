@@ -64,7 +64,7 @@ Parameters:
       this parameter is not specified, the default "MariaDB" database is created
       in the DB instance.
     Type: String
-    MinLength: '8'
+    MinLength: '5'
     MaxLength: '63'
     AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
@@ -215,7 +215,7 @@ Resources:
           - DBEC2SecurityGroup
           - GroupId
     DependsOn: DBSubnetGroup
-    DeletionPolicy: Delete
+    DeletionPolicy: Snapshot
 Outputs:
   MasterJDBCConnectionString:
     Description: JDBC connection string for the master database
