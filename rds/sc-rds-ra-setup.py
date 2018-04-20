@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/rds/sc-rds-postgresql-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/rds/sc-rds-postgresql-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -150,7 +150,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/rds/sc-rds-mysql-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/rds/sc-rds-mysql-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -197,7 +197,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/rds/sc-rds-mariadb-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/rds/sc-rds-mariadb-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
@@ -244,7 +244,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/rds/sc-rds-mssql-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/rds/sc-rds-mssql-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },

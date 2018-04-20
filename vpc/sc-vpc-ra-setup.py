@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/vpc/sc-vpc-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/vpc/sc-vpc-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
