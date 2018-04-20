@@ -103,7 +103,7 @@ response = client.create_product(
         'Name': 'v1.0',
         'Description': 'baseline version',
         'Info': {
-            "LoadTemplateFromURL" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/ec2/sc-ec2-linux-ra.json"
+            "LoadTemplateFromURL" : "https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/ec2/sc-ec2-linux-ra.json"
         },
         'Type': 'CLOUD_FORMATION_TEMPLATE'
     },
