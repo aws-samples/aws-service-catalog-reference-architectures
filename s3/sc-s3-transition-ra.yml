@@ -27,7 +27,6 @@ Parameters:
   S3ObjectDeletionDelay:
     Description: Number of days before an S3 object permanently deleted.
     Type: Number
-    Default: '180'
     MinValue: '180'
     MaxValue: '360'
     ConstraintDescription: Valid values range from 180 to 360
