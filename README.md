@@ -134,7 +134,6 @@ Perform following steps to remove a Reference Architecture from Service Catalog:
 ## Authors
 
 * Israel Lawson - AWS Sr. Solutions Architect - Initial work
-* Kanchan Waikar - AWS Solutions Architect
 
 ## Acknowledgments
 
