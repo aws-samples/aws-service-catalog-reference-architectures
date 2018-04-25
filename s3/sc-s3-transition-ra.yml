@@ -13,14 +13,12 @@ Parameters:
   S3ToS3IADelay:
     Description: Number of days of inactivity before an S3 object is transitioned from S3 to S3-IA 
     Type: Number
-    Default: '30'
     MinValue: '30'
     MaxValue: '90'
     ConstraintDescription: Valid values range from 30 to 90
   S3ToGlacierDelay:
     Description: Number of days of inactivity before an S3-IA object is transitioned from S3-IA to Glacier.
     Type: Number
-    Default: '90'
     MinValue: '90'
     MaxValue: '180'
     ConstraintDescription: Valid values range from 90 to 180
@@ -28,8 +26,7 @@ Parameters:
     Description: Number of days before an S3 object permanently deleted.
     Type: Number
     MinValue: '180'
-    MaxValue: '360'
-    ConstraintDescription: Valid values range from 180 to 360
+    ConstraintDescription: Minimum value is 180 
 Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
