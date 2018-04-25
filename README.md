@@ -24,6 +24,8 @@ To give you an example, the Amazon EC2 use case shows how an organization can le
  4. Relational Database Service (RDS)
  5. Elastic MapReduce (EMR).  
 
+Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.
+
 ## Getting Started
 
 When implemented this reference architecture creates a Service Catalog Portfolio called "Service Catalog XXX Reference Architecture" with one associated product.  The Service Catalog Products reference cloudformation templates for corresponding service which can be lauched by end users through Service Catalog.    
