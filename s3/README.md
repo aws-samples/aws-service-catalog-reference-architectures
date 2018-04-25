@@ -41,6 +41,9 @@ When implemented this reference architecture creates a Service Catalog Portfolio
 
 ### For instructions on how to set up this Service catalog product and portfolio, see [How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
 
+Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.
+
+
 ## License
 
 * This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
