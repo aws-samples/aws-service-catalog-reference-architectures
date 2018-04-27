@@ -26,30 +26,20 @@ To give you an example, the Amazon EC2 use case shows how an organization can le
 
 Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. These sample CloudFormation templates may need updates before you can use them in production.
 
-Once you run the python scripts provided for setup, AWS Service Catalog portfolios will be created for each of the reference blueprints.  These portfolios contain the AWS Service Catalog products created from the cloudformation templates provided for each service.  
-
-![sc-ra-portfolios.png](sc-ra-portfolios.png)
-
-### AWS Service Catalog Product Launch
-
-Once access has been provided to one or more end users, the reference blueprint product can be lauched.  To know more about how to launch AWS Service Catalog product, see 
-[documentation](https://docs.aws.amazon.com/servicecatalog/latest/userguide/enduser-launch.html)
-
-![sc-ra-products.png](sc-ra-products.png)
 
 ### How to set up AWS Service Catalog Reference blueprint products and portfolios?
 
 ### Pre-requisites
 
-1. Installation and configuration of the AWS Command Line Interface (CLI).  It is important to ensure that the AWS CLI configuration contains the correct target region as this region will be used to create the reference blueprint components within AWS Service Catalog.
+1. AWS CLI should be installed and configured to point to the region in which you want to create the reference blueprint components within AWS Service Catalog.
 
-2. Access to a system with permission to execute a python script. The script utilizes "boto3" and "random" modules.
+2. Access to a system with permissions to execute a python script. The script utilizes "boto3" and "random" modules.
 
 ### Assumptions
 
-* AWS Service Catalog has been enbaled in the target region.
-* An AWS Service Catalog Admin IAM principal account with attached "**AWSServiceCatalogAdminFullAccess**" managed policy has been created.
-* An AWS Service Catalog End-user principal account with attached "**AWSServiceCatalogEndUserFullAccess**" managed policy has been created.
+* AWS Service Catalog has been set up in target AWS region.
+* An AWS Service Catalog Admin IAM principal with "**AWSServiceCatalogAdminFullAccess**" managed policy associated has been created.
+* An AWS Service Catalog End-user principal with "**AWSServiceCatalogEndUserFullAccess**" managed policy associated has been created.
 
 ### Installion - Overview
 
@@ -95,6 +85,18 @@ region = us-east-2
 Before you execute the script, review and revisit the parameters defined in the python script.
 ./sc-vpc-ra-setup.py 
 ```
+
+Once you execute python script, an AWS Service Catalog portfolio containing reference blueprint product will be created. However, if you want to set up the portfolio manually, you can do so using AWS Service Catalog console.
+
+![sc-ra-portfolios.png](sc-ra-portfolios.png)
+
+Once you have set up the portfolio, you would need to grant end-users access. To know more about how to grant access, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html)
+### AWS Service Catalog Product Launch
+
+Once access has been provided to one or more end users, the reference blueprint product can be lauched.  To know more about how to launch AWS Service Catalog product, see 
+[documentation](https://docs.aws.amazon.com/servicecatalog/latest/userguide/enduser-launch.html)
+
+![sc-ra-products.png](sc-ra-products.png)
 
 ## License
 
