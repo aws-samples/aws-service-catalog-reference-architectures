@@ -24,7 +24,7 @@ To give you an example, the Amazon EC2 use case shows how an organization can le
  4. Relational Database Service (RDS)
  5. Elastic MapReduce (EMR).  
 
-Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, and other aspects of the template and ensure that they are as per your expectations. These CloudFormation templates may need updates before you can use them in production.
+Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. These sample CloudFormation templates may need updates before you can use them in production.
 
 ## Getting Started
 
@@ -101,6 +101,7 @@ cat ~/.aws/config
 region = us-east-2
 
 ### Execute the setup script 
+Before you execute the script, review and revisit the parameters defined in the python script.
 ./sc-vpc-ra-setup.py 
 ```
 
