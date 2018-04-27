@@ -15,9 +15,9 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For Information on AWS Service Catalog, see (documentation)[https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html]
 
-As an organization you can leverage AWS Service Catalog to create and manage catalogs of IT services that are approved for use on AWS. Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference architectures are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. 
+As an organization you can leverage AWS Service Catalog to create and manage catalogs of IT services that are approved for use on AWS. Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. 
 
-To give you an example, the Amazon EC2 use case shows how an organization can leverage the AWS Service Catalog to provide Amazon Elastic Compute (EC2) instances and AWS Systems Manager (SSM)-based patching for testing and integration. Currently GitHub repository contains following reference architectures: 
+To give you an example, the Amazon EC2 use case shows how an organization can leverage the AWS Service Catalog to provide Amazon Elastic Compute (EC2) instances and AWS Systems Manager (SSM)-based patching for testing and integration. Currently GitHub repository contains following reference blueprints: 
  1. Virtual Private Cloud (VPC)
  2. Elastic Compute Cloud (EC2)
  3. Simple Storage Service (S3)
@@ -32,16 +32,16 @@ Once you run the python scripts provided for setup, AWS Service Catalog portfoli
 
 ### AWS Service Catalog Product Launch
 
-Once access has been provided to one or more end users, the reference architecture product can be lauched.  To know more about how to launch AWS Service Catalog product, see 
+Once access has been provided to one or more end users, the reference blueprint product can be lauched.  To know more about how to launch AWS Service Catalog product, see 
 [documentation](https://docs.aws.amazon.com/servicecatalog/latest/userguide/enduser-launch.html)
 
 ![sc-ra-products.png](sc-ra-products.png)
 
-### How to set up AWS Service Catalog Reference architecture products and portfolios?
+### How to set up AWS Service Catalog Reference blueprint products and portfolios?
 
 ### Pre-requisites
 
-1. Installation and configuration of the AWS Command Line Interface (CLI).  It is important to ensure that the AWS CLI configuration contains the correct target region as this region will be used to create the reference architecture components within AWS Service Catalog.
+1. Installation and configuration of the AWS Command Line Interface (CLI).  It is important to ensure that the AWS CLI configuration contains the correct target region as this region will be used to create the reference blueprint components within AWS Service Catalog.
 
     Instructions on installing and configurating the AWS Command Line Interface can be found on the AWS website at: https://aws.amazon.com/cli/
 
@@ -57,26 +57,26 @@ Once access has been provided to one or more end users, the reference architectu
 
 ### Installion - Overview
 
-1. Using your terminal, clone the reference architecture from Github into a folder.
+1. Using your terminal, clone the reference blueprint from Github into a folder.
 2. Contents will include directories for the following:
     * ./vpc 
     * ./ec2
     * ./s3
     * ./rds
     * ./emr
-3. Navigate to the folder corresponding to the reference architecture you wish to distribute via AWS Service Catalog
+3. Navigate to the folder corresponding to the reference blueprint you wish to distribute via AWS Service Catalog
 4. Review AWS Region you are currently in.
 5. Execute the python setup script.
 
 ### Installation -  Step-By-Step instructions
 Here is the list of commands to be executed from terminal - 
 ```text
-### Download reference architecture
+### Download reference blueprint
 mkdir ~/Downloads/sc-ra
 cd ~/Downloads/sc-ra
 git clone https://github.com/aws-samples/aws-service-catalog-reference-architectures       
 
-### Change to appropriate Reference Architecture directory, these instructions show how to create VPC Service Catalog product. However instructions remain identical for all reference architecture modules.
+### Change to appropriate Reference blueprint directory, these instructions show how to create VPC Service Catalog product. However instructions remain identical for all reference blueprint modules.
 cd vpc      
 
 ### You can execute ls -l if you are using linux terminal to see files available.
@@ -100,9 +100,9 @@ Before you execute the script, review and revisit the parameters defined in the 
 ./sc-vpc-ra-setup.py 
 ```
 
-### Reference Architecture Cleanup instructions
+### Reference Blueprint Cleanup instructions
 
-1. Terminate all AWS Service Catalog Reference Architecture provisioned products corresponding to your product.
+1. Terminate all AWS Service Catalog Reference Blueprint provisioned products corresponding to your product.
 2. Remove all products from the portfolio.
 3. Remove all constraints from the portfolio.**
 3. Remove all access to users, groups and roles from the portfolio.
@@ -123,7 +123,7 @@ Before you execute the script, review and revisit the parameters defined in the 
 
 ## Acknowledgments
 
-The following AWS team members have provided guidance, code review and other assistance throughout the design of this reference architecture.
+The following AWS team members have provided guidance, code review and other assistance throughout the design of this reference blueprint.
 
 * David Aiken - AWS Solutions Architect Manager
 * Mahdi - Service Calalog Business Development

@@ -11,7 +11,7 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
   express or implied. See the License for the specific language governing 
   permissions and limitations under the License.
 
-# Service Catalog EMR Reference Architecture
+# Service Catalog EMR Reference blueprint
 
 This reference architecture demonstrates how an organization can leverage Serivce Catalog to provide Amazon Elastic MapReduce (EMR) clusters for testing and integration.
 

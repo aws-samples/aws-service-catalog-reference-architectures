@@ -12,13 +12,13 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
   permissions and limitations under the License.
 
 
-# Service Catalog RDS Reference Architecture
+# Service Catalog RDS Reference blueprint
 
-This reference architecture demonstrates how an organization can leverage Serivce Catalog to provide Amazon Relation Database Service (RDS) databases testing and integration..  
+This reference blueprint demonstrates how an organization can leverage Serivce Catalog to provide Amazon Relation Database Service (RDS) databases testing and integration..  
 
 ## Getting Started
 
-When implemented this reference architecture creates a Service Catalog Portfolio called "Service Catalog RDS Reference Architecture" with four associated products.  The Service Catalog Products reference RDS database cloudformation templates for PostgreSQL, MySQL, MariaDB, Microsoft SQL which can be lauched by end users through Service Catalog as either single instance databases or multi-availability zone databases.
+When implemented this reference blueprint creates a Service Catalog Portfolio called "Service Catalog RDS Reference Architecture" with four associated products.  The Service Catalog Products reference RDS database cloudformation templates for PostgreSQL, MySQL, MariaDB, Microsoft SQL which can be lauched by end users through Service Catalog as either single instance databases or multi-availability zone databases.
 
 ### Single Instance Architecture
 
