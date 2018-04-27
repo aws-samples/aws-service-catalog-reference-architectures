@@ -11,9 +11,9 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
   express or implied. See the License for the specific language governing 
   permissions and limitations under the License.
 
-# AWS Service Catalog Reference Architectures
+# AWS Service Catalog Reference Blueprints
 
-AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need.
+AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For Information on AWS Service Catalog, see (documentation)[https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html]
 
 As an organization you can leverage AWS Service Catalog to create and manage catalogs of IT services that are approved for use on AWS. Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference architectures are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. 
 
@@ -26,13 +26,7 @@ To give you an example, the Amazon EC2 use case shows how an organization can le
 
 Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. These sample CloudFormation templates may need updates before you can use them in production.
 
-## Getting Started
-
-When implemented this reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog XXX Reference Architecture" with one associated product.  The AWS Service Catalog Products reference cloudformation templates for corresponding service which can be lauched by end users through Service Catalog.    
-
-### Service Catalog Portfolios
-
-AWS Service Catalog portfolios will be created for each of the reference architectues.  These portfolios contain the AWS Service Catalog products created from the cloudformation templates provided for each service.  Portfolios can be administered to include the management of users, application of constraints, tagging of portfolios and products, and the sharing of porfolios and products with other accounts.
+Once you run the python scripts provided for setup, AWS Service Catalog portfolios will be created for each of the reference blueprints.  These portfolios contain the AWS Service Catalog products created from the cloudformation templates provided for each service.  
 
 ![sc-ra-portfolios.png](sc-ra-portfolios.png)
 
@@ -58,8 +52,8 @@ Once access has been provided to one or more end users, the reference architectu
 ### Assumptions
 
 * AWS Service Catalog has been enbaled in the target region.
-* An AWS Service Catalog Admin account with attached "**AWSServiceCatalogAdminFullAccess**" managed policy has been created.
-* An AWS Service Catalog Admin account with attached "**AWSServiceCatalogEndUserFullAccess**" managed policy has been created.
+* An AWS Service Catalog Admin IAM principal account with attached "**AWSServiceCatalogAdminFullAccess**" managed policy has been created.
+* An AWS Service Catalog End-user principal account with attached "**AWSServiceCatalogEndUserFullAccess**" managed policy has been created.
 
 ### Installion - Overview
 
@@ -107,8 +101,6 @@ Before you execute the script, review and revisit the parameters defined in the 
 ```
 
 ### Reference Architecture Cleanup instructions
-
-Perform following steps to remove a Reference Architecture from AWS Service Catalog:
 
 1. Terminate all AWS Service Catalog Reference Architecture provisioned products corresponding to your product.
 2. Remove all products from the portfolio.
