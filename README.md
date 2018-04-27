@@ -24,7 +24,7 @@ To give you an example, the Amazon EC2 use case shows how an organization can le
  4. Relational Database Service (RDS)
  5. Elastic MapReduce (EMR).  
 
-Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.
+Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, and other aspects of the template and ensure that they are as per your expectations. These CloudFormation templates may need updates before you can use them in production.
 
 ## Getting Started
 
