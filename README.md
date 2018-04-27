@@ -13,7 +13,7 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 # AWS Service Catalog Reference Blueprints
 
-AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For Information on AWS Service Catalog, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html)
+AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For more Information on AWS Service Catalog, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html)
 
 Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. 
 

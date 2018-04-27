@@ -12,13 +12,13 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
   permissions and limitations under the License.
 
 
-# Service Catalog RDS Reference blueprint
+# AWS Service Catalog RDS Reference blueprint
 
 This reference blueprint demonstrates how an organization can leverage Serivce Catalog to provide Amazon Relation Database Service (RDS) databases testing and integration..  
 
 ## Getting Started
 
-When implemented this reference blueprint creates a Service Catalog Portfolio called "Service Catalog RDS Reference Architecture" with four associated products.  The Service Catalog Products reference RDS database cloudformation templates for PostgreSQL, MySQL, MariaDB, Microsoft SQL which can be lauched by end users through Service Catalog as either single instance databases or multi-availability zone databases.
+When implemented this reference blueprint creates a AWS Service Catalog Portfolio called "AWS Service Catalog RDS Reference Architecture" with four associated products.  The AWS Service Catalog Products reference RDS database cloudformation templates for PostgreSQL, MySQL, MariaDB, Microsoft SQL which can be lauched by end users through AWS Service Catalog as either single instance databases or multi-availability zone databases.
 
 ### Single Instance Architecture
 
@@ -29,7 +29,7 @@ When implemented this reference blueprint creates a Service Catalog Portfolio ca
 
 ![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-single-instance.png)
 
-### For instructions on how to set up this Service catalog product and portfolio, see [How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+### For instructions on how to set up this AWS Service catalog product and portfolio, see [How to set up AWS Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
 
 
 Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.

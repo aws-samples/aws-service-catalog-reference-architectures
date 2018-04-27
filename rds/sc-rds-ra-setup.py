@@ -1,4 +1,5 @@
-#!/usr/bin/python
+#!/Library/Frameworks/Python.framework/Versions/3.6/bin/python3
+
 
 """
   Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -51,8 +52,8 @@ product_type='CLOUD_FORMATION_TEMPLATE'
 # Start Service Catalog BOTO3 API Client
 #####
 client = boto3.client('servicecatalog')
-print "STARTED -- Setup of Service Catalog RDS Reference Architecture."
-print ""
+print ("STARTED -- Setup of Service Catalog RDS Reference Architecture.")
+print ("")
 
 #####
 # Create Portfolio
@@ -73,10 +74,10 @@ response = client.create_portfolio(
 )
 portfolio_id = response['PortfolioDetail']['Id']
 portfolio_arn = response['PortfolioDetail']['ARN']
-print "PORTFOLIO CREATED: Service Catalog RDS Reference Architecture"
-print "--id=" + portfolio_id
-print "--arn=" + portfolio_arn
-print ""
+print ("PORTFOLIO CREATED: Service Catalog RDS Reference Architecture")
+print ("--id=" + portfolio_id)
+print ("--arn=" + portfolio_arn)
+print ("")
 
 
 #####
@@ -110,7 +111,7 @@ response = client.create_product(
     IdempotencyToken=token
 )
 postgresql_product_id = response['ProductViewDetail']['ProductViewSummary']['ProductId']
-print "PRODUCT CREATED: Amazon RDS PostgreSQL Database"
+print ("PRODUCT CREATED: Amazon RDS PostgreSQL Database")
 
 
 #####
@@ -121,9 +122,9 @@ response = client.associate_product_with_portfolio(
     ProductId=postgresql_product_id,
     PortfolioId=portfolio_id,
 )
-print "PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS PostgreSQL Database"
-print "--id=" + postgresql_product_id
-print ""
+print ("PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS PostgreSQL Database")
+print ("--id=" + postgresql_product_id)
+print ("")
 
 
 #####
@@ -157,7 +158,7 @@ response = client.create_product(
     IdempotencyToken=token
 )
 mysql_product_id = response['ProductViewDetail']['ProductViewSummary']['ProductId']
-print "PRODUCT CREATED: Amazon RDS MySQL Database"
+print ("PRODUCT CREATED: Amazon RDS MySQL Database")
 
 
 #####
@@ -168,9 +169,9 @@ response = client.associate_product_with_portfolio(
     ProductId=mysql_product_id,
     PortfolioId=portfolio_id,
 )
-print "PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MySQL Database"
-print "--id=" + mysql_product_id
-print ""
+print ("PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MySQL Database")
+print ("--id=" + mysql_product_id)
+print ("")
 
 
 #####
@@ -204,7 +205,7 @@ response = client.create_product(
     IdempotencyToken=token
 )
 mariadb_product_id = response['ProductViewDetail']['ProductViewSummary']['ProductId']
-print "PRODUCT CREATED: Amazon RDS MariaDB Database"
+print ("PRODUCT CREATED: Amazon RDS MariaDB Database")
 
 
 #####
@@ -215,9 +216,9 @@ response = client.associate_product_with_portfolio(
     ProductId=mariadb_product_id,
     PortfolioId=portfolio_id,
 )
-print "PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MariaDB Database"
-print "--id=" + mariadb_product_id
-print ""
+print ("PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS MariaDB Database")
+print ("--id=" + mariadb_product_id)
+print ("")
 
 
 #####
@@ -251,7 +252,7 @@ response = client.create_product(
     IdempotencyToken=token
 )
 mssql_product_id = response['ProductViewDetail']['ProductViewSummary']['ProductId']
-print "PRODUCT CREATED: Amazon RDS Microsoft SQL Database"
+print ("PRODUCT CREATED: Amazon RDS Microsoft SQL Database")
 
 
 #####
@@ -262,13 +263,13 @@ response = client.associate_product_with_portfolio(
     ProductId=mssql_product_id,
     PortfolioId=portfolio_id,
 )
-print "PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS Microsoft SQL Database"
-print "--id=" + mssql_product_id
-print ""
+print ("PRODUCT/PORTFOLIO ASSOCIATED: Amazon RDS Microsoft SQL Database")
+print ("--id=" + mssql_product_id)
+print ("")
 
 
 #####
 # End Process
 #####
-print "FINISHED -- Setup of Service Catalog RDS Reference Architecture."
-print ""
+print ("FINISHED -- Setup of Service Catalog RDS Reference Architecture.")
+print ("")
