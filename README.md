@@ -100,19 +100,6 @@ Before you execute the script, review and revisit the parameters defined in the 
 ./sc-vpc-ra-setup.py 
 ```
 
-### Reference Blueprint Cleanup instructions
-
-1. Terminate all AWS Service Catalog Reference Blueprint provisioned products corresponding to your product.
-2. Remove all products from the portfolio.
-3. Remove all constraints from the portfolio.**
-3. Remove all access to users, groups and roles from the portfolio.
-4. Remove all shares associated with the portfolio.**
-4. Remove all tags from the portfolio.
-5. Remove all tagOptions from the portfolio.**
-5. Delete all products from AWS Service Catalog.
-5. Delete the porfolio from AWS Service Catalog.
-
-
 ## License
 
 * This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
