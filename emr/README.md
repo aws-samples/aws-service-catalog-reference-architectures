@@ -23,7 +23,8 @@ When implemented this reference architecture creates an AWS Service Catalog Port
 
 ![sc-emr-ra-architecture.png](sc-emr-ra-architecture.png)
 
-### For instructions on how to set up this AWS Service catalog product and portfolio, see [How to set up Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+
+### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-emr-ra-walktrough.pdf)
 
 
 Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.

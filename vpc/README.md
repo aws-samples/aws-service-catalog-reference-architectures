@@ -24,7 +24,8 @@ When implemented this reference blueprint creates an AWS Service Catalog Portfol
 
 ![sc-vpc-ra-architecture-multi-az.png](sc-vpc-ra-architecture-multi-az.png)
 
-### For instructions on how to set up this AWS Service Catalog product and portfolio, see [How to set up AWS Service Catalog Reference blueprint products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+
+### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-vpc-ra-walkthrough.pdf)
 
 ## License
 

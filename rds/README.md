@@ -29,7 +29,8 @@ When implemented this reference blueprint creates a AWS Service Catalog Portfoli
 
 ![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-single-instance.png)
 
-### For instructions on how to set up this AWS Service catalog product and portfolio, see [How to set up AWS Service Catalog Reference architecture products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-rds-ra-walkthrough.pdf)
+
 
 
 Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.

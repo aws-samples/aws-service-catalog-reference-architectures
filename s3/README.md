@@ -39,7 +39,9 @@ When implemented this reference blueprint creates an AWS Service Catalog Portfol
 
 ![sc-s3-transition-ra-architecture.png](sc-s3-transition-ra-architecture.png)
 
-### For instructions on how to set up this AWS Service catalog product and portfolio, see [How to set up AWS Service Catalog Reference blueprint products and portfolios section](https://github.com/aws-samples/aws-service-catalog-reference-architectures)
+
+### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-s3-ra-walkthrough.pdf)
+
 
 Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.
 
