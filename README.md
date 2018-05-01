@@ -28,10 +28,11 @@ Note - Before you distribute the CloudFormation template to your organization, r
 
 
 ### How to set up AWS Service Catalog Reference blueprint products and portfolios?
+Each Blueprint comes with a detailed walkthrough guide that includes step-by-step instructions on how to set up the Service Catalog Blueprint. 
 
 ### Pre-requisites
 
-1. AWS CLI should be installed and configured to point to the region in which you want to create the reference blueprint components within AWS Service Catalog.
+1. AWS CLI configured to point to point to the region in which you want to create the reference blueprint components within AWS Service Catalog.
 
 2. Access to a system with permissions to execute a python script. The script utilizes "boto3" and "random" modules.
 
@@ -52,7 +53,7 @@ Note - Before you distribute the CloudFormation template to your organization, r
     * ./emr
 3. Navigate to the folder corresponding to the reference blueprint you wish to distribute via AWS Service Catalog
 4. Review AWS Region you are currently in.
-5. Execute the python setup script.
+5. Review the python script, modify necessary parameters, and finally execute the python setup script.
 
 ### Installation -  Step-By-Step instructions
 Here is the list of commands to be executed from terminal - 
@@ -67,16 +68,16 @@ cd vpc
 
 ### You can execute ls -l if you are using linux terminal to see files available.
 ls -l
--rw-r--r--  1 username  staff   7873 Mar 12 16:07 README.md
--rwxr-xr-x  1 username  staff   3358 Mar 12 15:19 sc-vpc-ra-setup.py
--rw-r--r--  1 username  staff  31408 Mar 12 16:10 sc-vpc-ra.json
--rw-r--r--  1 username  staff  15265 Mar 12 16:00 sc-vpc-ra.yml
--rw-r--r--  1 username  staff 360954 Mar 12 17:53 sc-vpc-ra-architecture-multi-az.png
+-rw-r--r--  1 username  staff   #### Mar 12 16:07 README.md
+-rwxr-xr-x  1 username  staff   #### Mar 12 15:19 sc-vpc-ra-setup.py
+-rw-r--r--  1 username  staff  ##### Mar 12 16:10 sc-vpc-ra.json
+-rw-r--r--  1 username  staff  ##### Mar 12 16:00 sc-vpc-ra.yml
+-rw-r--r--  1 username  staff ###### Mar 12 17:53 sc-vpc-ra-architecture-multi-az.png
 
 ### Set execute permissions on an appropriate python setup script
 chmod +x sc-vpc-ra-setup.py 
 
-### Verify whether your CLI is configured for appropraite region. Note that the script will create an AWS Service Catalog product along with corresponding portfolio. 
+### Verify whether your CLI is configured for appropriate region. Note that the script will create an AWS Service Catalog product along with corresponding portfolio. 
 cat ~/.aws/config
 [default]
 region = us-east-2
