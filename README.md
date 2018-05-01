@@ -112,7 +112,7 @@ Once access has been provided to one or more end users, the reference blueprint 
 The following AWS team members have provided guidance, code review and other assistance throughout the design of this reference blueprint.
 
 * David Aiken - AWS Solutions Architect Manager
-* Mahdi - Service Calalog Business Development
+* Mahdi Sajjadpour - AWS Service Catalog Business Development
 * Phil Chen - AWS Sr. Solutions Architect
 * Kanchan Waikar - AWS Solutions Architect
 * Kenneth Walsh - AWS Solutions Architect
