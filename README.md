@@ -15,7 +15,7 @@ Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
 AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For more Information on AWS Service Catalog, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html)
 
-Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. 
+Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. Note that these products have been tested in US-EAST-1 region.
 
 To give you an example, the Amazon EC2 use case shows how an organization can leverage the AWS Service Catalog to provide Amazon Elastic Compute (EC2) instances and AWS Systems Manager (SSM)-based patching for testing and integration. Currently GitHub repository contains following reference blueprints: 
  1. Virtual Private Cloud (VPC)
