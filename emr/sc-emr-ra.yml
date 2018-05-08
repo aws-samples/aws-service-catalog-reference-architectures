@@ -113,6 +113,7 @@ Parameters:
 Resources:
   LogBucket:
     Type: 'AWS::S3::Bucket'
+    DeletionPolicy: Retain
     Properties:
       AccessControl: Private
       Tags:
