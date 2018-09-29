@@ -78,7 +78,7 @@ Parameters:
   DBPortNumber:
     Description: The port number on which the database accepts connections.
     Type: Number
-    Default: '5432'
+    Default: '3306'
     MinValue: '1150'
     MaxValue: '65535'
     ConstraintDescription: Valid values range from 1150-65535
