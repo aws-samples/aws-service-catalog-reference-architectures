@@ -22,12 +22,12 @@ When implemented this reference blueprint creates a AWS Service Catalog Portfoli
 
 ### Single Instance Architecture
 
-![sc-rds-ra-architecture-single-instance.png](sc-rds-ra-architecture-multi-az.png)
+![sc-rds-ra-architecture-single-instance.png](sc-rds-ra-architecture-single-instance.png)
 
 
 ### Multi-Availability Zone Architecture
 
-![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-single-instance.png)
+![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-multi-az.png)
 
 ### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-rds-ra-walkthrough.pdf)
 
