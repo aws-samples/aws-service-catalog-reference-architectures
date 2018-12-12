@@ -42,13 +42,13 @@ S3 bucket then follow these instructions:
     * ./s3
     * ./rds
     * ./emr
-6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
+4. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
 For example the EC2 portfolio would be:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
-7. If this is the first portfolio you are creating:  
+5. If this is the first portfolio you are creating:  
  then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
- If you have already run a portfolio template you should put the created launch constraint role name in the _LaunchRoleName_ field (default is SCEC2LaunchRole).
-8. Set the _RepoRootURL_ parameter to your bucket's root url:  
+ If you have already run a VPC or EC2 portfolio template you should use the LaunchRoleName output value. 
+6. Set the _RepoRootURL_ parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
   
 Once you create the stacks, an AWS Service Catalog portfolio containing reference blueprint products will be created. 
