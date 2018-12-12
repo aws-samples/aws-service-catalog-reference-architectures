@@ -5,7 +5,7 @@ AWS Service Catalog allows you to centrally manage these commonly deployed IT se
 Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate specific use-cases around specific AWS Services. Note that these products have been tested in US-EAST-1 region.
 
 To give you an example, the Amazon EC2 use case shows how an organization can leverage the AWS Service Catalog to provide Amazon Elastic Compute (EC2) instances and AWS Systems Manager (SSM)-based patching for testing and integration. Currently GitHub repository contains following reference blueprints: 
- 1. Virtual Private Cloud (VPC)
+ 1. [Virtual Private Cloud (VPC)](vpc)
  2. Elastic Compute Cloud (EC2)
  3. Simple Storage Service (S3)
  4. Relational Database Service (RDS)
