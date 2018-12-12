@@ -6,6 +6,7 @@ Resources:
       RoleName: SCRDSLaunchRole 
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonRDSFullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:

@@ -152,7 +152,7 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "AccessControl": "Private",
-                "BucketName":{"Fn::Sub":"sc-emr-logs-${AccountId}"}
+                "BucketName":{"Fn::Sub":"sc-emr-logs-${AWS::AccountId}"}
             }
         },
         "Cluster": {
