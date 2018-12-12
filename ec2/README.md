@@ -22,7 +22,7 @@ When implemented this reference blueprint creates an AWS Service Catalog Portfol
 ### Create Stack
 
 In the AWS CloudFormation console choose "Create Stack" and supply the Portfolio url:  
-(sc-portfolio-ec2.json)
+!(sc-portfolio-ec2.json)
 
 ### EC2 Architecture with Amazon Linux and Microsoft Windows instances
 
