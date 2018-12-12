@@ -152,12 +152,7 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "AccessControl": "Private",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": "SC-EMR-RA-Log-Bucket"
-                    }
-                ]
+                "BucketName":{"Fn::Sub":"sc-emr-logs-${AccountId}"}
             }
         },
         "Cluster": {

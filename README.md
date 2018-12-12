@@ -64,8 +64,8 @@ Once access has been provided to one or more end users, the reference blueprint 
 ![sc-ra-products.png](sc-ra-products.png)
 
 ## License  
-Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.  
 This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
+Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.  
 
 ## Authors
 

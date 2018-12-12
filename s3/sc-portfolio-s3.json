@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Portfolio setup for Service Catalog with EC2 products. Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. (fdp-1p4da46nc)",
+    "Description": "Portfolio setup for Service Catalog with S3 products. Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.(fdp-1p4da46pn)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -46,16 +46,16 @@
        "PorfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
-            "Default":"Service Catalog EC2 Reference Architecture"
+            "Default":"Service Catalog S3 Reference Architecture"
         },
         "PorfolioDescription": {
             "Type":"String",
             "Description":"Portfolio Description",
-            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
+            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Simple Storage Service."
         },
         "LaunchRoleName": {
             "Type":"String",
-            "Description":"Name of the launch constraint role for EC2 products. leave this blank to create the role."            
+            "Description":"Name of the launch constraint role for VPC products. leave this blank to create the role."            
         },
        "LinkedRole1": {
             "Type":"String",
@@ -77,7 +77,7 @@
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}			
     },
     "Resources": {
-        "SCEC2portfolio": {
+        "SCS3portfolio": {
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
@@ -90,7 +90,7 @@
           "Condition":"CondLinkRole1",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PortfolioId" : {"Ref":"SCS3portfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -99,7 +99,7 @@
           "Condition":"CondLinkRole2",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PortfolioId" : {"Ref":"SCS3portfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -107,12 +107,12 @@
           "Type" : "AWS::CloudFormation::Stack",
           "Condition":"CreateLaunchConstraint",
           "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/ec2LaunchRole.yml"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/s3LaunchRole.yml"},
             "TimeoutInMinutes" : 5
           }
         },
         
-        "ec2linuxproduct": {
+        "s3publicproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
@@ -122,15 +122,14 @@
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
                 ]},
-                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "PortfolioId":{"Ref":"SCS3portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-linux.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-product-s3-public.json"},
             "TimeoutInMinutes" : 5
           }
         },
-        
-        "ec2windowsproduct": {
+		"s3privateproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
@@ -140,12 +139,64 @@
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
                 ]},
-                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "PortfolioId":{"Ref":"SCS3portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-product-s3-private.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"s3privateEncproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCS3portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-product-s3-private-enc.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"s3privateMFAproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCS3portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-product-s3-private-mfa.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"s3privatetransproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCS3portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-product-s3-private-trans.json"},
             "TimeoutInMinutes" : 5
           }
         }
+		
     }  
 }
