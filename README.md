@@ -1,16 +1,3 @@
-Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-  
-  Licensed under the Apache License, Version 2.0 (the "License").
-  You may not use this file except in compliance with the License.
-  A copy of the License is located at
-  
-      http://www.apache.org/licenses/LICENSE-2.0
-  
-  or in the "license" file accompanying this file. This file is distributed 
-  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-  express or implied. See the License for the specific language governing 
-  permissions and limitations under the License.
-
 # AWS Service Catalog Reference Blueprints
 
 AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. For more Information on AWS Service Catalog, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html)
@@ -32,9 +19,8 @@ Each Blueprint comes with a detailed walkthrough guide that includes step-by-ste
 
 ### Pre-requisites
 
-1. AWS CLI configured to point to point to the region in which you want to create the reference blueprint components within AWS Service Catalog.
-
-2. Access to a system with permissions to execute a python script. The script utilizes "boto3" and "random" modules.
+1. AWS CLI configured to point to the region in which you want to create the reference blueprint components within AWS Service Catalog.  
+2. Access to a system with permissions to execute a python script. The script utilizes "boto3" and "random" modules.  
 
 ### Assumptions
 
@@ -101,6 +87,7 @@ Once access has been provided to one or more end users, the reference blueprint 
 
 ## License
 
+Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 * This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
 
 ## Authors

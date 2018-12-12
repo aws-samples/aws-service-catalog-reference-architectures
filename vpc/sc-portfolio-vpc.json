@@ -1,0 +1,134 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Portfolio setup for Service Catalog with VPC products. Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Portfolio Information"
+                    },
+                    "Parameters": [
+                        "PorfolioName",
+                        "PortfolioProvider",
+                        "PorfolioDescription"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "IAM Settings"
+                    },
+                    "Parameters": [
+                        "LaunchRoleName",
+                        "LinkedRole1",
+                        "LinkedRole2"
+                    ]
+                } ,
+                {
+                    "Label": {
+                        "default": "Product Settings"
+                    },
+                    "Parameters": [
+                        "RepoRootURL"
+                    ]
+                } 
+  
+            ]
+        }
+    },
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name",
+            "Default":"IT Services"
+        },
+       "PorfolioName": {
+            "Type":"String",
+            "Description":"Portfolio Name",
+            "Default":"Service Catalog VPC Reference Architecture"
+        },
+        "PorfolioDescription": {
+            "Type":"String",
+            "Description":"Portfolio Description",
+            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Virtual Private Cloud."
+        },
+        "LaunchRoleName": {
+            "Type":"String",
+            "Description":"Name of the launch constraint role for VPC products. leave this blank to create the role."            
+        },
+       "LinkedRole1": {
+            "Type":"String",
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
+        },       
+        "LinkedRole2": {
+            "Type":"String",
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
+        },       
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates.",
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        }
+      },
+      "Conditions":{
+        "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
+        "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}			
+    },
+    "Resources": {
+        "SCVPCportfolio": {
+          "Type" : "AWS::ServiceCatalog::Portfolio",
+          "Properties" : {
+            "ProviderName": {"Ref":"PortfolioProvider"},
+            "Description" : {"Ref":"PorfolioDescription"},
+            "DisplayName" : {"Ref":"PorfolioName"}
+          }
+        },
+        "addrole1":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole1",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
+            "PortfolioId" : {"Ref":"SCVPCportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "addrole2":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole2",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
+            "PortfolioId" : {"Ref":"SCVPCportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CreateLaunchConstraint",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/ec2LaunchRole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
+        "vpcproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCVPCportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}vpc/sc-product-vpc.json"},
+            "TimeoutInMinutes" : 5
+          }
+        }
+		
+    }  
+}

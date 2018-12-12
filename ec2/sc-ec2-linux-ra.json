@@ -21,7 +21,8 @@
                     "Parameters": [
                         "LinuxInstanceType",
                         "LinuxSubnet",
-                        "LinuxSSHPort"
+                        "LinuxSSHPort",
+						"LatestAmiId"
                     ]
                 }
             ],
@@ -43,6 +44,9 @@
                 },
                 "LinuxSSHPort": {
                     "default": "Linux SSH Port"
+                },
+                "LatestAmiId": {
+                    "default": "SSM key to the latest Amazon linux AMI"
                 }
             }
         }
@@ -66,13 +70,18 @@
         },
         "LinuxInstanceType": {
             "AllowedValues": [
-                "t2.nano",
+                "t3.nano",
+                "t3.micro",
+                "t3.small",
+                "t3.medium",
+                "t3.large",
+				"t2.nano",
                 "t2.micro",
                 "t2.small",
                 "t2.medium",
                 "t2.large"
             ],
-            "Default": "t2.micro",
+            "Default": "t3.micro",
             "Description": "Amazon EC2 Linux Instance Type",
             "Type": "String"
         },
@@ -85,62 +94,11 @@
         "KeyPair": {
             "Description": "Name of existing EC2 key pair for Linux Instances",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        }
-    },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "reference-ami": {
-                "LINUXAMI": "amzn-ami-hvm-2017.09.1.20180307-x86_64-gp2 (ami-1853ac65)"
-            },
-            "ap-south-1": {
-                "LINUXAMI": "ami-7c87d913"
-            },
-            "eu-west-3": {
-                "LINUXAMI": "ami-4f55e332"
-            },
-            "eu-west-2": {
-                "LINUXAMI": "ami-dff017b8"
-            },
-            "eu-west-1": {
-                "LINUXAMI": "ami-3bfab942"
-            },
-            "ap-northeast-3": {
-                "LINUXAMI": "ami-df2729a2"
-            },
-            "ap-northeast-2": {
-                "LINUXAMI": "ami-5e1ab730"
-            },
-            "ap-northeast-1": {
-                "LINUXAMI": "ami-a77c30c1"
-            },
-            "sa-east-1": {
-                "LINUXAMI": "ami-5339733f"
-            },
-            "ca-central-1": {
-                "LINUXAMI": "ami-5b55d23f"
-            },
-            "ap-southeast-1": {
-                "LINUXAMI": "ami-e2adf99e"
-            },
-            "ap-southeast-2": {
-                "LINUXAMI": "ami-43874721"
-            },
-            "eu-central-1": {
-                "LINUXAMI": "ami-ac442ac3"
-            },
-            "us-east-1": {
-                "LINUXAMI": "ami-1853ac65"
-            },
-            "us-east-2": {
-                "LINUXAMI": "ami-25615740"
-            },
-            "us-west-1": {
-                "LINUXAMI": "ami-bf5540df"
-            },
-            "us-west-2": {
-                "LINUXAMI": "ami-d874e0a0"
-            }
-        }
+        },
+		"LatestAmiId": {
+			"Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+			"Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+		}
     },
     "Resources": {
         "InstancePatchingRole": {
@@ -214,15 +172,7 @@
         "LinuxInstance": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        "LINUXAMI"
-                    ]
-                },
+                "ImageId": { "Ref" : "LatestAmiId"},
                 "InstanceType": {
                     "Ref": "LinuxInstanceType"
                 },
@@ -243,7 +193,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "Value": "SC-EC2-RA-Linux-Instance"
+                        "Value": {"Fn::Sub":"SC-RA-Linux-${LinuxSubnet}"}
                     },
                     {
                         "Key": "Description",
