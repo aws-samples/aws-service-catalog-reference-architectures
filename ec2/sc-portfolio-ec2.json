@@ -59,13 +59,11 @@
         },
        "LinkedRole1": {
             "Type":"String",
-            "Description":"(Optional) The name of a role which can execute products in this portfolio.",
-            "Default":"Admin"
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
         },       
         "LinkedRole2": {
             "Type":"String",
-            "Description":"(Optional) The name of a second role which can execute products in this portfolio.",
-            "Default":"User"
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
         },       
         "RepoRootURL": {
             "Type":"String",
@@ -148,8 +146,6 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
             "TimeoutInMinutes" : 5
           }
-        },
-
-    }
-  }
+        }
+    }  
 }
