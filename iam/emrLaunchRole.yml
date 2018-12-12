@@ -5,7 +5,7 @@ Resources:
     Properties:
       RoleName: SCEMRLaunchRole 
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2FullAccess      
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
