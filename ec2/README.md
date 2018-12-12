@@ -24,15 +24,17 @@ When implemented this reference blueprint creates an AWS Service Catalog Portfol
 1. clone this git repo:  
   ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
 1. Copy everything in the repo to an S3 bucket:  
+  ```cd aws-service-catalog-reference-architectures```  
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude ".git*" --recursive```  
-2. In the AWS CloudFormation console choose "Create Stack" and supply the Portfolio S3 url:  
+2. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
 3. Set the "RepoRootURL" parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
-
   
 Or, just click this button:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json)
+
+You can see the programatic way to create portfolios and products using python in sc-ec2-ra-setup.py
 
 
 ### EC2 Architecture with Amazon Linux and Microsoft Windows instances
