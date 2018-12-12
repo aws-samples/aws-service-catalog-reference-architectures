@@ -36,15 +36,13 @@ S3 bucket then follow these instructions:
 2. Copy everything in the repo to an S3 bucket:  
   ```cd aws-service-catalog-reference-architectures```  
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE]  --exclude "*" --include "*.json" --include "*.yml" --recursive``` 
-3. Contents will include directories for the following:
+3. Contents of the S3 bucket will include directories for the following:
     * ./vpc 
     * ./ec2
     * ./s3
     * ./rds
     * ./emr
-4. Navigate to the folder corresponding to the reference blueprint you wish to distribute via AWS Service Catalog
-5. Review AWS Region you are currently in.
-6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
+6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation)  Review AWS Region you are currently in, then choose "Create Stack" and supply the Portfolio's S3 url. 
 For example the EC2 portfolio would be:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
 7. If this is the first portfolio you are creating:  
@@ -65,8 +63,7 @@ Once access has been provided to one or more end users, the reference blueprint 
 
 ![sc-ra-products.png](sc-ra-products.png)
 
-## License
-
+## License  
 Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.  
 This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
 
