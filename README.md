@@ -42,7 +42,7 @@ S3 bucket then follow these instructions:
     * ./s3
     * ./rds
     * ./emr
-6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation)  Review AWS Region you are currently in, then choose "Create Stack" and supply the Portfolio's S3 url. 
+6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
 For example the EC2 portfolio would be:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
 7. If this is the first portfolio you are creating:  
@@ -51,7 +51,7 @@ For example the EC2 portfolio would be:
 8. Set the _RepoRootURL_ parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
   
-Once you create the stacks, an AWS Service Catalog portfolio containing reference blueprint product will be created. 
+Once you create the stacks, an AWS Service Catalog portfolio containing reference blueprint products will be created. 
 However, if you want to set up the portfolio manually, you can do so using AWS Service Catalog console and directly import the resource teamplates.  
 
 Once you have set up the portfolio, you would need to grant end-users access.  If you supplied values for _LinkedRole1_ and _LinkedRole1_ Then this is doene for you.

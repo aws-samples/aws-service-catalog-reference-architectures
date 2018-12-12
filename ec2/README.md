@@ -13,7 +13,7 @@ Aamzon Linux and Microsoft Windows operating systems.
 
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json)  
 
-### Manual install from your own S3 bucket  
+### Install from your own S3 bucket  
 1. clone this git repo:  
   ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
 1. Copy everything in the repo to an S3 bucket:  
