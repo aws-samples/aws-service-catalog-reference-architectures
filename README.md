@@ -35,7 +35,7 @@ S3 bucket then follow these instructions:
   ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
 2. Copy everything in the repo to an S3 bucket:  
   ```cd aws-service-catalog-reference-architectures```  
-  ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude ".git*" --recursive``` 
+  ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE]  --exclude "*" --include "*.json" --include "*.yml" --recursive``` 
 3. Contents will include directories for the following:
     * ./vpc 
     * ./ec2
@@ -47,7 +47,8 @@ S3 bucket then follow these instructions:
 6. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
 For example the EC2 portfolio would be:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
-7. If this is the first portfolio you are creating then leave _LaunchRoleName_ blank to allow CloudFormation to creat the launchconstraint role for you.
+7. If this is the first portfolio you are creating:  
+ then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
  If you have already run a portfolio template you should put the created launch constraint role name in the _LaunchRoleName_ field (default is SCEC2LaunchRole).
 8. Set the _RepoRootURL_ parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
