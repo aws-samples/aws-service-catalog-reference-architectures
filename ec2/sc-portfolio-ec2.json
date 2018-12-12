@@ -68,7 +68,7 @@
         "RepoRootURL": {
             "Type":"String",
             "Description":"Root url for the repo containing the product templates.",
-            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/"
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
         }
       },
       "Conditions":{
