@@ -107,7 +107,7 @@
           "Type" : "AWS::CloudFormation::Stack",
           "Condition":"CreateLaunchConstraint",
           "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/ec2LaunchRole.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/ec2LaunchRole.yml"},
             "TimeoutInMinutes" : 5
           }
         },
