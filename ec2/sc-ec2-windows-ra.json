@@ -442,11 +442,6 @@
         "TemplateID": {
             "Value": "service-catalog-reference-architectures/sc-ec2-ra"
         },
-        "StackName": {
-            "Value": {
-                "Fn::Sub": "${AWS::StackName}"
-            }
-        },
         "AWSRegionName": {
             "Value": {
                 "Ref": "AWS::Region"

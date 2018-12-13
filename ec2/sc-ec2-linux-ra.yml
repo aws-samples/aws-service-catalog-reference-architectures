@@ -1,21 +1,32 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Service Catalog: EC2 Reference Architecture(fdp-1oc5f3ula).Before you distribute this CloudFormation template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production.  Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.'
+Description: 'Service Catalog: EC2 Reference Architecture(fdp-1oc5f3ula). Before you
+  distribute this template, review IAM permissions, Deletion policies, update stack
+  behavior, other aspects of the template, and ensure that they are as per your expectations
+  and processes. Sample CloudFormation templates may need updates before you can use
+  them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights
+  Reserved.Licensed under the Apache License, Version 2.0 (the "License"). You may
+  not use this file except in compliance with the License.A copy of the License is
+  located at http://www.apache.org/licenses/LICENSE-2.0 or in the "license" file accompanying
+  this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+  OF ANY KIND, either express or implied. See the License for the specific language
+  governing permissions and limitations under the License.'
 Metadata:
-  'AWS::CloudFormation::Interface':
+  AWS::CloudFormation::Interface:
     ParameterGroups:
     - Label:
-        default: 'General Configuration'
+        default: General Configuration
       Parameters:
       - VPC
       - KeyPair
       - RemoteAccessCIDR
     - Label:
-        default: 'Linux Instance Configuration'
+        default: Linux Instance Configuration
       Parameters:
       - LinuxInstanceType
       - LinuxSubnet
       - LinuxSSHPort
+      - LatestAmiId
     ParameterLabels:
       VPC:
         default: VPC
@@ -29,82 +40,56 @@ Metadata:
         default: Linux Subnet
       LinuxSSHPort:
         default: Linux SSH Port
+      LatestAmiId:
+        default: SSM key to the latest Amazon linux AMI
 Parameters:
   VPC:
-    Type: "AWS::EC2::VPC::Id"
+    Type: AWS::EC2::VPC::Id
     Description: Select the VPC where the EC2 instances will be created
     ConstraintDescription: must be an existing VPC
   LinuxSubnet:
-    Type: "AWS::EC2::Subnet::Id"
+    Type: AWS::EC2::Subnet::Id
     Description: Select subnet for Linux Instance
     ConstraintDescription: must be an existing subnet
   RemoteAccessCIDR:
     Description: CIDR block to allow access to linux instances
     Type: String
-    AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
   LinuxInstanceType:
     AllowedValues:
-      - t2.nano
-      - t2.micro
-      - t2.small
-      - t2.medium
-      - t2.large 
-    Default: t2.micro
+    - t3.nano
+    - t3.micro
+    - t3.small
+    - t3.medium
+    - t3.large
+    - t2.nano
+    - t2.micro
+    - t2.small
+    - t2.medium
+    - t2.large
+    Default: t3.micro
     Description: Amazon EC2 Linux Instance Type
     Type: String
   LinuxSSHPort:
-    Description: 'Linux SSH Port Number'
+    Description: Linux SSH Port Number
     Type: Number
     Default: 22
     ConstraintDescription: must be 22 or a number from 1024 to 65535
   KeyPair:
     Description: Name of existing EC2 key pair for Linux Instances
     Type: AWS::EC2::KeyPair::KeyName
-Mappings:
-  AWSAMIRegionMap:
-    reference-ami:
-      LINUXAMI: 'amzn-ami-hvm-2017.09.1.20180307-x86_64-gp2 (ami-1853ac65)'
-    ap-south-1:
-      LINUXAMI: ami-7c87d913
-    eu-west-3:
-      LINUXAMI: ami-4f55e332
-    eu-west-2:
-      LINUXAMI: ami-dff017b8
-    eu-west-1:
-      LINUXAMI: ami-3bfab942
-    ap-northeast-3:
-      LINUXAMI: ami-df2729a2
-    ap-northeast-2:
-      LINUXAMI: ami-5e1ab730
-    ap-northeast-1:
-      LINUXAMI: ami-a77c30c1
-    sa-east-1:
-      LINUXAMI: ami-5339733f
-    ca-central-1:
-      LINUXAMI: ami-5b55d23f
-    ap-southeast-1:
-      LINUXAMI: ami-e2adf99e
-    ap-southeast-2:
-      LINUXAMI: ami-43874721
-    eu-central-1:
-      LINUXAMI: ami-ac442ac3
-    us-east-1:
-      LINUXAMI: ami-1853ac65
-    us-east-2:
-      LINUXAMI: ami-25615740
-    us-west-1:
-      LINUXAMI: ami-bf5540df
-    us-west-2:
-      LINUXAMI: ami-d874e0a0
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 Resources:
   InstancePatchingRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-        - "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      - arn:aws:iam::aws:policy/AmazonSSMFullAccess
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -114,13 +99,12 @@ Resources:
             - ec2.amazonaws.com
           Action:
           - sts:AssumeRole
-  PatchingInstanceProfile: 
-    Type: "AWS::IAM::InstanceProfile"
-    Properties: 
+  PatchingInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
       Path: "/"
-      Roles: 
-        - 
-          Ref: "InstancePatchingRole"
+      Roles:
+      - Ref: InstancePatchingRole
   LinuxSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -128,63 +112,74 @@ Resources:
       VpcId:
         Ref: VPC
       SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref LinuxSSHPort
-          ToPort: !Ref LinuxSSHPort
-          CidrIp: !Ref 'RemoteAccessCIDR'
-        - IpProtocol: icmp
-          FromPort: '-1'
-          ToPort: '-1'
-          CidrIp: !Ref 'RemoteAccessCIDR'
+      - IpProtocol: tcp
+        FromPort:
+          Ref: LinuxSSHPort
+        ToPort:
+          Ref: LinuxSSHPort
+        CidrIp:
+          Ref: RemoteAccessCIDR
+      - IpProtocol: icmp
+        FromPort: "-1"
+        ToPort: "-1"
+        CidrIp:
+          Ref: RemoteAccessCIDR
   LinuxInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: !FindInMap [AWSAMIRegionMap, !Ref "AWS::Region", LINUXAMI]
-      InstanceType: !Ref LinuxInstanceType
-      SubnetId: !Ref LinuxSubnet
-      SecurityGroupIds: 
-        - !Ref LinuxSecurityGroup
-      KeyName: !Ref 'KeyPair'
-      IamInstanceProfile: !Ref PatchingInstanceProfile
+      ImageId:
+        Ref: LatestAmiId
+      InstanceType:
+        Ref: LinuxInstanceType
+      SubnetId:
+        Ref: LinuxSubnet
+      SecurityGroupIds:
+      - Ref: LinuxSecurityGroup
+      KeyName:
+        Ref: KeyPair
+      IamInstanceProfile:
+        Ref: PatchingInstanceProfile
       Tags:
-        - Key: Name
-          Value: SC-EC2-RA-Linux-Instance
-        - Key: Description
-          Value: 'Service-Catalog-EC2-Reference-Architecture'
+      - Key: Name
+        Value:
+          Fn::Sub: SC-RA-Linux-${LinuxSubnet}
+      - Key: Description
+        Value: Service-Catalog-EC2-Reference-Architecture
   LinuxPatchBaseline:
-    Type: "AWS::SSM::PatchBaseline"
+    Type: AWS::SSM::PatchBaseline
     Properties:
       OperatingSystem: AMAZON_LINUX
       ApprovalRules:
         PatchRules:
-          - ApproveAfterDays: 0
-            ComplianceLevel: CRITICAL
-            EnableNonSecurity: true
-            PatchFilterGroup:
-              PatchFilters:
-                - Key: PRODUCT
-                  Values: 
-                    - AmazonLinux2017.09
-                - Key: CLASSIFICATION
-                  Values: 
-                    - Security
-                    - Bugfix
-                    - Enhancement
-                    - Recommended
-                - Key: SEVERITY
-                  Values: 
-                    - Critical
-                    - Important
-                    - Medium
-                    - Low
-      Description: 'Service Catalog EC2 Reference Architecture Patch Baseline for Amazon Linux instace'
-      Name: 'sc-ec2-ra-linux-patch-baseline'
+        - ApproveAfterDays: 0
+          ComplianceLevel: CRITICAL
+          EnableNonSecurity: true
+          PatchFilterGroup:
+            PatchFilters:
+            - Key: PRODUCT
+              Values:
+              - AmazonLinux2017.09
+            - Key: CLASSIFICATION
+              Values:
+              - Security
+              - Bugfix
+              - Enhancement
+              - Recommended
+            - Key: SEVERITY
+              Values:
+              - Critical
+              - Important
+              - Medium
+              - Low
+      Description: Service Catalog EC2 Reference Architecture Patch Baseline for Amazon
+        Linux instace
+      Name: sc-ec2-ra-linux-patch-baseline
   MaintenanceWindowRole:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole"
+      - arn:aws:iam::aws:policy/service-role/AmazonSSMMaintenanceWindowRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -196,7 +191,7 @@ Resources:
           Action:
           - sts:AssumeRole
   MaintenanceWindow:
-    Type: "AWS::SSM::MaintenanceWindow"
+    Type: AWS::SSM::MaintenanceWindow
     Properties:
       Description: Maintenance window to allow for patching Amazon Linux instances
       AllowUnassociatedTargets: false
@@ -205,85 +200,115 @@ Resources:
       Duration: 6
       Name: sc-ec2-ra-linux-maintenance-window
   LinuxMainteanceWindowTarget:
-    Type: "AWS::SSM::MaintenanceWindowTarget"
+    Type: AWS::SSM::MaintenanceWindowTarget
     Properties:
-      OwnerInformation: 'Service Catalog EC2 Reference Architecture'
-      Description: 'Service Catalog EC2 Reference Architecture - Patch Maintenance for Amazon Linux Instances'
-      WindowId: !Ref MaintenanceWindow
+      OwnerInformation: Service Catalog EC2 Reference Architecture
+      Description: Service Catalog EC2 Reference Architecture - Patch Maintenance
+        for Amazon Linux Instances
+      WindowId:
+        Ref: MaintenanceWindow
       ResourceType: INSTANCE
-      Targets: 
-        - Key: InstanceIds
-          Values: 
-            - !Ref LinuxInstance
-      Name: 'sc-ec2-ra-linux-patch-targets'
+      Targets:
+      - Key: InstanceIds
+        Values:
+        - Ref: LinuxInstance
+      Name: sc-ec2-ra-linux-patch-targets
   LinuxMaintenanceWindowTaskScan:
-    Type: "AWS::SSM::MaintenanceWindowTask"
+    Type: AWS::SSM::MaintenanceWindowTask
     Properties:
       MaxErrors: 1
-      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window Task: Scan for update for Amazon Linux Instance'
-      ServiceRoleArn: !GetAtt MaintenanceWindowRole.Arn
+      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window
+        Task: Scan for update for Amazon Linux Instance'
+      ServiceRoleArn:
+        Fn::GetAtt:
+        - MaintenanceWindowRole
+        - Arn
       Priority: 1
       MaxConcurrency: 1
-      Targets: 
-        - Key: InstanceIds
-          Values: 
-            - !Ref LinuxInstance
-      Name: 'patch-sc-ec2-ra-linux-instances'
+      Targets:
+      - Key: InstanceIds
+        Values:
+        - Ref: LinuxInstance
+      Name: patch-sc-ec2-ra-linux-instances
       TaskArn: AWS-RunPatchBaseline
-      WindowId: !Ref MaintenanceWindow
-      TaskParameters: 
-        Operation: 
-          Values: [Scan]
+      WindowId:
+        Ref: MaintenanceWindow
+      TaskParameters:
+        Operation:
+          Values:
+          - Scan
       TaskType: RUN_COMMAND
   LinuxMaintenanceWindowTaskInstall:
-    Type: "AWS::SSM::MaintenanceWindowTask"
+    Type: AWS::SSM::MaintenanceWindowTask
     Properties:
       MaxErrors: 1
-      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window Task: Install update for Amazon Linux Instance'
-      ServiceRoleArn: !GetAtt MaintenanceWindowRole.Arn
+      Description: 'Service Catalog EC2 Reference Architecture Maintenance Window
+        Task: Install update for Amazon Linux Instance'
+      ServiceRoleArn:
+        Fn::GetAtt:
+        - MaintenanceWindowRole
+        - Arn
       Priority: 2
       MaxConcurrency: 1
-      Targets: 
-        - Key: InstanceIds
-          Values: 
-            - !Ref LinuxInstance
-      Name: 'patch-sc-ec2-ra-linux-instances'
+      Targets:
+      - Key: InstanceIds
+        Values:
+        - Ref: LinuxInstance
+      Name: patch-sc-ec2-ra-linux-instances
       TaskArn: AWS-RunPatchBaseline
-      WindowId: !Ref MaintenanceWindow
-      TaskParameters: 
-        Operation: 
-          Values: [Install]
+      WindowId:
+        Ref: MaintenanceWindow
+      TaskParameters:
+        Operation:
+          Values:
+          - Install
       TaskType: RUN_COMMAND
 Outputs:
   TemplateID:
-    Value: 'service-catalog-reference-architectures/sc-ec2-ra'
-  StackName:
-    Value: !Sub '${AWS::StackName}'
-  AWSRegionName: 
-    Value: !Ref "AWS::Region"
+    Value: service-catalog-reference-architectures/sc-ec2-ra
+  AWSRegionName:
+    Value:
+      Ref: AWS::Region
   LinuxInstanceId:
-    Value: !Ref LinuxInstance
+    Value:
+      Ref: LinuxInstance
   LinuxInstancePrivateIpAddress:
-    Value: !GetAtt LinuxInstance.PrivateIp
+    Value:
+      Fn::GetAtt:
+      - LinuxInstance
+      - PrivateIp
   LinuxInstanceAvailabilityZone:
-    Value: !GetAtt LinuxInstance.AvailabilityZone
+    Value:
+      Fn::GetAtt:
+      - LinuxInstance
+      - AvailabilityZone
   KeyPair:
-    Value: !Ref KeyPair
+    Value:
+      Ref: KeyPair
   LinuxSSHPort:
-    Value: !Ref LinuxSSHPort
+    Value:
+      Ref: LinuxSSHPort
   LinuxSubet:
-    Value: !Ref LinuxSubnet
+    Value:
+      Ref: LinuxSubnet
   LinuxInstanceType:
-    Value: !Ref LinuxInstanceType
+    Value:
+      Ref: LinuxInstanceType
   RemoteAccessCIDR:
-    Value: !Ref RemoteAccessCIDR
+    Value:
+      Ref: RemoteAccessCIDR
   VPC:
-    Value: !Ref VPC
+    Value:
+      Ref: VPC
   IAMInstancePatchingRole:
-    Value: !Ref InstancePatchingRole
+    Value:
+      Ref: InstancePatchingRole
   IAMPatchingInstanceProfile:
-    Value: !Ref PatchingInstanceProfile
+    Value:
+      Ref: PatchingInstanceProfile
   SSMMaintenaceWindowRole:
-    Value: !Ref MaintenanceWindowRole
+    Value:
+      Ref: MaintenanceWindowRole
   SSMLinuxPatchBaseline:
-    Value: !Ref LinuxPatchBaseline
+    Value:
+      Ref: LinuxPatchBaseline

@@ -1,65 +1,44 @@
 # AWS Service Catalog Reference Blueprints
 
-AWS Service Catalog allows you to centrally manage these commonly deployed IT services, and helps you achieve consistent governance 
-and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need. 
-For more Information on AWS Service Catalog, see the 
-[documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html).
+[AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html) allows you to centrally manage commonly deployed AWS services, and helps you achieve consistent governance which meets your compliance requirements, while enabling users to quickly deploy only the approved AWS services they need. 
 
-Many organizations are looking for sample products that they can distribute to their IAM users for a specific use-case. 
-The AWS Service Catalog Reference blueprints are sample products distributed via this GitHub repository that demonstrate
- specific use-cases around specific AWS Services. Note that these products have been tested in US-EAST-1 region.
+This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).  To see the full documentation on ServiceCatalog and CloudFormation go here:  
+[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)  
 
-To give you an example, the Amazon EC2 use case shows how an organization can leverage the AWS Service Catalog to provide
- Amazon Elastic Compute (EC2) instances and AWS Systems Manager (SSM)-based patching for testing and integration.
- The portfolio templates in each section will create a ServiceCatalog Portfolio with various products, a launch constraint and linked roles for execution.
- Currently we provide the following reference blueprints:  
+The portfolio templates in each section will create a ServiceCatalog Portfolio with various products, a launch constraint and linked roles for provisioning. 
  1. [Virtual Private Cloud (VPC)](vpc)
  2. [Elastic Compute Cloud (EC2)](ec2)
  3. [Simple Storage Service (S3)](s3)
  4. [Relational Database Service (RDS)](rds)
  5. [Elastic MapReduce (EMR)](emr)
 
-Note - Before you distribute the CloudFormation template to your organization, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. These sample CloudFormation templates may need updates before you can use them in production.
+Note - Before you distribute the CloudFormation template to your organization, review the template. Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. These sample CloudFormation templates may need updates before you can use them in production.
 
+### Assumptions  
+* You have the required permissions to execute CloudFormation templates: [Controlling Cloudformation Access with IAM](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-template.html).
+* You have the required admin permissions to manage ServiceCatalog: [Authentication and Access Control for AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/controlling_access.html)  
 
-### Assumptions
+### Installation
+First, you must [create a role](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html) for the users who will be provisioning Service Catalog products and it must have the **AWSServiceCatalogEndUserFullAccess** managed policy attached.  This role will be referred to as _SCProvisioningRole_.  This role name will be the value in the Portfolio templates' parameter _LinkedRole1_.  If you have another role which you want to give access to a portfolio, then use _LinkedRole2_.  If you wish to add a user or group directly, then modify the portfolio templates with the [PortfolioPrincipalAssociation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicecatalog-portfolioprincipalassociation.html) resource.
 
-* AWS Service Catalog has been set up in target AWS region.
-* An AWS Service Catalog Admin IAM principal with "**AWSServiceCatalogAdminFullAccess**" managed policy associated has been created.
-* An AWS Service Catalog End-user principal with "**AWSServiceCatalogEndUserFullAccess**" managed policy associated has been created.
-
-### Installation - Overview  
-To get started quickly you can click the "Launch Stack" button in each section.  Or, if you wish to modify files and execute from your own
-S3 bucket then follow these instructions:  
-1. clone this git repo:  
+To get started quickly you can click the "Launch Stack" button in each section.  Or, if you wish to modify files and execute from your own S3 bucket then follow these instructions:  
+1. clone this git repo  
   ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
-2. Copy everything in the repo to an S3 bucket:  
+2. Copy the templates in the repo to an S3 bucket  
   ```cd aws-service-catalog-reference-architectures```  
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE]  --exclude "*" --include "*.json" --include "*.yml" --recursive``` 
-3. Contents of the S3 bucket will include directories for the following:
-    * ./vpc 
-    * ./ec2
-    * ./s3
-    * ./rds
-    * ./emr
-4. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
-For example the EC2 portfolio would be:  
+3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
+For example the EC2 portfolio would be  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
-5. If this is the first portfolio you are creating:  
- then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
- If you have already run a VPC or EC2 portfolio template you should use the LaunchRoleName output value. 
+4. Leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
+	a. The VPC and EC2 portfolios share the _SCEC2LaunchRole_; if you have already run a VPC or EC2 portfolio template, you should use the _LaunchRoleName_ output value of the first in the second's input.  If you leave it blank you will get a role already exists error. 
+	b. All other templates create their own launchconstraint role, you should leave the _LaunchRoleName_ blank unless you are using a pre-existing role which you have setup.
+5. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
 6. Set the _RepoRootURL_ parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
   
-Once you create the stacks, an AWS Service Catalog portfolio containing reference blueprint products will be created. 
-However, if you want to set up the portfolio manually, you can do so using AWS Service Catalog console and directly import the resource teamplates.  
-
-Once you have set up the portfolio, you would need to grant end-users access.  If you supplied values for _LinkedRole1_ and _LinkedRole1_ Then this is doene for you.
-To know more about how to grant access, see [documentation](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html)
-### AWS Service Catalog Product Launch
-
-Once access has been provided to one or more end users, the reference blueprint product can be lauched.  To know more about how to launch AWS Service Catalog product, see 
-[documentation](https://docs.aws.amazon.com/servicecatalog/latest/userguide/enduser-launch.html)
+### AWS Service Catalog Product Launch  
+After creating the Cloudformation Stacks you will have a ServiceCatalog Portfolio with products, launch constraints, and associated user roles.  Your end users may now launch products from the ServiceCatalog dashboard. To learn more about the end user dashboard for AWS Service Catalog, see [Using the End User Console View](https://docs.aws.amazon.com/servicecatalog/latest/userguide/end-user-console.html)
 
 ![sc-ra-products.png](sc-ra-products.png)
 
