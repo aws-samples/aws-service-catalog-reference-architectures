@@ -11,7 +11,7 @@
             "Type":"String",
             "Description":"ARN of the launch constraint role for EC2 products."
         },
-        "DemoPortfolio":{
+        "PortfolioId":{
             "Type":"String",
             "Description":"The SC portfolio this product will be attached to."
         },
@@ -37,14 +37,14 @@
                     {
                         "Description": "NGINX webserver",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${S3ProductPrefix}sc-ec2-linux-nginx-simple.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx-simple.json"}
                         },
                         "Name": "NGINX v1.0"
                     },                    
                     {
                         "Description": "Apache webserver",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${S3ProductPrefix}sc-ec2-linux-apache-simple.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache-simple.json"}
                         },
                         "Name": "Apache v1.0"
                     }
@@ -54,7 +54,7 @@
         "Associatenginxcf":{
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
-            "PortfolioId" : {"Ref":"DemoPortfolio"},
+            "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"WebserverProduct"}
           }
         },
@@ -62,11 +62,14 @@
           "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
           "DependsOn" : "Associatenginxcf",
           "Properties" : {
-            "PortfolioId" : {"Ref":"DemoPortfolio"},
+            "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"WebserverProduct"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
-    }
+    },
+	"Outputs": {
+		"ProductId":{"Value": { "Ref":"WebserverProduct" } }
+	}
 }

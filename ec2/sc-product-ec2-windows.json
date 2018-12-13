@@ -61,5 +61,8 @@
 			"Description": {"Ref":"LaunchConstraintARN"}
 		  }
 		}
+	},
+	"Outputs": {
+		"ProductId":{"Value": { "Ref":"scec2windowsproduct" } }
 	}
 }	

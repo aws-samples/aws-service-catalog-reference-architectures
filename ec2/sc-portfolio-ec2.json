@@ -165,5 +165,11 @@
             "TimeoutInMinutes" : 5
           }
         }
-    }  
+    },
+	"Outputs": {
+		"LaunchConstraintRoleARN":{"Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] } },
+		"ec2windowsproductId":{"Value": 	{ "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
+		"ec2webserverproductId":{"Value": 	{ "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
+		"ec2linuxproductId":{"Value": 		{ "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} }
+	}
 }
