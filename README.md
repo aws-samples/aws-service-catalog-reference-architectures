@@ -44,18 +44,3 @@ After creating the Cloudformation Stacks you will have a ServiceCatalog Portfoli
 
 ## License  
 This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
-Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.  
-
-## Authors
-
-* Israel Lawson - AWS Sr. Solutions Architect - Initial work
-
-## Acknowledgments
-
-The following AWS team members have provided guidance, code review and other assistance throughout the design of this reference blueprint.
-
-* David Aiken - AWS Solutions Architect Manager
-* Mahdi Sajjadpour - AWS Service Catalog Business Development
-* Phil Chen - AWS Sr. Solutions Architect
-* Kanchan Waikar - AWS Solutions Architect
-* Kenneth Walsh - AWS Solutions Architect

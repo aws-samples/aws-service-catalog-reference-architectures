@@ -31,10 +31,3 @@ and a Security Group can be deployed into the public subnet to allow for remote 
 ### Multi-Availability Zone Architecture with Amazon Linux Bastion Instance
 
 ![sc-vpc-ra-architecture-multi-az.png](sc-vpc-ra-architecture-multi-az.png)
-
-
-### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-vpc-ra-walkthrough.pdf)
-
-## License  
-This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
-Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
