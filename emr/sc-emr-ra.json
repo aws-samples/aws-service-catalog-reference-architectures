@@ -24,7 +24,8 @@
                         "MasterInstanceType",
                         "CoreInstanceType",
                         "CoreNodeCount",
-                        "ReleaseLabel"
+                        "ReleaseLabel",
+						"CreateLogBucket"
                     ]
                 }
             ],
@@ -55,6 +56,9 @@
                 },
                 "ReleaseLabel": {
                     "default": "Release Configuration"
+                },
+				"CreateLogBucket": {
+                    "default": "Create EMR Log Bucket for Account"
                 }
             }
         }
@@ -144,12 +148,25 @@
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access.",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+		"CreateLogBucket": {
+            "Description": "Set to true to create the EMR Log bucket for this account. If false, then the existing bucket will be used.",
+            "Type": "String",
+            "Default": false,
+            "AllowedValues": [
+                true,
+                false
+            ]
         }
     },
+	"Conditions": {
+        "CondCreateLogBucket": { "Fn::Equals": [{"Ref": "CreateLogBucket"}, true]}
+	},
     "Resources": {
         "LogBucket": {
             "Type": "AWS::S3::Bucket",
             "DeletionPolicy": "Retain",
+			"Condition":"CondCreateLogBucket",
             "Properties": {
                 "AccessControl": "Private",
                 "BucketName":{"Fn::Sub":"sc-emr-logs-${AWS::AccountId}"}
@@ -204,9 +221,7 @@
                 "ReleaseLabel": {
                     "Ref": "ReleaseLabel"
                 },
-                "LogUri": {
-                    "Fn::Sub": "s3://${LogBucket}"
-                },
+                "LogUri": {"Fn::Sub": "s3://sc-emr-logs-${AWS::AccountId}"},
                 "VisibleToAllUsers": true,
                 "Tags": [
                     {
@@ -299,6 +314,7 @@
             }
         },
         "S3LogBucket": {
+			"Condition":"CondCreateLogBucket",
             "Description": "S3 Log Bucket",
             "Value": {
                 "Ref": "LogBucket"

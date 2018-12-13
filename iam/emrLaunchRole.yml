@@ -5,8 +5,7 @@ Resources:
     Properties:
       RoleName: SCEMRLaunchRole 
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess
-        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess        
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -25,17 +24,17 @@ Resources:
               - Sid: SCLaunchPolicySID
                 Effect: Allow
                 Action:                  
-                  - "iam:AddRoleToInstanceProfile"
                   - "iam:ListRolePolicies"
                   - "iam:ListPolicies"
+                  - "iam:CreateRole"
                   - "iam:DeleteRole"
                   - "iam:GetRole"
-                  - "iam:CreateInstanceProfile"
                   - "iam:PassRole"
-                  - "iam:DeleteInstanceProfile"
                   - "iam:ListRoles"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:AddRoleToInstanceProfile"
                   - "iam:RemoveRoleFromInstanceProfile"
-                  - "iam:CreateRole"
                   - "iam:DetachRolePolicy"
                   - "iam:AttachRolePolicy"                                 
                   - "cloudformation:DescribeStackResource"
