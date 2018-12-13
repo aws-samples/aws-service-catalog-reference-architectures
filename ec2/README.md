@@ -21,11 +21,10 @@ Aamzon Linux and Microsoft Windows operating systems.
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
 2. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
-3. If this is the first portfolio you are creating:  
- then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
- If you have already run a this or the VPC template:  
- you should put the _output.LaunchRoleName_ from the completed LaunchConstraintRole stack in the _LaunchRoleName_ field (default is SCEC2LaunchRole).  
-4. Set the "RepoRootURL" parameter to your bucket's root url:  
+3. If this is the first portfolio you are creating, then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
+    * If you have already run the VPC template, then you will put the _output.LaunchRoleName_ from the completed LaunchConstraintRole stack in the _LaunchRoleName_ field (default is SCEC2LaunchRole).  
+4. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
+5. Set the "RepoRootURL" parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
   
 

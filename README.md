@@ -28,13 +28,13 @@ To get started quickly you can click the "Launch Stack" button in each section. 
   ```cd aws-service-catalog-reference-architectures```  
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE]  --exclude "*" --include "*.json" --include "*.yml" --recursive``` 
 3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio's S3 url. 
-For example the EC2 portfolio would be  
+For example, the EC2 portfolio would be:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ec2/sc-portfolio-ec2.json```  
 4. Leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
-	a. The VPC and EC2 portfolios share the _SCEC2LaunchRole_; if you have already run a VPC or EC2 portfolio template, you should use the _LaunchRoleName_ output value of the first in the second's input.  If you leave it blank you will get a role already exists error. 
-	b. All other templates create their own launchconstraint role, you should leave the _LaunchRoleName_ blank unless you are using a pre-existing role which you have setup.
+    * The VPC and EC2 portfolios share the _SCEC2LaunchRole_; if you have already run a VPC or EC2 portfolio template, you should use the _LaunchRoleName_ output value of the first in the second's input.  If you leave it blank you will get a role already exists error.  
+    * All other templates create their own launchconstraint role, you should leave the _LaunchRoleName_ blank unless you are using a pre-existing role which you have setup separately.
 5. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
-6. Set the _RepoRootURL_ parameter to your bucket's root url:  
+6. Change the _RepoRootURL_ parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
   
 ### AWS Service Catalog Product Launch  

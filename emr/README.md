@@ -16,7 +16,8 @@ When implemented this reference architecture creates an AWS Service Catalog Port
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
 2. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/emr/sc-portfolio-emr.json```  
-3. Set the "RepoRootURL" parameter to your bucket's root url:  
+3. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
+4. Change the "RepoRootURL" parameter to your bucket's root url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```
 
 
