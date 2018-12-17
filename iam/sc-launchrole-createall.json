@@ -1,0 +1,60 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create all Roles for ServiceCatalog RA launch constraints. Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License. (fdp-1p4da46nc)",    
+    "Resources": {
+        "ec2vpcCLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-ec2vpc-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"emrLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-emr-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"rdsLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-rds-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"s3LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-s3-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        }        
+    },
+	"Outputs": {
+		"ec2vpcLaunchConstraintRoleARN":{
+		  "Value": { "Fn::GetAtt":["ec2vpcCLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+		  "Export" : {
+            "Name" : "sc-ec2vpc-launchconstraint-role"
+          }
+		},
+		"s3LaunchConstraintRoleARN":{
+		  "Value": { "Fn::GetAtt":["s3LaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+		  "Export" : {
+            "Name" : "sc-s3-launchconstraint-role"
+          }
+		},
+		"rdsLaunchConstraintRoleARN":{
+		  "Value": { "Fn::GetAtt":["rdsLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+		  "Export" : {
+            "Name" : "sc-rds-launchconstraint-role"
+          } 
+		},
+		"emrLaunchConstraintRoleARN":{
+		  "Value": { "Fn::GetAtt":["emrLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+		  "Export" : {
+            "Name" : "sc-emr-launchconstraint-role"
+          }
+		}
+	}
+}

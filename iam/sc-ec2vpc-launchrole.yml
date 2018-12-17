@@ -3,7 +3,7 @@ Resources:
   SCEC2LaunchRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: SCEC2LaunchRole 
+      RoleName: SCEC2LaunchRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2FullAccess      
         - arn:aws:iam::aws:policy/AmazonSSMFullAccess
