@@ -767,11 +767,6 @@
         "TemplateID": {
             "Value": "service-catalog-reference-architectures/sc-vpc-ra"
         },
-        "StackName": {
-            "Value": {
-                "Fn::Sub": "${AWS::StackName}"
-            }
-        },
         "AWSRegionName": {
             "Value": {
                 "Ref": "AWS::Region"
@@ -788,7 +783,9 @@
             }
         },
         "VPCCIDR": {
-            "Value": "VCPCIDR"
+            "Value": {
+                "Fn::GetAtt": ["VPC","CidrBlock"]
+            }
         },
         "SubnetAPublicCIDR": {
             "Value": {
