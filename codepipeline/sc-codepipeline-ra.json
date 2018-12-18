@@ -14,8 +14,14 @@
             "Type":"String",
             "Description":"The project name, also the CodeCommit Repository name",
             "Default":"SCPortfoliosRepo"
-        }
+        },"ChildAccountAccess":{
+			"Type":"CommaDelimitedList",
+		    "Description":"List of AccountIds to Grant GetObject Access to the Deployed Templates Bucket"        
+		}
 	},
+	"Conditions":{
+        "CreateBucketPolicy" : {"Fn::Not": [{"Fn::Equals" : [{ "Fn::Select" : [ "0", {"Ref": "ChildAccountAccess"} ] }, ""]}]}
+    },
 	"Resources": {
         "PipelineArtifacts": {
             "Type": "AWS::S3::Bucket",
@@ -31,6 +37,28 @@
 				"BucketName" : {"Fn::Sub":"${DeployedTemplatesBucketName}-${AWS::AccountId}"}
             }
         },
+		"DeployedTemplatesBucketPolicy":{
+		   "Type" : "AWS::S3::BucketPolicy",
+		   "Condition":"CreateBucketPolicy",
+		   "Properties" : {
+			  "Bucket" : {"Ref" : "DeployedTemplates"},
+			  "PolicyDocument" : {"Statement":[{
+				"Effect": "Allow",
+				"Principal": {
+					"AWS": {"Fn::Split": [",",  
+						{"Fn::Sub": [ "arn:aws:iam::${acc}:role/AWSCloudFormationStackSetExecutionRole", {
+							"acc": {"Fn::Join": [
+								":role/AWSCloudFormationStackSetExecutionRole,arn:aws:iam::", 
+								{ "Ref": "ChildAccountAccess" }
+							]}
+						}]}
+					]}													
+				},
+				"Action": "s3:GetObject",
+				"Resource": { "Fn::Sub" : "arn:aws:s3:::${DeployedTemplates}/*" }
+			  }]}
+		   }
+		},
 		"SCPortfoliosRepo": {
 		  "Type" : "AWS::CodeCommit::Repository",
 		  "Properties" : {
