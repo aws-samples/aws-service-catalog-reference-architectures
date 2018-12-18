@@ -107,7 +107,7 @@
           "Type" : "AWS::CloudFormation::Stack",
           "Condition":"CreateLaunchConstraint",
           "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/emrLaunchRole.yml"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-emr-launchrole.yml"},
             "TimeoutInMinutes" : 5
           }
         },

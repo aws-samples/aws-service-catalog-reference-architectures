@@ -107,7 +107,7 @@
           "Type" : "AWS::CloudFormation::Stack",
           "Condition":"CreateLaunchConstraint",
           "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/s3LaunchRole.yml"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-s3-launchrole.yml"},
             "TimeoutInMinutes" : 5
           }
         },
