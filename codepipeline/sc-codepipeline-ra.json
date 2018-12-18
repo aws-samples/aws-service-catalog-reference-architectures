@@ -1,0 +1,336 @@
+{
+	"Description": "ServiceCatalog Portfolio Pipeline",
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "pipelineartifactsBucketName": {
+            "Type":"String",
+            "Description":"Bucket name for the codepipeline artifacts container",
+            "Default":"servicesatalog-pipelineartifacts"
+        },"DeployedTemplatesBucketName": {
+            "Type":"String",
+            "Description":"Bucket name for the Deployed Templates container",
+            "Default":"servicesatalog-deployedtemplates"
+        },"CodeCommitRepoName": {
+            "Type":"String",
+            "Description":"The project name, also the CodeCommit Repository name",
+            "Default":"SCPortfoliosRepo"
+        },"ChildAccountAccess":{
+			"Type":"CommaDelimitedList",
+		    "Description":"List of AccountIds to Grant GetObject Access to the Deployed Templates Bucket"        
+		}
+	},
+	"Conditions":{
+        "CreateBucketPolicy" : {"Fn::Not": [{"Fn::Equals" : [{ "Fn::Select" : [ "0", {"Ref": "ChildAccountAccess"} ] }, ""]}]}
+    },
+	"Resources": {
+        "PipelineArtifacts": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+				"BucketName" : {"Fn::Sub":"${pipelineartifactsBucketName}-${AWS::AccountId}"}
+            }
+        },
+		"DeployedTemplates": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+				"BucketName" : {"Fn::Sub":"${DeployedTemplatesBucketName}-${AWS::AccountId}"}
+            }
+        },
+		"DeployedTemplatesBucketPolicy":{
+		   "Type" : "AWS::S3::BucketPolicy",
+		   "Condition":"CreateBucketPolicy",
+		   "Properties" : {
+			  "Bucket" : {"Ref" : "DeployedTemplates"},
+			  "PolicyDocument" : {"Statement":[{
+				"Effect": "Allow",
+				"Principal": {
+					"AWS": {"Fn::Split": [",",  
+						{"Fn::Sub": [ "arn:aws:iam::${acc}:role/AWSCloudFormationStackSetExecutionRole", {
+							"acc": {"Fn::Join": [
+								":role/AWSCloudFormationStackSetExecutionRole,arn:aws:iam::", 
+								{ "Ref": "ChildAccountAccess" }
+							]}
+						}]}
+					]}													
+				},
+				"Action": "s3:GetObject",
+				"Resource": { "Fn::Sub" : "arn:aws:s3:::${DeployedTemplates}/*" }
+			  }]}
+		   }
+		},
+		"SCPortfoliosRepo": {
+		  "Type" : "AWS::CodeCommit::Repository",
+		  "Properties" : {
+			"RepositoryDescription" : "Repository for Service Catalog Portfolios and products",
+			"RepositoryName" : {"Ref":"CodeCommitRepoName"},
+			"Triggers" : [ ]
+		  }
+		},
+		"CodeBuildRole" :{
+			"Type":"AWS::IAM::Role",
+			"Properties":{
+				"RoleName": "CodeBuilderS3Role",
+				"AssumeRolePolicyDocument": {
+					"Version":"2012-10-17",
+					"Statement":{
+						"Effect":"Allow",
+						"Principal":{
+							"Service":"codebuild.amazonaws.com"
+						},
+						"Action":"sts:AssumeRole"
+					}
+				},
+				"ManagedPolicyArns": [
+					"arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+				],
+				"Policies": [ { 
+					"PolicyName":"CodeBuildManageS3Artifacts",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+							{
+								"Effect": "Allow",
+								"Action": [
+									"s3:*"
+								],
+								"Resource": [
+									{"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
+									{"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"},
+									{"Fn::Sub":"arn:aws:s3:::${DeployedTemplates}"},
+									{"Fn::Sub":"arn:aws:s3:::${DeployedTemplates}/*"}
+								]
+							},{
+							  "Effect": "Allow",
+							  "Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents",
+								"logs:DescribeLogStreams"
+								],
+								  "Resource": [
+									{"Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/*"}
+								]
+							  }
+						]
+					}
+				},{ 
+					"PolicyName":"CodeBuildManageCloudformation",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+							{
+								"Effect": "Allow",
+								"Action": [
+									"cloudformation:DescribeStackResource",
+									"cloudformation:DescribeStackResources",
+									"cloudformation:GetTemplate",
+									"cloudformation:List*",
+									"cloudformation:DescribeStackEvents",
+									"cloudformation:DescribeStacks",
+									"cloudformation:CreateStack",
+									"cloudformation:DeleteStack",
+									"cloudformation:DescribeStackEvents",
+									"cloudformation:DescribeStacks",
+									"cloudformation:GetTemplateSummary",
+									"cloudformation:SetStackPolicy",
+									"cloudformation:ValidateTemplate",
+									"cloudformation:UpdateStack",
+									"s3:GetObject"
+								],
+								"Resource": "*"
+							}
+						]
+					}
+				}]
+			}
+		},		
+		"CodePipelineServiceCatalogRole":{
+			"Type":"AWS::IAM::Role",
+			"Properties":{
+				"RoleName": "CodePipelieManageProductsRole",
+				"AssumeRolePolicyDocument": {
+					"Version":"2012-10-17",
+					"Statement":{
+						"Effect":"Allow",
+						"Principal":{
+							"Service":"codepipeline.amazonaws.com"
+						},
+						"Action":"sts:AssumeRole"
+					}
+				},
+				"Policies": [ { 
+					"PolicyName":"SCManageArtifacts",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+						    {"Effect": "Allow",
+							"Action": [
+								"servicecatalog:ListProvisioningArtifacts",
+								"servicecatalog:CreateProvisioningArtifact",
+								"servicecatalog:DescribeProvisioningArtifact",
+								"servicecatalog:DeleteProvisioningArtifact",
+								"servicecatalog:UpdateProduct"
+							],
+							"Resource": "*"
+							},{
+								"Effect": "Allow",
+								"Action": [
+									"cloudformation:ValidateTemplate"
+								],
+								"Resource": "*"
+							},{
+								"Effect": "Allow",
+								"Action": [
+									"s3:*"
+								],
+								"Resource": [
+									{"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
+									{"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"}
+								]
+							}
+						]
+					}
+					},{ 
+					"PolicyName":"codepipeline-codecommit",
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+						    {"Effect": "Allow",
+							"Action": [
+								"codecommit:GetBranch",
+								"codecommit:GetCommit",
+								"codecommit:UploadArchive",
+								"codecommit:GetUploadArchiveStatus",
+								"codecommit:CancelUploadArchive"
+							],
+							"Resource": "*"
+							},{
+							  "Effect":"Allow",
+							  "Action":[
+								"codebuild:StartBuild",
+								"codebuild:StartBuild",
+								"codebuild:StopBuild",
+								"codebuild:BatchGet*",
+								"codebuild:Get*",
+								"codebuild:List*"
+							  ],
+							  "Resource":[
+								{"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]}
+							 ]							  
+							},{
+							  "Action":[
+								"s3:PutObject"
+							  ],
+							  "Resource":[
+								"arn:aws:s3:::codepipeline*"
+							 ],
+							  "Effect":"Allow"
+							}								
+							
+						]
+					}
+					}
+				
+				]
+			}			
+		},
+		"CodeBuildDeployS3Project" : {
+			"Type": "AWS::CodeBuild::Project",
+			"Properties": {
+			  "Name": "DeployServiceCatalogPortfolio",
+			  "Description": "Copy templates to S3 then update the portfolio.",
+			  "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+			  "Artifacts": {
+				"Type": "CODEPIPELINE"
+			  },
+			  "Environment": {
+				"Type": "LINUX_CONTAINER",
+				"ComputeType": "BUILD_GENERAL1_SMALL",
+				"Image": "aws/codebuild/ubuntu-base:14.04"
+			  },
+			  "Source": {
+				"Type": "CODEPIPELINE"				
+			  },
+			  "TimeoutInMinutes": 10
+			}			
+		},
+		"ProductPipeline" :{
+		  "Type" : "AWS::CodePipeline::Pipeline",		  
+		  "Properties" : {
+			"ArtifactStore" :{
+				"Type": "S3",
+				"Location":{"Ref":"PipelineArtifacts"}
+			},
+			"Name" : "ServiceCatalog-ProductPipeline",
+			"RoleArn" : {"Fn::GetAtt":["CodePipelineServiceCatalogRole","Arn"]},
+			"Stages" : [ 
+				{
+					"Name": "SourceStageCodeCommit",
+					"Actions": [
+						{
+						  "InputArtifacts":[],
+						  "Name":"Source",
+						  "ActionTypeId": {
+							  "Category": "Source",
+							  "Owner": "AWS",
+							  "Version": "1",
+							  "Provider": "CodeCommit"							  
+						  },
+						  "Configuration": {
+							  "RepositoryName":{"Fn::GetAtt":["SCPortfoliosRepo","Name"]},
+							  "BranchName":"master"
+						  },
+						  "OutputArtifacts":[
+							  {
+								"Name":"ServiceCatalogPortfolioApp"
+							  }
+						  ]
+						}
+					]
+				},{
+					"Name": "CopyAndDeploy",
+					"Actions": [{
+					  "InputArtifacts":[{"Name":"ServiceCatalogPortfolioApp"}],
+					  "Name":"Artifact",
+					  "ActionTypeId": {
+						  "Category": "Build",
+						  "Owner": "AWS",
+						  "Version": "1",
+						  "Provider": "CodeBuild"							  
+					  },
+					  "Configuration": {
+						  "ProjectName":{"Ref":"CodeBuildDeployS3Project"}
+					  },
+					  "OutputArtifacts":[
+						  {
+							"Name":"DeployOutput"
+						  }
+					  ]
+					}]
+				}
+			]
+		  }
+		}
+		
+        
+    },
+    "Outputs": {
+	    "PipelineArtifactsBucket": {
+		  "Value": { "Fn::Join": [ "", [
+                        "https://",{"Fn::GetAtt": ["PipelineArtifacts","DomainName"] },"/"
+					]]},						
+		  "Description": "S3 bucket url for pipeline artifacts."
+		},
+		"DeployedTemplatesBucket": {
+		  "Value": { "Fn::Join": [ "", [
+                        "https://",{ "Fn::GetAtt": ["DeployedTemplates","DomainName"] },"/"
+				   ]]},
+		  "Description": "S3 bucket url for deployed templates."
+		},
+        "CloneUrlSsh": {
+          "Value": { "Fn::GetAtt": ["SCPortfoliosRepo","CloneUrlSsh"] },
+          "Description": "URL for ssh cloning the Product Repo"
+        }
+    }
+}

@@ -1,12 +1,11 @@
-Description: "ServiceCatalog EC2 Launch Role Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License."
+Description: "ServiceCatalog EMR Launch Role Before you distribute this template, review IAM permissions, Deletion policies, update stack behavior, other aspects of the template, and ensure that they are as per your expectations and processes. Sample CloudFormation templates may need updates before you can use them in production. Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.Licensed under the Apache License, Version 2.0 (the \"License\"). You may not use this file except in compliance with the License.A copy of the License is located at http://www.apache.org/licenses/LICENSE-2.0 or in the \"license\" file accompanying this file. This file is distributed on an \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License."
 Resources:
-  SCEC2LaunchRole:
+  SCEMRLaunchRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: SCEC2LaunchRole 
+      RoleName: SCEMRLaunchRole 
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2FullAccess      
-        - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess        
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -25,17 +24,17 @@ Resources:
               - Sid: SCLaunchPolicySID
                 Effect: Allow
                 Action:                  
-                  - "iam:AddRoleToInstanceProfile"
                   - "iam:ListRolePolicies"
                   - "iam:ListPolicies"
+                  - "iam:CreateRole"
                   - "iam:DeleteRole"
                   - "iam:GetRole"
-                  - "iam:CreateInstanceProfile"
                   - "iam:PassRole"
-                  - "iam:DeleteInstanceProfile"
                   - "iam:ListRoles"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:AddRoleToInstanceProfile"
                   - "iam:RemoveRoleFromInstanceProfile"
-                  - "iam:CreateRole"
                   - "iam:DetachRolePolicy"
                   - "iam:AttachRolePolicy"                                 
                   - "cloudformation:DescribeStackResource"
@@ -51,12 +50,11 @@ Resources:
                   - "cloudformation:GetTemplateSummary"
                   - "cloudformation:SetStackPolicy"
                   - "cloudformation:ValidateTemplate"
-                  - "cloudformation:UpdateStack"               
-                  - "s3:GetObject"
+                  - "cloudformation:UpdateStack"     
                 Resource: '*'
 Outputs:
     LaunchRoleArn:
-        Value: !GetAtt SCEC2LaunchRole.Arn
+        Value: !GetAtt SCEMRLaunchRole.Arn
     LaunchRoleName:
-        Value: !Ref SCEC2LaunchRole
+        Value: !Ref SCEMRLaunchRole
         
