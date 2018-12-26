@@ -1,0 +1,14 @@
+---
+global:
+  owner: owner@company.com
+  qsname: SCPortfoliosRepo
+  regions:
+    - eu-west-1
+    - us-east-1
+    - us-east-2
+  reporting: true
+  s3bucket: taskcat-tempbucket-YOUR-ACCOUNT-HERE
+tests:
+  check-ec2-master:
+    template_file: sc-portfolio-ec2.json
+    parameter_input: sc-portfolio-ec2-defaults.json
