@@ -176,7 +176,7 @@
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
                 ]},
-                "PortfolioId":{"Ref":"SCVPCportfolio"},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}vpc/sc-product-vpc.json"},
