@@ -245,7 +245,9 @@
                                 "codebuild:List*"
                               ],
                               "Resource":[
-                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]}
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildCFNNAG"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildValidateTemplate"}} ]}
                              ]                              
                             },{
                               "Action": "lambda:ListFunctions",
@@ -266,36 +268,6 @@
                 
                 ]
             }            
-        },
-        "CodeLintBuildProject": {
-            "Type": "AWS::CodeBuild::Project",
-            "Properties": {
-                "Name": {
-                    "Fn::Sub": "CFN-Lint-${ProductPipeline}"
-                },
-                "Description": "Submit build jobs as part of CFN Template CI/CD pipeline",
-                "ServiceRole": {
-                    "Fn::GetAtt": [
-                        "CodeBuildRole",
-                        "Arn"
-                    ]
-                },
-                "Artifacts": {
-                    "Type": "no_artifacts"
-                },
-                "Environment": {
-                    "Type": "LINUX_CONTAINER",
-                    "ComputeType": "BUILD_GENERAL1_SMALL",
-                    "Image": "ubuntu:16.04"
-                },
-                "Source": {
-                    "Location": {
-                        "Fn::Sub": "https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${CodeCommitRepoName}"
-                    },
-                    "Type": "CODECOMMIT"
-                },
-                "TimeoutInMinutes": 10
-            }
         },        
         "CodeBuildDeployS3Project" : {
             "Type": "AWS::CodeBuild::Project",

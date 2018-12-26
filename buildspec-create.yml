@@ -1,0 +1,21 @@
+version: 0.2
+phases:
+    install:
+        commands:
+            - echo "Python has some SSL issues in this version so we force an upgrade which doesn't fix everything; don't be alarmed by the warnings."
+            - sudo -i pip install --upgrade requests            
+    build:
+        commands:
+            - echo "S3 Upload Beginning"
+            - python -V
+            - ls ./
+            - aws s3 sync . s3://servicesatalog-deployedtemplates-YOUR-ACCOUNT-HERE/ --delete --exclude "*" --include "*.json" --include "*.yml"
+            - echo "S3 Upload Complete, updating cloudformation now..."
+            - aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-IAMroles --parameters '[{"ParameterKey":"RepoRootURL","ParameterValue":"https://s3.amazonaws.com/servicesatalog-deployedtemplates-YOUR-ACCOUNT-HERE/"}]' --template-url https://s3.amazonaws.com/servicesatalog-deployedtemplates-YOUR-ACCOUNT-HERE/iam/sc-launchrole-createall.json --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND                     
+            - aws cloudformation create-stack-instances --stack-set-name SC-IAC-automated-IAMroles --regions '["us-east-1"]' --accounts '["YOUR-ACCOUNT-HERE","YOUR-SPOKE-ACCOUNT-HERE"]' --operation-preferences FailureToleranceCount=0,MaxConcurrentCount=2
+            - aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters '[{"ParameterKey":"LinkedRole1","ParameterValue":"Admin"},{"ParameterKey":"LinkedRole2","ParameterValue":""},{"ParameterKey":"LaunchRoleName","ParameterValue":"SCEC2LaunchRole"},{"ParameterKey":"RepoRootURL","ParameterValue":"https://s3.amazonaws.com/servicesatalog-deployedtemplates-YOUR-ACCOUNT-HERE/"}]' --template-url https://s3.amazonaws.com/servicesatalog-deployedtemplates-YOUR-ACCOUNT-HERE/ec2/sc-portfolio-ec2.json 
+            - aws cloudformation create-stack-instances --stack-set-name SC-IAC-automated-portfolio --regions '["us-east-1","us-east-2","us-west-1"]' --accounts '["YOUR-ACCOUNT-HERE","YOUR-SPOKE-ACCOUNT-HERE"]' --operation-preferences FailureToleranceCount=0,MaxConcurrentCount=2
+                      
+    post_build:
+        commands:
+            - echo "Deploy complete"

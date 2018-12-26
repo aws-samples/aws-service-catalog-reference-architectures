@@ -10,8 +10,8 @@ phases:
   pre_build:
     commands:
       - echo Entered the pre_build phase...
-      - chmod +x ci/setup-validate.sh
-      - /bin/bash ci/setup-validate.sh
+      - mkdir templates/
+      - cp ec2/sc-portfolio-ec2.json templates/
       - export dirname=${PWD##*/}
       - echo Directory name $dirname
       - cd ..

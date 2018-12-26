@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s nullglob
-for f in {ec2,iam}/*.{json,yml} ; do
+for f in {ec2,vpc}/*.{json,yml} ; do
     if cfn_nag_scan --input-path "$f"; then
         echo "$f PASSED"
     else
