@@ -1,0 +1,10 @@
+version: 0.2
+phases:
+  install:
+    commands:
+      - apt-get -y update
+      - gem install cfn-nag      
+  build:
+    commands:
+      - chmod +x ci/run-cfnnag.sh
+      - /bin/bash ci/run-cfnnag.sh      
