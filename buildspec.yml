@@ -9,7 +9,7 @@ phases:
             - echo "S3 Upload Beginning"
             - python -V
             - ls ./
-            - export ACCID="$(aws sts get-caller-identity --query 'Account')"
+            - export ACCID=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
             - echo "Account:$ACCID"
             - aws s3 sync . s3://servicesatalog-deployedtemplates-$ACCID/ --delete --exclude "*" --include "*.json" --include "*.yml"
             - echo "S3 Upload Complete, updating cloudformation now..."
