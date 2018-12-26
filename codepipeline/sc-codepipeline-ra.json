@@ -1,5 +1,5 @@
 {
-	"Description": "ServiceCatalog Portfolio Pipeline",
+	"Description": "ServiceCatalog Portfolio Pipeline (fdp-1p4dlgcoo)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "pipelineartifactsBucketName": {
@@ -35,6 +35,12 @@
             "Properties": {
                 "AccessControl": "Private",
 				"BucketName" : {"Fn::Sub":"${DeployedTemplatesBucketName}-${AWS::AccountId}"}
+            }
+        },
+		"ScratchBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private"
             }
         },
 		"DeployedTemplatesBucketPolicy":{
@@ -109,9 +115,22 @@
 								"logs:DescribeLogStreams"
 								],
 								  "Resource": [
-									{"Fn::Sub": "arn:aws:logs:*:${AWS::AccountId}:log-group:/aws/codebuild/*"}
+									{"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}									
 								]
-							  }
+							},{
+                                "Action": [
+                                    "codecommit:GetUploadArchiveStatus",
+                                    "codecommit:CancelUploadArchive",
+                                    "codecommit:GetBranch",
+                                    "codecommit:GetCommit",
+                                    "codecommit:GitPull",
+                                    "codecommit:UploadArchive"
+                                ],
+                                "Resource":{"Fn::Sub":"arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"},
+                                "Effect": "Allow"
+                            }
+                              
+                              
 						]
 					}
 				},{ 
@@ -182,7 +201,10 @@
 							},{
 								"Effect": "Allow",
 								"Action": [
-									"s3:*"
+									"s3:GetObject",
+									"s3:GetObjectVersion",
+									"s3:GetBucketVersioning",
+									"s3:PutObject"
 								],
 								"Resource": [
 									{"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
@@ -204,7 +226,7 @@
 								"codecommit:GetUploadArchiveStatus",
 								"codecommit:CancelUploadArchive"
 							],
-							"Resource": "*"
+							"Resource": {"Fn::Sub":"arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"}
 							},{
 							  "Effect":"Allow",
 							  "Action":[
@@ -212,21 +234,23 @@
 								"codebuild:StartBuild",
 								"codebuild:StopBuild",
 								"codebuild:BatchGet*",
-								"codebuild:Get*",
 								"codebuild:List*"
 							  ],
 							  "Resource":[
 								{"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]}
 							 ]							  
 							},{
-							  "Action":[
-								"s3:PutObject"
-							  ],
-							  "Resource":[
-								"arn:aws:s3:::codepipeline*"
-							 ],
-							  "Effect":"Allow"
-							}								
+                              "Action": "lambda:ListFunctions",
+                              "Resource": "*",
+                              "Effect": "Allow"
+                            },{
+								"Action": "lambda:InvokeFunction",
+								"Resource": [
+									{"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:Validate_Template"},
+									{"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:Lint_Template"}
+								],
+								"Effect": "Allow"
+							}										
 							
 						]
 					}
@@ -235,6 +259,36 @@
 				]
 			}			
 		},
+		"CodeLintBuildProject": {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+                "Name": {
+                    "Fn::Sub": "CFN-Lint-${ProductPipeline}"
+                },
+                "Description": "Submit build jobs as part of CFN Template CI/CD pipeline",
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "CodeBuildRole",
+                        "Arn"
+                    ]
+                },
+                "Artifacts": {
+                    "Type": "no_artifacts"
+                },
+                "Environment": {
+                    "Type": "LINUX_CONTAINER",
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "Image": "ubuntu:16.04"
+                },
+                "Source": {
+                    "Location": {
+                        "Fn::Sub": "https://git-codecommit.${AWS::Region}.amazonaws.com/v1/repos/${CodeCommitRepoName}"
+                    },
+                    "Type": "CODECOMMIT"
+                },
+                "TimeoutInMinutes": 10
+            }
+        },		
 		"CodeBuildDeployS3Project" : {
 			"Type": "AWS::CodeBuild::Project",
 			"Properties": {
@@ -283,16 +337,62 @@
 						  },
 						  "OutputArtifacts":[
 							  {
-								"Name":"ServiceCatalogPortfolioApp"
+								"Name":"SourceArtifacts"
 							  }
 						  ]
 						}
 					]
 				},{
+					"Name": "PreCreateTests",
+					"Actions": [
+						{
+							"InputArtifacts": [ 
+							  {"Name": "SourceArtifacts"}
+							],
+							"Name": "Validate_Template",
+							"ActionTypeId": {
+								"Category": "Invoke",
+								"Owner": "AWS",
+								"Version": "1",
+								"Provider": "Lambda"
+							},
+							"OutputArtifacts": [],
+							"Configuration": {
+								"FunctionName": "Validate_Template",
+								"UserParameters": {
+									"Fn::Sub":"{ \"StackId\": \"${AWS::StackId}\", \"CITemplatePath\":\"\", \"ScratchBucket\": \"${ScratchBucket}\" }"                                          
+								}
+							},
+							"RunOrder": 1
+						},
+						{
+							"InputArtifacts": [
+								{
+									"Name": "SourceArtifacts"
+								}
+							],
+							"Name": "Lint_Template",
+							"ActionTypeId": {
+								"Category": "Invoke",
+								"Owner": "AWS",
+								"Version": "1",
+								"Provider": "Lambda"
+							},
+							"OutputArtifacts": [],
+							"Configuration": {
+								"FunctionName": "Lint_Template",
+								"UserParameters": {
+									"Fn::Sub": "{ \"StackId\": \"${AWS::StackId}\", \"CITemplatePath\":\"\", \"ScratchBucket\": \"${ScratchBucket}\" }"										
+								}
+							},
+							"RunOrder": 2
+						}                              
+					 ]
+				},{
 					"Name": "CopyAndDeploy",
 					"Actions": [{
-					  "InputArtifacts":[{"Name":"ServiceCatalogPortfolioApp"}],
-					  "Name":"Artifact",
+					  "InputArtifacts":[{"Name":"SourceArtifacts"}],
+					  "Name":"CopyAndDeploy",
 					  "ActionTypeId": {
 						  "Category": "Build",
 						  "Owner": "AWS",
