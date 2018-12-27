@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS Lambda Service Catalog product",
+    "Description": "AWS Lambda Service Catalog product (fdp-1p5rtpgls)",
     "Parameters":
       {
         "PortfolioProvider": {

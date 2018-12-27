@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "ServiceCatalog Resource template for Serverless application",
+  "Description": "ServiceCatalog Resource template for Serverless application (fdp-1p5rtpglk)",
   "Parameters": {
 	"ApplicationName":{
 	  "Type":"String"

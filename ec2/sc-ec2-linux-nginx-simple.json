@@ -1,5 +1,5 @@
 {
-	"Description": "AWS EC2 NGINX webserver",
+	"Description": "AWS EC2 NGINX webserver (fdp-1p4dlgcpk)",
     "Parameters": {
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName"

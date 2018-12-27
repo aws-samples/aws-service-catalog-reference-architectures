@@ -1,5 +1,5 @@
 {
-	"Description": "AWS EC2 Apache webserver",
+	"Description": "AWS EC2 Apache webserver (fdp-1p4dlgcpe)",
     "Parameters": {
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName"

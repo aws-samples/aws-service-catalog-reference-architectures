@@ -1,4 +1,4 @@
-Description: "Create CodeCommit User"
+Description: "CodeCommit User (fdp-1p5s1035c)"
 Parameters:
   UserName:
     Type: String

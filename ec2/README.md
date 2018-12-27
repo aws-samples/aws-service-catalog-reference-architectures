@@ -5,7 +5,7 @@ This reference blueprint demonstrates how an organization can leverage Serivce C
 ## Getting Started
 
 When implemented this reference blueprint creates an AWS Service Catalog Portfolio called "Service Catalog EC2 Reference Architecture" 
-with two associated products.  The AWS Service Catalog Product references cloudformation templates for the Amazon EC2 Linux and 
+with associated products.  The AWS Service Catalog Product references cloudformation templates for the Amazon EC2 Linux and 
 Windows instances which can be lauched by end users through AWS Service Catalog.  The AWS Service Catalog EC2 product creates 
 either an Aamzon Linux or Microsoft Windows EC2 instance in the VPC and Subnets selected by the end user.  
 A Amazon Simple Systems Manager patch baseline, maintenance window and task are created to allow for automated patching of the 

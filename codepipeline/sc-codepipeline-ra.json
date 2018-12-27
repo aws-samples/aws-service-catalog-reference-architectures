@@ -1,5 +1,5 @@
 {
-    "Description": "ServiceCatalog Portfolio Pipeline (fdp-1p4dlgcoo)",
+    "Description": "ServiceCatalog Portfolio Automation Pipeline (fdp-1p4dlgcoo)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "pipelineartifactsBucketName": {
@@ -83,7 +83,7 @@
         "CodeBuildRole" :{
             "Type":"AWS::IAM::Role",
             "Properties":{
-                "RoleName": "CodeBuilderS3Role",
+                "RoleName": "CodeBuilderRole",
                 "AssumeRolePolicyDocument": {
                     "Version":"2012-10-17",
                     "Statement":{
@@ -95,7 +95,9 @@
                     }
                 },
                 "ManagedPolicyArns": [
-                    "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+                    "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess",
+                    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+                    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
                 ],
                 "Policies": [ { 
                     "PolicyName":"CodeBuildManageS3Artifacts",
@@ -125,20 +127,7 @@
                                   "Resource": [
                                     {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}                                    
                                 ]
-                            },{
-                                "Action": [
-                                    "codecommit:GetUploadArchiveStatus",
-                                    "codecommit:CancelUploadArchive",
-                                    "codecommit:GetBranch",
-                                    "codecommit:GetCommit",
-                                    "codecommit:GitPull",
-                                    "codecommit:UploadArchive"
-                                ],
-                                "Resource":{"Fn::Sub":"arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"},
-                                "Effect": "Allow"
-                            }
-                              
-                              
+                            } 
                         ]
                     }
                 },{ 
@@ -163,17 +152,41 @@
                                     "cloudformation:SetStackPolicy",
                                     "cloudformation:ValidateTemplate",
                                     "cloudformation:UpdateStack",
-                                    "ec2:DescribeSubnets",
-                                    "ec2:DescribeVpcs",
-                                    "ec2:DescribeImages",
-                                    "ssm:GetParameters",
                                     "s3:GetObject"
                                 ],
                                 "Resource": "*"
                             }
                         ]
                     }
-                }]
+                },
+                { 
+                    "PolicyName":"TaskCatEC2ValidationPolicy",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "iam:AddRoleToInstanceProfile",
+                                    "iam:ListRolePolicies",
+                                    "iam:ListPolicies",
+                                    "iam:CreateRole",
+                                    "iam:DeleteRole",
+                                    "iam:GetRole",
+                                    "iam:PassRole",
+                                    "iam:ListRoles",
+                                    "iam:CreateInstanceProfile",
+                                    "iam:DeleteInstanceProfile",
+                                    "iam:RemoveRoleFromInstanceProfile",
+                                    "iam:DetachRolePolicy",
+                                    "iam:AttachRolePolicy"
+                                ],
+                                "Resource": "*"
+                            }
+                        ]
+                    }
+                }
+                ]
             }
         },
         "CodePipelineServiceCatalogRole":{
@@ -191,26 +204,11 @@
                     }
                 },
                 "Policies": [ { 
-                    "PolicyName":"SCManageArtifacts",
+                    "PolicyName":"CodePipelineManageS3Artifacts",
                     "PolicyDocument": {
                         "Version": "2012-10-17",
                         "Statement": [
-                            {"Effect": "Allow",
-                            "Action": [
-                                "servicecatalog:ListProvisioningArtifacts",
-                                "servicecatalog:CreateProvisioningArtifact",
-                                "servicecatalog:DescribeProvisioningArtifact",
-                                "servicecatalog:DeleteProvisioningArtifact",
-                                "servicecatalog:UpdateProduct"
-                            ],
-                            "Resource": "*"
-                            },{
-                                "Effect": "Allow",
-                                "Action": [
-                                    "cloudformation:ValidateTemplate"
-                                ],
-                                "Resource": "*"
-                            },{
+                            {
                                 "Effect": "Allow",
                                 "Action": [
                                     "s3:GetObject",
@@ -253,19 +251,7 @@
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildCFNNAG"}} ]},
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildValidateTemplate"}} ]}
                              ]                              
-                            },{
-                              "Action": "lambda:ListFunctions",
-                              "Resource": "*",
-                              "Effect": "Allow"
-                            },{
-                                "Action": "lambda:InvokeFunction",
-                                "Resource": [
-                                    {"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:Validate_Template"},
-                                    {"Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:Lint_Template"}
-                                ],
-                                "Effect": "Allow"
                             }
-                            
                         ]
                     }
                     }
