@@ -11,7 +11,7 @@ phases:
     commands:
       - echo Entered the pre_build phase...
       - mkdir templates/
-      - cp ec2/sc-portfolio-ec2.json templates/
+      - cp ec2/*.json templates/
       - export dirname=${PWD##*/}
       - echo Directory name $dirname
       - cd ..

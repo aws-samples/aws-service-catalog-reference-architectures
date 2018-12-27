@@ -12,3 +12,12 @@ tests:
   check-ec2-master:
     template_file: sc-portfolio-ec2.json
     parameter_input: sc-portfolio-ec2-defaults.json
+# uncomment to have Taskcat validate your product templates
+# templates will need to be altered to your AWS environment
+#  check-ec2linux-template:
+#    template_file: sc-ec2-linux-ra.json
+#    parameter_input: sc-linux-ec2-defaults.json
+#  check-ec2windows-template:
+#    template_file: sc-ec2-windows-ra.json
+#    parameter_input: sc-windows-ec2-defaults.json
+  

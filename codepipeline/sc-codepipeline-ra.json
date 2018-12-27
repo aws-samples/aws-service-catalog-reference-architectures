@@ -163,6 +163,10 @@
                                     "cloudformation:SetStackPolicy",
                                     "cloudformation:ValidateTemplate",
                                     "cloudformation:UpdateStack",
+                                    "ec2:DescribeSubnets",
+                                    "ec2:DescribeVpcs",
+                                    "ec2:DescribeImages",
+                                    "ssm:GetParameters",
                                     "s3:GetObject"
                                 ],
                                 "Resource": "*"
@@ -284,7 +288,8 @@
                 "Image": "aws/codebuild/ubuntu-base:14.04"
               },
               "Source": {
-                "Type": "CODEPIPELINE"                
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec.yml"                      
               },
               "TimeoutInMinutes": 10
             }            

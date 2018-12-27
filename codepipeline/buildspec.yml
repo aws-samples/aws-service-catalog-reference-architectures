@@ -13,8 +13,8 @@ phases:
             - echo "Account:$ACCID"
             - aws s3 sync . s3://servicesatalog-deployedtemplates-$ACCID/ --delete --exclude "*" --include "*.json" --include "*.yml"
             - echo "S3 Upload Complete, updating cloudformation now..."
-            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-IAMroles  --region us-east-1 --template-url "https://s3.amazonaws.com/servicesatalog-deployedtemplates-$ACCID/iam/sc-ec2vpc-launchrole.yml" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-portfolio --region us-east-1 --parameters '[{"ParameterKey":"LinkedRole2","UsePreviousValue":true},{"ParameterKey":"LinkedRole1","UsePreviousValue":true},{"ParameterKey":"LaunchRoleName","UsePreviousValue":true},{"ParameterKey":"RepoRootURL","UsePreviousValue":true}]' --template-url "https://s3.amazonaws.com/servicesatalog-deployedtemplates-$ACCID/ec2/sc-portfolio-ec2VPC.json"
+            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-IAMroles --template-url "https://s3.amazonaws.com/servicesatalog-deployedtemplates-$ACCID/iam/sc-demosetup-iam.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters '[{"ParameterKey":"LinkedRole2","UsePreviousValue":true},{"ParameterKey":"LinkedRole1","UsePreviousValue":true},{"ParameterKey":"LaunchRoleName","UsePreviousValue":true},{"ParameterKey":"RepoRootURL","UsePreviousValue":true}]' --template-url "https://s3.amazonaws.com/servicesatalog-deployedtemplates-$ACCID/ec2/sc-portfolio-ec2VPC.json"
                       
     post_build:
         commands:

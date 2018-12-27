@@ -111,7 +111,14 @@
             "TimeoutInMinutes" : 5
           }
         },
-        
+        "LinkEndusers":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" },
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
         "ec2linuxproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {

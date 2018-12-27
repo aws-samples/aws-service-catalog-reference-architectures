@@ -10,6 +10,13 @@
         }
       },
 	"Resources": {
+        "SCEndUSersIAM": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
         "ec2vpcCLaunchConstraintRole": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
@@ -40,26 +47,32 @@
         }        
     },
 	"Outputs": {
-		"ec2vpcLaunchConstraintRoleARN":{
-		  "Value": { "Fn::GetAtt":["ec2vpcCLaunchConstraintRole", "Outputs.LaunchRoleName"] },
+		"SCEndUSersGroupARN":{
+		  "Value": { "Fn::GetAtt":["SCEndUSersIAM", "Outputs.EndUserGroupName"] },
+		  "Export" : {
+            "Name" : "sc-enduser-group"
+          }
+		},
+        "ec2vpcLaunchConstraintRoleARN":{
+		  "Value": { "Fn::GetAtt":["ec2vpcCLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
 		  "Export" : {
             "Name" : "sc-ec2vpc-launchconstraint-role"
           }
 		},
 		"s3LaunchConstraintRoleARN":{
-		  "Value": { "Fn::GetAtt":["s3LaunchConstraintRole", "Outputs.LaunchRoleName"] },
+		  "Value": { "Fn::GetAtt":["s3LaunchConstraintRole", "Outputs.LaunchRoleArn"] },
 		  "Export" : {
             "Name" : "sc-s3-launchconstraint-role"
           }
 		},
 		"rdsLaunchConstraintRoleARN":{
-		  "Value": { "Fn::GetAtt":["rdsLaunchConstraintRole", "Outputs.LaunchRoleName"] },
+		  "Value": { "Fn::GetAtt":["rdsLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
 		  "Export" : {
             "Name" : "sc-rds-launchconstraint-role"
           } 
 		},
 		"emrLaunchConstraintRoleARN":{
-		  "Value": { "Fn::GetAtt":["emrLaunchConstraintRole", "Outputs.LaunchRoleName"] },
+		  "Value": { "Fn::GetAtt":["emrLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
 		  "Export" : {
             "Name" : "sc-emr-launchconstraint-role"
           }

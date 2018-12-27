@@ -1,0 +1,29 @@
+Description: "ServiceCatalog End User policy and group (fdp-1p4dlgcp7)"
+Resources:
+  SCEnduserGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: ServiceCatalogEndusers
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/ServiceCatalogEndUserAccess
+      Path: /      
+  SCEnduserPolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - Effect: "Allow"
+            Action: 
+              - "servicecatalog:ProvisionProduct"
+            Resource: "*"
+      PolicyName:  ServiceCatalogEndusers-AdditionalPermissions
+      Groups:
+        - !Ref SCEnduserGroup
+Outputs:
+    EndUserGroupArn:
+        Value: !GetAtt SCEnduserGroup.Arn
+    EndUserGroupName:
+        Value: !Ref SCEnduserGroup
+
+         
