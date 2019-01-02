@@ -17,13 +17,6 @@ You must create the IAM end user group and policy stack from the IAM section bef
  * [Elastic MapReduce (EMR)](emr)
  * [Automated CodePipeline](codepipeline)
 
-Warning - Before you distribute the CloudFormation template to your organization, review the template. 
-Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, 
-and ensure that they are as per your expectations and processes. 
-These sample CloudFormation templates may need updates before you can use them in production.  
-Running these templates may result in charges to your AWS account.  
-Provisioning the supplied Products through ServiceCatalog will create AWS Services which will be billed to your account.
-
 ### Assumptions  
 * You have the required permissions to execute CloudFormation templates: [Controlling Cloudformation Access with IAM](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-template.html).
 * You have the required admin permissions to manage ServiceCatalog: [Authentication and Access Control for AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/controlling_access.html)  
@@ -62,6 +55,15 @@ For example, the EC2 portfolio would be:
 After creating the Cloudformation Stacks you will have a ServiceCatalog Portfolio with products, launch constraints, and associated user roles.  Your end users may now launch products from the ServiceCatalog dashboard. To learn more about the end user dashboard for AWS Service Catalog, see [Using the End User Console View](https://docs.aws.amazon.com/servicecatalog/latest/userguide/end-user-console.html)
 
 ![sc-ra-products.png](sc-ra-products.png)
+
+##Warning
+Before you distribute the CloudFormation template to your organization, review the template. 
+Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, 
+and ensure that they are as per your expectations and processes. 
+These sample CloudFormation templates may need updates before you can use them in production.  
+Running these templates may result in charges to your AWS account.  
+Provisioning the supplied Products through ServiceCatalog will create AWS Services which will be billed to your account.
+
 
 ## License  
 This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
