@@ -21,7 +21,7 @@ The hub account id is needed to create the trust relationship in each spoke acco
 1. setup AWS cli config for your hub account.  
 2. run the install.sh script
   * for multi-account change the ```--accounts $ACC``` parameter (in the buildspec.yml and install.sh) to a json array for the spoke acocunts such as:   
-  ```--accounts '[1234567890,0987654321]'```
+  ```--accounts 1234567890 0987654321```
   * windows users will need the Windows Subsystem for Linux installed.  Or, you can run this from an AWS Linux EC2 instance.
 
 

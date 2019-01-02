@@ -107,7 +107,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" },
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PortfolioId" : {"Ref":"SCEMRportfolio"},
             "PrincipalType" : "IAM"
           }
         },
