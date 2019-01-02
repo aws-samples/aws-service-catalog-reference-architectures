@@ -1,9 +1,10 @@
-# AWS Service Catalog Reference Blueprints
+# AWS Service Catalog Reference Architecture
 
 [AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html) allows you to centrally manage commonly deployed AWS services, and helps you achieve consistent governance which meets your compliance requirements, while enabling users to quickly deploy only the approved AWS services they need. 
 
-This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).  To see the full documentation on ServiceCatalog and CloudFormation go here:  
-[https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)  
+This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).
+ Read the [User Guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
+ for the full documentation on ServiceCatalog and CloudFormation.  
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products, 
 a launch constraint and linked roles for provisioning. 
@@ -29,25 +30,20 @@ Provisioning the supplied Products through ServiceCatalog will create AWS Servic
 
 ### Installation
 First, you must create the end user IAM group and policy with permissions to access ServiceCatalog and provision products.  
-An example template is provided which will create this for you automatically in the IAM section of this repo. 
-You should create the End Users policy and group stack once for each account before running any portfolio templates because they will link the 
-_ServiceCatalogEndusers_ group to the portfolios during creation.  
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
+An [example template](iam/sc-enduser-iam.yml) is provided which will create this for you automatically in the [IAM](iam) section.
+ You should create the End Users policy and group stack once for each account before running any portfolio templates because they will link the
+ _ServiceCatalogEndusers_ group to the portfolios during creation. See the
+ [ServiceCatalog IAM Guide](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html) for more details.
+ Users, groups, and roles which will be provisioning Service Catalog products must have the
+ **AWSServiceCatalogEndUserFullAccess** managed policy attached. If you have other roles which you want to give access to a
+ portfolio, then use _LinkedRole1_ and _LinkedRole2_. If you wish to add other users or groups directly, then modify the portfolio templates with the
+ [PortfolioPrincipalAssociation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicecatalog-portfolioprincipalassociation.html) resource.
 
-[ServiceCatalog IAM Guide](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html)  
- 
-Users, groups, and roles which will be provisioning Service Catalog products must have the 
-**AWSServiceCatalogEndUserFullAccess** managed policy attached.  
-This role will be referred to as _SCProvisioningRole_ and the role name will set as the value in the 
-portfolio templates' parameter _LinkedRole1_.  If you have another role which you want to give access to a 
-portfolio, then use _LinkedRole2_.  
-
-If you wish to add other users or groups directly, then modify the portfolio templates with the 
-[PortfolioPrincipalAssociation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicecatalog-portfolioprincipalassociation.html) resource.
-
-To get started quickly in a single account and region you can click the "Launch Stack" button in each section. 
-Or, if you wish to modify files and execute from your own S3 bucket then follow the instructions below. If you wish to use 
-an automated pipeline in a multi-account multi-region setup the checkout the [codepipeline](codepipeline) section.  
-1. clone this git repo  
+To get started quickly in a single account and region you can click the "Launch Stack" button in each section.
+ Or, if you wish to modify files and execute from your own S3 bucket then follow the instructions below. If you wish to use
+ an automated pipeline in a multi-account multi-region setup look at the [codepipeline](codepipeline) section.  
+1. Clone this git repo  
   ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
 2. Copy the templates in the repo to an S3 bucket  
   ```cd aws-service-catalog-reference-architectures```  

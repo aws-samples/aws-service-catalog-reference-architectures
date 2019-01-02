@@ -9,10 +9,7 @@ This reference architecture creates an AWS Service Catalog Portfolio called
  to connect to the instances used by EMR via SSH.
 
 ### Install  
-1. Launch the IAM group and policy stack for end user provisioning:  
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
-
-2. Launch the EMR portfolio stack:  
+Launch the EMR portfolio stack:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-EMRPortfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/emr/sc-portfolio-emr.json)
 
 

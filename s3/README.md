@@ -12,10 +12,7 @@ This reference architecture creates an AWS Service Catalog Portfolio called "Ser
 
 
 ### Install  
-1. Launch the IAM group and policy stack for end user provisioning:  
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
-
-2. Launch the S3 portfolio stack:  
+Launch the S3 portfolio stack:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-S3Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/s3/sc-portfolio-s3.json)
 
 
