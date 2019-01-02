@@ -56,7 +56,7 @@ After creating the Cloudformation Stacks you will have a ServiceCatalog Portfoli
 
 ![sc-ra-products.png](sc-ra-products.png)
 
-##Warning
+## Warning
 Before you distribute the CloudFormation template to your organization, review the template. 
 Check IAM permissions, Deletion policies, update stack behavior, other aspects of the template, 
 and ensure that they are as per your expectations and processes. 
