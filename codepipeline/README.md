@@ -67,7 +67,7 @@ The hub account id is needed to create the trust relationship in each spoke acco
 6. Edit the supplied config files for CodePipeline and [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
   a. replace the text “YOUR-ACCOUNT-HERE” with your Account ID in the TaskCat config files: ci/sc-portfolio-ec2-defaults.json,
 ci/taskcat.yml. Replace 1234567890 with your actaul Account ID in the command below:  
-  ```grep -rl YOUR-ACCOUNT-HERE ./ | xargs sed -i 's/YOUR-ACCOUNT-HERE/1234567890/g'```  
+  ```grep -rl YOUR-ACCOUNT-HERE ./ci | xargs sed -i 's/YOUR-ACCOUNT-HERE/1234567890/g'```  
   b. update the regions and accounts in "buildspec.yml"  
   c. Update “ci/sc-portfolio-ec2-defaults.json” to reflect the parameters you set in the “codepiepline/buildspec.yml”
   to allow TaskCat to validate the setup.  If you setup the TaskCat parameter files with values from your account,

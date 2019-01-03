@@ -21,7 +21,8 @@
                     "Parameters": [
                         "WindowsInstanceType",
                         "WindowsSubnet",
-                        "WindowsRDPPort"
+                        "WindowsRDPPort",
+                        "LatestAmiId"
                     ]
                 }
             ],
@@ -43,6 +44,9 @@
                 },
                 "WindowsRDPPort": {
                     "default": "Windows RDP Port"
+                },
+                "LatestAmiId":{
+                    "default": "SSM path for latest Windows AMI ImageId"
                 }
             }
         }
@@ -87,63 +91,12 @@
         "KeyPair": {
             "Description": "Name of existing EC2 key pair for Windows Instances",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        }
-    },
-    "Mappings": {
-        "AWSAMIRegionMap": {
-            "reference-ami": {
-                "WINDOWSAMI": "Windows_Server-2016-English-Full-Base-2018.03.06 (ami-cab14db7)"
-            },
-            "ap-south-1": {
-                "WINDOWSAMI": "ami-bb9cc2d4"
-            },
-            "eu-west-3": {
-                "WINDOWSAMI": "ami-bc68dec1"
-            },
-            "eu-west-2": {
-                "WINDOWSAMI": "ami-8bee09ec"
-            },
-            "eu-west-1": {
-                "WINDOWSAMI": "ami-0284c77b"
-            },
-            "ap-northeast-3": {
-                "WINDOWSAMI": "ami-d12826ac"
-            },
-            "ap-northeast-2": {
-                "WINDOWSAMI": "ami-1d1db073"
-            },
-            "ap-northeast-1": {
-                "WINDOWSAMI": "ami-9b2e62fd"
-            },
-            "sa-east-1": {
-                "WINDOWSAMI": "ami-0a175d66"
-            },
-            "ca-central-1": {
-                "WINDOWSAMI": "ami-4748cf23"
-            },
-            "ap-southeast-1": {
-                "WINDOWSAMI": "ami-e36a3e9f"
-            },
-            "ap-southeast-2": {
-                "WINDOWSAMI": "ami-406fae22"
-            },
-            "eu-central-1": {
-                "WINDOWSAMI": "ami-f91a7496"
-            },
-            "us-east-1": {
-                "WINDOWSAMI": "ami-cab14db7"
-            },
-            "us-east-2": {
-                "WINDOWSAMI": "ami-bc784ed9"
-            },
-            "us-west-1": {
-                "WINDOWSAMI": "ami-aaa2a8ca"
-            },
-            "us-west-2": {
-                "WINDOWSAMI": "ami-ef9a0e97"
-            }
-        }
-    },
+        },
+        "LatestAmiId": {
+			"Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+			"Default": "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base"
+		}
+    },    
     "Resources": {
         "InstancePatchingRole": {
             "Type": "AWS::IAM::Role",
@@ -222,15 +175,7 @@
         "WindowsInstance": {
             "Type": "AWS::EC2::Instance",
             "Properties": {
-                "ImageId": {
-                    "Fn::FindInMap": [
-                        "AWSAMIRegionMap",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        "WINDOWSAMI"
-                    ]
-                },
+                "ImageId": {"Ref": "LatestAmiId"},
                 "InstanceType": {
                     "Ref": "WindowsInstanceType"
                 },

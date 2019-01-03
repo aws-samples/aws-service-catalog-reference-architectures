@@ -3,21 +3,45 @@ global:
   owner: owner@company.com
   qsname: SCPortfoliosRepo
   regions:
-    - eu-west-1
     - us-east-1
     - us-east-2
+    - us-west-1    
   reporting: true
   s3bucket: taskcat-tempbucket-YOUR-ACCOUNT-HERE
 tests:
-  check-ec2-master:
+  ec2-portfolio:
     template_file: sc-portfolio-ec2.json
     parameter_input: sc-portfolio-ec2-defaults.json
 # uncomment to have Taskcat validate your product templates
 # templates will need to be altered to your AWS environment
-#  check-ec2linux-template:
+#  ec2linux-template-us-east-1:
+#    regions:
+#        - us-east-1  
 #    template_file: sc-ec2-linux-ra.json
-#    parameter_input: sc-linux-ec2-defaults.json
-#  check-ec2windows-template:
+#    parameter_input: sc-linux-ec2-defaults-useast1.json
+#  ec2windows-template-us-east-1:
+#    regions:
+#        - us-east-1  
 #    template_file: sc-ec2-windows-ra.json
-#    parameter_input: sc-windows-ec2-defaults.json
+#    parameter_input: sc-windows-ec2-defaults-useast1.json
+#  ec2linux-template-us-east-2:
+#    regions:
+#        - us-east-2  
+#    template_file: sc-ec2-linux-ra.json
+#    parameter_input: sc-linux-ec2-defaults-useast2.json
+#  ec2windows-template-us-east-2:
+#    regions:
+#        - us-east-2  
+#    template_file: sc-ec2-windows-ra.json
+#    parameter_input: sc-windows-ec2-defaults-useast2.json
+#  ec2linux-template-us-west-1:
+#    regions:
+#        - us-west-1  
+#    template_file: sc-ec2-linux-ra.json
+#    parameter_input: sc-linux-ec2-defaults-uswest1.json
+#  ec2windows-template-us-west-1:
+#    regions:
+#        - us-west-1  
+#    template_file: sc-ec2-windows-ra.json
+#    parameter_input: sc-windows-ec2-defaults-uswest1.json
   

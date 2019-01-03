@@ -18,8 +18,7 @@
 		"RepoRootURL": {
             "Type":"String",
             "Description":"Root url for the repo containing the product templates."
-        }
-		
+        }		
       },
     "Resources": {
 		"scec2windowsproduct": {

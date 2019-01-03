@@ -1,6 +1,9 @@
 #!/bin/bash
 shopt -s nullglob
-for f in {ec2,vpc}/*.{json,yml} ; do
+mkdir templates/
+cp {ec2,vpc}/*.{json,yml} templates/
+cp codepipeline/sc-codepipeline-ra.json templates/
+for f in templates/*; do
     if cfn_nag_scan --input-path "$f"; then
         echo "$f PASSED"
     else
@@ -13,6 +16,6 @@ if [ -e FAILED ]; then
   echo cfn-nag FAILED at least once!
   exit 1
 else
-  echo cfn-nag Passed on all files!
+  echo cfn-nag PASSED on all files!
   exit 0
 fi

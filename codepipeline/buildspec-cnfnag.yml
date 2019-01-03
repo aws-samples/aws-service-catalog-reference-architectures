@@ -6,5 +6,5 @@ phases:
       - gem install cfn-nag      
   build:
     commands:
-      - chmod +x ci/run-cfnnag.sh
-      - /bin/bash ci/run-cfnnag.sh      
+      - chmod +x codepipeline/run-cfnnag.sh
+      - /bin/bash codepipeline/run-cfnnag.sh      

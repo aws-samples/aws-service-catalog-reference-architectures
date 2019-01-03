@@ -107,7 +107,18 @@
                             {
                                 "Effect": "Allow",
                                 "Action": [
-                                    "s3:*"
+                                    "s3:CreateBucket",
+                                    "s3:DeleteBucket",
+                                    "s3:DeleteBucketPolicy",
+                                    "s3:GetBucketPolicy",
+                                    "s3:GetBucketPolicyStatus",
+                                    "s3:PutBucketPolicy",
+                                    "s3:GetBucketLocation",
+                                    "s3:DeleteObject",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:ListBucket"
+                                    
                                 ],
                                 "Resource": [
                                     {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
@@ -141,7 +152,8 @@
                                     "cloudformation:DescribeStackResource",
                                     "cloudformation:DescribeStackResources",
                                     "cloudformation:GetTemplate",
-                                    "cloudformation:List*",
+                                    "cloudformation:ListStackSets",
+                                    "cloudformation:ListStacks",
                                     "cloudformation:DescribeStackEvents",
                                     "cloudformation:DescribeStacks",
                                     "cloudformation:CreateStack",
@@ -151,7 +163,6 @@
                                     "cloudformation:GetTemplateSummary",
                                     "cloudformation:SetStackPolicy",
                                     "cloudformation:ValidateTemplate",
-                                    "cloudformation:UpdateStack",
                                     "s3:GetObject"
                                 ],
                                 "Resource": "*"
@@ -179,13 +190,33 @@
                                     "iam:DeleteInstanceProfile",
                                     "iam:RemoveRoleFromInstanceProfile",
                                     "iam:DetachRolePolicy",
-                                    "iam:AttachRolePolicy"
+                                    "iam:AttachRolePolicy",
+                                    "iam:PutRolePolicy"
                                 ],
                                 "Resource": "*"
                             }
                         ]
                     }
-                }
+                },{ 
+                    "PolicyName":"CodeBuildManageCodeBuild",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                              "Effect":"Allow",
+                              "Action":[
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects",
+                                "codebuild:ListBuildsForProject",
+                                "codebuild:UpdateProject"
+                              ],
+                              "Resource":[
+                                 {"Fn::Sub":"arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*"}
+                             ]                              
+                            }
+                        ]
+                    }
+                    }
                 ]
             }
         },
@@ -243,8 +274,13 @@
                                 "codebuild:StartBuild",
                                 "codebuild:StartBuild",
                                 "codebuild:StopBuild",
-                                "codebuild:BatchGet*",
-                                "codebuild:List*"
+                                "codebuild:BatchGetProjects",
+                                "codebuild:BatchGetBuilds",
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects",
+                                "codebuild:ListBuildsForProject",
+                                "codebuild:ListCuratedEnvironmentImages",
+                                "codebuild:ListSourceCredentials"                                
                               ],
                               "Resource":[
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]},
@@ -328,7 +364,7 @@
               },
               "Source": {
                 "Type": "CODEPIPELINE",
-                "BuildSpec":"ci/buildspec-cnfnag.yml"
+                "BuildSpec":"codepipeline/buildspec-cnfnag.yml"
               },
               "TimeoutInMinutes": 10
             }            
@@ -370,22 +406,6 @@
                     "Name": "PreCreateTests",
                     "Actions": [
                         {
-                            "InputArtifacts": [ 
-                              {"Name": "SourceArtifacts"}
-                            ],
-                            "Name": "Validate_Template",
-                            "ActionTypeId": {
-                                "Category": "Build",
-                                "Owner": "AWS",
-                                "Version": "1",
-                                "Provider": "CodeBuild"
-                            },
-                            "OutputArtifacts": [],
-                            "Configuration": {
-                                "ProjectName":{"Ref":"CodeBuildValidateTemplate"}
-                            },
-                            "RunOrder": 1
-                        },{
                             "InputArtifacts": [
                                 { "Name": "SourceArtifacts" }
                             ],
@@ -401,7 +421,23 @@
                                 "ProjectName":{"Ref":"CodeBuildCFNNAG"}
                             },
                             "RunOrder": 1
-                        }                              
+                        },{
+                            "InputArtifacts": [ 
+                              {"Name": "SourceArtifacts"}
+                            ],
+                            "Name": "Validate_Template",
+                            "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Version": "1",
+                                "Provider": "CodeBuild"
+                            },
+                            "OutputArtifacts": [],
+                            "Configuration": {
+                                "ProjectName":{"Ref":"CodeBuildValidateTemplate"}
+                            },
+                            "RunOrder": 2
+                        }                             
                      ]
                 },{
                     "Name": "CopyAndDeploy",
