@@ -97,7 +97,8 @@
                 "ManagedPolicyArns": [
                     "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess",
                     "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
-                    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+                    "arn:aws:iam::aws:policy/AmazonSSMFullAccess",
+                    "arn:aws:iam::aws:policy/AWSCodeCommitPowerUser"
                 ],
                 "Policies": [ { 
                     "PolicyName":"CodeBuildManageS3Artifacts",
