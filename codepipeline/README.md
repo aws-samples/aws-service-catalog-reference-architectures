@@ -6,9 +6,8 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
  Updating a ServiceCatalog becomes as easy as ```git push```
 
 The guide below assumes a multi-account multi-region setup for which you must choose a hub account and central region.
- The IAM roles will be launched in each account once in the central region while the Portfolio templates will be launched
- in each region within each account.  The setup steps below will assume a single account is both the hub and execution account across 3 regions.
- CloudFormation StackSets will be used to distribute stacks across accounts and regions. You may deploy Stacks using StackSets to specific accounts
+ The IAM roles will be launched once in the central region in each account while the Portfolio templates will be launched
+ in each region within each account. CloudFormation StackSets will be used to distribute stacks across accounts and regions. You may deploy Stacks using StackSets to specific accounts
  or to an AWS Organization OU. For more information aabout CloudFormation StackSets review the [user guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-prereqs.html).  
 
 The hub account id is needed to create the trust relationship in each spoke account so the hub may execute CloudFormation in the spoke accounts. 
