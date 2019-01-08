@@ -6,9 +6,9 @@ This guide will help you deploy and manage your AWS ServiceCatalog using Infrast
  Read the [User Guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
  for the full documentation on ServiceCatalog and CloudFormation.  
 
-The portfolio templates in each section will create a ServiceCatalog Portfolio with various products, 
-a launch constraint and linked roles for provisioning. 
-You must create the IAM end user group and policy stack from the IAM section before launching any portfolio templates.
+The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
+ a launch constraint and linked roles for provisioning.  
+*You must create the IAM end user group and policy stack from the IAM section before launching any portfolio templates.
  * [IAM Templates](iam)
  * [Virtual Private Cloud (VPC)](vpc)
  * [Elastic Compute Cloud (EC2)](ec2)
@@ -21,18 +21,12 @@ You must create the IAM end user group and policy stack from the IAM section bef
 * You have the required permissions to execute CloudFormation templates: [Controlling Cloudformation Access with IAM](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-iam-template.html).
 * You have the required admin permissions to manage ServiceCatalog: [Authentication and Access Control for AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/controlling_access.html)  
 
-### Installation
-First, you must create the end user IAM group and policy with permissions to access ServiceCatalog and provision products.  
+### Installation  
+**Do this First and once per account:**
+You must create the end user IAM group and policy with permissions to access ServiceCatalog and provision products.  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
-An [example template](iam/sc-enduser-iam.yml) is provided which will create this for you automatically in the [IAM](iam) section.
- You should create the End Users policy and group stack once for each account before running any portfolio templates because they will link the
- _ServiceCatalogEndusers_ group to the portfolios during creation. See the
- [ServiceCatalog IAM Guide](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/getstarted-iamenduser.html) for more details.
- Users, groups, and roles which will be provisioning Service Catalog products must have the
- **AWSServiceCatalogEndUserFullAccess** managed policy attached. If you have other roles which you want to give access to a
- portfolio, then use _LinkedRole1_ and _LinkedRole2_. If you wish to add other users or groups directly, then modify the portfolio templates with the
- [PortfolioPrincipalAssociation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-servicecatalog-portfolioprincipalassociation.html) resource.
-
+[Enduser IAM template](iam/sc-enduser-iam.yml)
+ 
 To get started quickly in a single account and region you can click the "Launch Stack" button in each section.
  Or, if you wish to modify files and execute from your own S3 bucket then follow the instructions below. If you wish to use
  an automated pipeline in a multi-account multi-region setup look at the [codepipeline](codepipeline) section.  
