@@ -23,7 +23,7 @@ The portfolio templates in each section will create a ServiceCatalog Portfolio w
 
 ### Installation  
 
-##Do this First and once per account:
+## Do this First and once per account:  
 You must create the end user IAM group and policy with permissions to access ServiceCatalog and provision products.  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
 [Enduser IAM template](iam/sc-enduser-iam.yml)
