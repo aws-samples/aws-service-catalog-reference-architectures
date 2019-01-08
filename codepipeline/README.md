@@ -59,9 +59,10 @@ The hub account id is needed to create the trust relationship in each spoke acco
   f. Deploy to any regions in which you want to use ServiceCatalog - this guide assumes us-east-1,us-east-2,us-west-1  
 
 6. Copy this Repo into your new CodeCommit Repo.  
-  * You will need an ssh user: [Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)
-  * The repo clone address is the **CloneUrlSsh** output variable from the SC-RA-IACPipeline CloudFormation Stack
-  * sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](iam/sc-codecommit-iamuser.yml)
+  You will need a codecommit ssh user:   
+  Sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](iam/sc-codecommit-iamuser.yml)  
+  [Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
+  The repo clone address is the **CloneUrlSsh** output variable from the SC-RA-IACPipeline CloudFormation Stack
   ```
   git clone git@github.com:aws-service-catalog-reference-architectures.git
   git clone YOUR-REPO-NAME-HERE
