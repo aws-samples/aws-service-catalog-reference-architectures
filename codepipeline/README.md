@@ -60,8 +60,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
 
 6. Copy this Repo into your new CodeCommit Repo.  
   You will need a codecommit ssh user:   
-  Sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](iam/sc-codecommit-iamuser.yml)  
-  [Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
+    - Sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](iam/sc-codecommit-iamuser.yml)  
+    - [Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
   The repo clone address is the **CloneUrlSsh** output variable from the SC-RA-IACPipeline CloudFormation Stack
   ```
   git clone git@github.com:aws-service-catalog-reference-architectures.git
