@@ -1,0 +1,24 @@
+[
+    {
+        "ParameterKey": "PortfolioProvider",
+        "ParameterValue": "IT Services"
+    },{
+        "ParameterKey": "PorfolioName",
+        "ParameterValue": "Service Catalog EC2 Reference Architecture"
+    },{
+        "ParameterKey": "PorfolioDescription",
+        "ParameterValue": "Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
+    },{
+        "ParameterKey": "LaunchRoleName",
+        "ParameterValue": "SCEC2LaunchRole"
+    },{
+        "ParameterKey": "LinkedRole1",
+        "ParameterValue": ""
+    },{
+        "ParameterKey": "LinkedRole2",
+        "ParameterValue": ""
+    },{
+        "ParameterKey": "RepoRootURL",
+        "ParameterValue": "https://s3.amazonaws.com/$[taskcat_autobucket]/SCPortfoliosRepo/"
+    }
+]

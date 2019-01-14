@@ -1,0 +1,74 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Linux EC2 Webserver ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for EC2 products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The SC portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+    "Resources": {
+        "WebserverProduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "Amazon Elastic Compute Cloud (EC2) Linux Webserver",
+                "Description": "This product builds one Amazon Linux EC2 webserver (Apache or NGINX) instance.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "NGINX webserver",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx-simple.json"}
+                        },
+                        "Name": "NGINX v1.0"
+                    },
+                    {
+                        "Description": "Apache webserver",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache-simple.json"}
+                        },
+                        "Name": "Apache v1.0"
+                    }
+                ]
+            }
+        },
+        "Associatenginxcf":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"WebserverProduct"}
+          }
+        },
+        "constraintnginxcf":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associatenginxcf",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"WebserverProduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    },
+    "Outputs": {
+        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
+    }
+}

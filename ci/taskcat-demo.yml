@@ -1,0 +1,13 @@
+---
+global:
+  cleanup: true 
+  owner: owner@company.com
+  qsname: SCPortfoliosRepo
+  regions:
+    - us-east-1
+tests:
+  ec2vpc-portfolio:
+    template_file: taskcat-verify-ec2VPC.json
+    parameter_input: taskcat-params-verify-ec2vpc.json
+
+  

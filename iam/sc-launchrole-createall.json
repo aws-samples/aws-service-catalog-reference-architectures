@@ -1,0 +1,81 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Create all Roles for ServiceCatalog RA launch constraints. (fdp-1p5rtpgm8)",    
+    "Parameters":
+      {        
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates.",
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        }
+      },
+    "Resources": {
+        "SCEndUSersIAM": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "ec2vpcCLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-ec2vpc-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "emrLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-emr-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "rdsLaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-rds-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "s3LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-s3-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        }        
+    },
+    "Outputs": {
+        "SCEndUSersGroupARN":{
+          "Value": { "Fn::GetAtt":["SCEndUSersIAM", "Outputs.EndUserGroupName"] },
+          "Export" : {
+            "Name" : "sc-enduser-group"
+          }
+        },
+        "ec2vpcLaunchConstraintRoleARN":{
+          "Value": { "Fn::GetAtt":["ec2vpcCLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+          "Export" : {
+            "Name" : "sc-ec2vpc-launchconstraint-role"
+          }
+        },
+        "s3LaunchConstraintRoleARN":{
+          "Value": { "Fn::GetAtt":["s3LaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+          "Export" : {
+            "Name" : "sc-s3-launchconstraint-role"
+          }
+        },
+        "rdsLaunchConstraintRoleARN":{
+          "Value": { "Fn::GetAtt":["rdsLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+          "Export" : {
+            "Name" : "sc-rds-launchconstraint-role"
+          } 
+        },
+        "emrLaunchConstraintRoleARN":{
+          "Value": { "Fn::GetAtt":["emrLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
+          "Export" : {
+            "Name" : "sc-emr-launchconstraint-role"
+          }
+        }
+    }
+}

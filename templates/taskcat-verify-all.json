@@ -1,0 +1,124 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "TaskCat testing template for all aws-service-catalog-reference-architectures",    
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name",
+            "Default":"IT Services"
+        },
+       "PorfolioName": {
+            "Type":"String",
+            "Description":"Portfolio Name",
+            "Default":"Service Catalog EC2 Reference Architecture"
+        },
+        "PorfolioDescription": {
+            "Type":"String",
+            "Description":"Portfolio Description",
+            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
+        },
+        "LaunchRoleName": {
+            "Type":"String",
+            "Description":"Name of the launch constraint role for EC2 products. leave this blank to create the role."            
+        },
+       "LinkedRole1": {
+            "Type":"String",
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
+        },       
+        "LinkedRole2": {
+            "Type":"String",
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
+        },       
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+      "Conditions":{
+        "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
+        "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}
+    },
+    "Resources": {
+       
+        "IAMenduser": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },        
+        "STACKec2portfolio": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "DependsOn" : "IAMenduser",
+          "Properties" : {
+            "Parameters" : {         
+                "LaunchRoleName": "",
+                "LinkedRole1": {"Ref":"LinkedRole1"},
+                "LinkedRole2": {"Ref":"LinkedRole2"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-portfolio-ec2.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "STACKvpcportfolio": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "DependsOn" : ["IAMenduser"],
+          "Properties" : {
+            "Parameters" : {         
+                "LaunchRoleName": {"Fn::GetAtt":["STACKec2portfolio","Outputs.LaunchConstraintRoleName"]},
+                "LinkedRole1": {"Ref":"LinkedRole1"},
+                "LinkedRole2": {"Ref":"LinkedRole2"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}vpc/sc-portfolio-vpc.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "STACKrdsportfolio": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "DependsOn" : ["IAMenduser"],
+          "Properties" : {
+            "Parameters" : {         
+                "LaunchRoleName": "",
+                "LinkedRole1": {"Ref":"LinkedRole1"},
+                "LinkedRole2": {"Ref":"LinkedRole2"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-portfolio-rds.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "STACKemrportfolio": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "DependsOn" : ["IAMenduser"],
+          "Properties" : {
+            "Parameters" : {         
+                "LaunchRoleName": "",
+                "LinkedRole1": {"Ref":"LinkedRole1"},
+                "LinkedRole2": {"Ref":"LinkedRole2"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}emr/sc-portfolio-emr.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "STACKs3portfolio": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "DependsOn" : ["IAMenduser"],
+          "Properties" : {
+            "Parameters" : {         
+                "LaunchRoleName": "",
+                "LinkedRole1": {"Ref":"LinkedRole1"},
+                "LinkedRole2": {"Ref":"LinkedRole2"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}s3/sc-portfolio-s3.json"},
+            "TimeoutInMinutes" : 5
+          }
+        }
+       
+    }
+}
