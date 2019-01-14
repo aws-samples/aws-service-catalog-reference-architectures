@@ -1,24 +1,34 @@
-Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-  
-  Licensed under the Apache License, Version 2.0 (the "License").
-  You may not use this file except in compliance with the License.
-  A copy of the License is located at
-  
-      http://www.apache.org/licenses/LICENSE-2.0
-  
-  or in the "license" file accompanying this file. This file is distributed 
-  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either 
-  express or implied. See the License for the specific language governing 
-  permissions and limitations under the License.
+# AWS Service Catalog S3 Reference architecture
 
-# AWS Service Catalog S3 Reference blueprint
+This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog S3 Reference Architecture"
+ with five associated products. The AWS Service Catalog Product references cloudformation templates for the Amazon S3 buckets which
+ can be lauched by end users through Service Catalog. The AWS Service Catalog S3 products create S3 buckets with varying 
+ configurations:  
+ 1. Read-Only bucket with access from anywhere
+ 2. Private bucket with access restricted to a source CIDR block
+ 3. Private bucket with access requiring multi-factor authentication
+ 4. Private bucket with contents encrypted with S3 server side encryption
+ 5. Private bucket with a transition ruleset to migrate innactive objects to S3-IA and Glacier.  
 
-This reference blueprint demonstrates how an organization can leverage Serivce Catalog to provide Amazon Simple Storage Service (S3)) buckets with various configurations for testing and integration.
 
-## Getting Started
+### Install  
+Launch the S3 portfolio stack:  
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-S3Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/s3/sc-portfolio-s3.json)
 
-When implemented this reference blueprint creates an AWS Service Catalog Portfolio called "Service Catalog S3 Reference Architecture" with five associated products.  The AWS Service Catalog Product references cloudformation templates for the Amazon S3 buckets which can be lauched by end users through Service Catalog.  The AWS Service Catalog S3 products create S3 buckets with varying configurations: 1) Read-Only bucket with access from anywhere, 2) Private bucket with access restricted to a source CIDR block, 3) Private bucket with access requiring multi-factor authentication, 4) Private bucket with contents encrypted with S3 server side encryption, and 5) Private bucket with a transition ruleset to migrate innactive objects to S3-IA and Glacier. 
 
+### Install from your own S3 bucket  
+1. clone this git repo:  
+  ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
+2. Copy everything in the repo to an S3 bucket:  
+  ```cd aws-service-catalog-reference-architectures```  
+  ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
+3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
+  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/s3/sc-portfolio-s3.json```  
+4. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
+5. Change the "RepoRootURL" parameter to your bucket's root url:  
+  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```
+
+ 
 ### AWS S3 public Access read-only bucket
 
 ![sc-s3-public-ra-architecture.png](sc-s3-public-ra-architecture.png)
@@ -40,14 +50,3 @@ When implemented this reference blueprint creates an AWS Service Catalog Portfol
 ![sc-s3-transition-ra-architecture.png](sc-s3-transition-ra-architecture.png)
 
 
-### For detailed instructions on how to set up this AWS Service catalog product and portfolio, see [Walkthrough Guide](sc-s3-ra-walkthrough.pdf)
-
-
-Note - Before you distribute this CloudFormation template, review the template and ensure that it is doing what you want it to do. Check IAM permissions, Deletion policies, and other aspects of the template to ensure that they are as per your expectations.
-
-
-## License
-
-* This project is licensed under the Apache 2.0 license - see the [LICENSE](LICENSE) file for details
-
- 

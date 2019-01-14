@@ -1,0 +1,12 @@
+Description: "CodeCommit User (fdp-1p5s1035c)"
+Parameters:
+  UserName:
+    Type: String
+    Default: CodeCommitUser
+Resources:
+  CodeCommitUser:
+    Type: 'AWS::IAM::User'
+    Properties:
+      UserName: !Ref UserName
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess

@@ -1,0 +1,193 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "RDS Portfolio for Service Catalog. (fdp-1p4dlgcoa)",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Portfolio Information"
+                    },
+                    "Parameters": [
+                        "PorfolioName",
+                        "PortfolioProvider",
+                        "PorfolioDescription"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "IAM Settings"
+                    },
+                    "Parameters": [
+                        "LaunchRoleName",
+                        "LinkedRole1",
+                        "LinkedRole2"
+                    ]
+                } ,
+                {
+                    "Label": {
+                        "default": "Product Settings"
+                    },
+                    "Parameters": [
+                        "RepoRootURL"
+                    ]
+                } 
+  
+            ]
+        }
+    },
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name",
+            "Default":"IT Services"
+        },
+       "PorfolioName": {
+            "Type":"String",
+            "Description":"Portfolio Name",
+            "Default":"Service Catalog RDS Reference Architecture"
+        },
+        "PorfolioDescription": {
+            "Type":"String",
+            "Description":"Portfolio Description",
+            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Relational Database Service (RDS)."
+        },
+        "LaunchRoleName": {
+            "Type":"String",
+            "Description":"Name of the launch constraint role for RDS products. leave this blank to create the role."            
+        },
+       "LinkedRole1": {
+            "Type":"String",
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
+        },       
+        "LinkedRole2": {
+            "Type":"String",
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
+        },       
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates.",
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        }
+      },
+      "Conditions":{
+        "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
+        "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
+    },
+    "Resources": {
+        "SCRDSportfolio": {
+          "Type" : "AWS::ServiceCatalog::Portfolio",
+          "Properties" : {
+            "ProviderName": {"Ref":"PortfolioProvider"},
+            "Description" : {"Ref":"PorfolioDescription"},
+            "DisplayName" : {"Ref":"PorfolioName"}
+          }
+        },
+        "addrole1":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole1",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
+            "PortfolioId" : {"Ref":"SCRDSportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "addrole2":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole2",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
+            "PortfolioId" : {"Ref":"SCRDSportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LinkEndusers":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" },
+            "PortfolioId" : {"Ref":"SCRDSportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CreateLaunchConstraint",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-rds-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
+        "rdsmariaproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCRDSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-product-rds-mariadb.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "rdsmysqlproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCRDSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-product-rds-mysql.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "rdsmssqlproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCRDSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-product-rds-mssql.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "rdspostgresproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCRDSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-product-rds-postgresql.json"},
+            "TimeoutInMinutes" : 5
+          }
+        }
+
+    }  
+}

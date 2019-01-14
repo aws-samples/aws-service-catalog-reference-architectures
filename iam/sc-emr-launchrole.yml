@@ -1,0 +1,60 @@
+Description: "ServiceCatalog EMR Launch Role. (fdp-1p5rtpgmf)"
+Resources:
+  SCEMRLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: SCEMRLaunchRole 
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonElasticMapReduceFullAccess        
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: SCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SCLaunchPolicySID
+                Effect: Allow
+                Action:                  
+                  - "iam:ListRolePolicies"
+                  - "iam:ListPolicies"
+                  - "iam:CreateRole"
+                  - "iam:DeleteRole"
+                  - "iam:GetRole"
+                  - "iam:PassRole"
+                  - "iam:ListRoles"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:AddRoleToInstanceProfile"
+                  - "iam:RemoveRoleFromInstanceProfile"
+                  - "iam:DetachRolePolicy"
+                  - "iam:AttachRolePolicy"                                 
+                  - "cloudformation:DescribeStackResource"
+                  - "cloudformation:DescribeStackResources"
+                  - "cloudformation:GetTemplate"
+                  - "cloudformation:List*"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:GetTemplateSummary"
+                  - "cloudformation:SetStackPolicy"
+                  - "cloudformation:ValidateTemplate"
+                  - "cloudformation:UpdateStack"     
+                Resource: '*'
+Outputs:
+    LaunchRoleArn:
+        Value: !GetAtt SCEMRLaunchRole.Arn
+    LaunchRoleName:
+        Value: !Ref SCEMRLaunchRole
+        

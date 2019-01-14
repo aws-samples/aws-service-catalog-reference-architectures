@@ -1,0 +1,67 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "VPC ServiceCatalog product. (fdp-1p4da46qe)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Owner and Distributor Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for VPC products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The ServiceCatalog portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+    "Resources": {
+        "scvpcproduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "Amazon Virtual Private Cloud (VPC)",
+                "Description": "This product builds a multi-availability zone Amazon AWS Virtual Private Cloud (VPC) with an option to include a single instance Amazon Linux bastion instance.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "baseline version",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}vpc/sc-vpc-ra.json"}
+                        },
+                        "Name": "v1.0"
+                    }
+                ]
+            }
+        },
+        "Associatevpc":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scvpcproduct"}
+          }
+        },
+        "constraintec2linux":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associatevpc",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scvpcproduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    },
+    "Outputs": {
+        "ProductId":{"Value": { "Ref":"scvpcproduct" } }
+    }
+}    

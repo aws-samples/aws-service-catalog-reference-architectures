@@ -1,0 +1,62 @@
+Description: "ServiceCatalog RDS Launch Role. (fdp-1p5s10365)"
+Resources:
+  SCRDSLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: SCRDSLaunchRole 
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonRDSFullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: SCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SCLaunchPolicySID
+                Effect: Allow
+                Action:                  
+                  - "iam:AddRoleToInstanceProfile"
+                  - "iam:ListRolePolicies"
+                  - "iam:ListPolicies"
+                  - "iam:DeleteRole"
+                  - "iam:GetRole"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:PassRole"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:ListRoles"
+                  - "iam:RemoveRoleFromInstanceProfile"
+                  - "iam:CreateRole"
+                  - "iam:DetachRolePolicy"
+                  - "iam:AttachRolePolicy"                                 
+                  - "cloudformation:DescribeStackResource"
+                  - "cloudformation:DescribeStackResources"
+                  - "cloudformation:GetTemplate"
+                  - "cloudformation:List*"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:GetTemplateSummary"
+                  - "cloudformation:SetStackPolicy"
+                  - "cloudformation:ValidateTemplate"
+                  - "cloudformation:UpdateStack"     
+                  - "s3:GetObject"
+                Resource: '*'
+Outputs:
+    LaunchRoleArn:
+        Value: !GetAtt SCRDSLaunchRole.Arn
+    LaunchRoleName:
+        Value: !Ref SCRDSLaunchRole
+        
