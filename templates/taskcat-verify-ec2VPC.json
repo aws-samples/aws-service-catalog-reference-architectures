@@ -1,0 +1,215 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Portfolio setup for Service Catalog with EC2 and VPC products. (fdp-1p4da46nc)",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Portfolio Information"
+                    },
+                    "Parameters": [
+                        "PorfolioName",
+                        "PortfolioProvider",
+                        "PorfolioDescription"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "IAM Settings"
+                    },
+                    "Parameters": [
+                        "LaunchRoleName",
+                        "LinkedRole1",
+                        "LinkedRole2"
+                    ]
+                } ,
+                {
+                    "Label": {
+                        "default": "Product Settings"
+                    },
+                    "Parameters": [
+                        "RepoRootURL"
+                    ]
+                } 
+  
+            ]
+        }
+    },
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name",
+            "Default":"IT Services"
+        },
+       "PorfolioName": {
+            "Type":"String",
+            "Description":"Portfolio Name",
+            "Default":"Service Catalog EC2 Reference Architecture"
+        },
+        "PorfolioDescription": {
+            "Type":"String",
+            "Description":"Portfolio Description",
+            "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
+        },
+        "LaunchRoleName": {
+            "Type":"String",
+            "Description":"Name of the launch constraint role for EC2 products. leave this blank to create the role."            
+        },
+       "LinkedRole1": {
+            "Type":"String",
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
+        },       
+        "LinkedRole2": {
+            "Type":"String",
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
+        },       
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates.",
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        }
+      },
+      "Conditions":{
+        "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
+        "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
+    },
+    "Resources": {
+        "SCEC2portfolio": {
+          "Type" : "AWS::ServiceCatalog::Portfolio",
+          "Properties" : {
+            "ProviderName": {"Ref":"PortfolioProvider"},
+            "Description" : {"Ref":"PorfolioDescription"},
+            "DisplayName" : {"Ref":"PorfolioName"}
+          }
+        },
+        "addrole1":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole1",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "addrole2":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole2",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CreateLaunchConstraint",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-ec2vpc-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },        
+        "IAMenduser": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        }, 
+        "LinkEndusers":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::GetAtt":["IAMenduser","Outputs.EndUserGroupArn"]},
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "ec2linuxproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-linux.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
+        "ec2webserverproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-webserver.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
+        "ec2windowsproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
+        "vpcproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}vpc/sc-product-vpc.json"},
+            "TimeoutInMinutes" : 5
+          }
+        }
+    },
+    "Outputs": {
+        "LaunchConstraintRoleARN":{
+          "Condition":"CreateLaunchConstraint",
+          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] } 
+        },
+        "LaunchConstraintRoleName":{
+          "Condition":"CreateLaunchConstraint",
+          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] } 
+        },
+        "ec2windowsproductId":{"Value":     { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
+        "ec2webserverproductId":{"Value":     { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
+        "ec2linuxproductId":{"Value":         { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} },
+        "vpcproductId":{"Value":         { "Fn::GetAtt":["vpcproduct","Outputs.ProductId"]} }
+    }
+}

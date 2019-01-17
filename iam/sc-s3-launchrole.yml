@@ -1,0 +1,56 @@
+Description: "ServiceCatalog S3 Launch Role. (fdp-1p5s1035s)"
+Resources:
+  SCS3LaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: SCS3LaunchRole 
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess      
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: SCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SCLaunchPolicySID
+                Effect: Allow
+                Action:                  
+                  - "iam:ListRolePolicies"
+                  - "iam:ListPolicies"
+                  - "iam:DeleteRole"
+                  - "iam:GetRole"
+                  - "iam:PassRole"
+                  - "iam:ListRoles"
+                  - "iam:CreateRole"
+                  - "iam:DetachRolePolicy"
+                  - "iam:AttachRolePolicy"                                 
+                  - "cloudformation:DescribeStackResource"
+                  - "cloudformation:DescribeStackResources"
+                  - "cloudformation:GetTemplate"
+                  - "cloudformation:List*"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:GetTemplateSummary"
+                  - "cloudformation:SetStackPolicy"
+                  - "cloudformation:ValidateTemplate"
+                  - "cloudformation:UpdateStack"               
+                Resource: '*'
+Outputs:
+    LaunchRoleArn:
+        Value: !GetAtt SCS3LaunchRole.Arn
+    LaunchRoleName:
+        Value: !Ref SCS3LaunchRole
+        

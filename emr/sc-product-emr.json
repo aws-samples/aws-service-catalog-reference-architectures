@@ -1,0 +1,65 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Linux EMR ServiceCatalog product. (fdp-1p4dlgco4)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Owner and Distributor Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for EMR products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The ServiceCatalog portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+        
+      },
+    "Resources": {
+        "scemrproduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "Amazon Elastic MapReduce (EMR)",
+                "Description": "This product builds an Amazon Elastic MapReduce cluster with 1 master nodes and 2 core nodes.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "baseline version",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}emr/sc-emr-ra.json"}
+                        },
+                        "Name": "v1.0"
+                    }
+                ]
+            }
+        },
+        "Associateemr":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scemrproduct"}
+          }
+        },
+        "constraintecemr":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associateemr",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scemrproduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    }
+}    

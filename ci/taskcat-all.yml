@@ -1,0 +1,13 @@
+---
+global:
+  cleanup: true 
+  owner: owner@company.com
+  qsname: SCPortfoliosRepo
+  regions:
+    - us-east-1
+tests:
+  taskcat-master-allportfolios:
+    template_file: taskcat-verify-all.json
+    parameter_input: taskcat-params-verify-all.json
+
+  
