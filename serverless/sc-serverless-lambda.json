@@ -2,10 +2,10 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "ServiceCatalog Resource template for Serverless application (fdp-1p5rtpglk)",
   "Parameters": {
-    "ApplicationName":{
+    "FunctionName":{
       "Type":"String"
     },
-    "ApplicationStage":{
+    "FunctionStage":{
       "Type":"String",
       "Description":"test, dev, prod, ..."
     },
@@ -42,18 +42,19 @@
         "Type":"Number",
         "Default" : 1024
     },
+    "FunctionTimeout":{
+        "Type":"Number",
+        "Default" : 6
+    },
     "LambdaVersionSHA256":{
         "Type":"String"
     }
   },
   "Resources": {
-    "ServerlessDeploymentBucket": {
-      "Type": "AWS::S3::Bucket"
-    },
     "AppLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": {"Fn::Sub":"/aws/lambda/${ApplicationName}-${ApplicationStage}-app"}
+        "LogGroupName": {"Fn::Sub":"/aws/lambda/${FunctionName}-${FunctionStage}"}
       }
     },
     "IamRoleLambdaExecution": {
@@ -77,7 +78,7 @@
         },
         "Policies": [
           {
-            "PolicyName": { "Fn::Sub": "${ApplicationStage}-${ApplicationName}-lambda"},            
+            "PolicyName": { "Fn::Sub": "${FunctionStage}-${FunctionName}-lambda"},            
             "PolicyDocument": {
               "Version": "2012-10-17",
               "Statement": [
@@ -88,7 +89,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev-app:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}-${FunctionStage}:*"
                     }
                   ]
                 },
@@ -99,7 +100,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/serverless-flask-dev-app:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${FunctionName}-${FunctionStage}:*:*"
                     }
                   ]
                 }
@@ -108,7 +109,7 @@
           }
         ],
         "Path": "/",
-        "RoleName": { "Fn::Sub": "${ApplicationName}-${ApplicationStage}-${AWS::Region}-lambdaRole"}              
+        "RoleName": { "Fn::Sub": "${FunctionName}-${FunctionStage}-${AWS::Region}-lambdaRole"}              
       }
     },
     "AppLambdaFunction": {
@@ -122,7 +123,7 @@
             "Ref": "BucketKey"
           }
         },
-        "FunctionName": { "Fn::Sub": "${ApplicationName}-${ApplicationStage}-app"},
+        "FunctionName": { "Fn::Sub": "${FunctionName}-${FunctionStage}"},
         "Handler": {"Ref": "FunctionHandler"},
         "MemorySize": {"Ref": "FunctionMemorySize"},
         "Role": {
@@ -132,7 +133,7 @@
           ]
         },
         "Runtime": {"Ref": "FunctionRuntime"},
-        "Timeout": 6
+        "Timeout": {"Ref": "FunctionTimeout"}
       },
       "DependsOn": [
         "AppLogGroup",
@@ -152,7 +153,7 @@
     "ApiGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
-        "Name": { "Fn::Sub": "${ApplicationStage}-${ApplicationName}"},
+        "Name": { "Fn::Sub": "${FunctionStage}-${FunctionName}"},
         "EndpointConfiguration": {
           "Types": [
             "EDGE"
@@ -238,7 +239,7 @@
         "RestApiId": {
           "Ref": "ApiGatewayRestApi"
         },
-        "StageName": {"Ref":"ApplicationStage"}
+        "StageName": {"Ref":"FunctionStage"}
       },
       "DependsOn": [
         "ApiGatewayMethodAny",
@@ -261,11 +262,6 @@
     }
   },
   "Outputs": {
-    "ServerlessDeploymentBucketName": {
-      "Value": {
-        "Ref": "ServerlessDeploymentBucket"
-      }
-    },
     "AppLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
@@ -274,7 +270,7 @@
     },
     "ServiceEndpoint": {
       "Description": "URL of the service endpoint",
-      "Value": { "Fn::Sub":"https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${ApplicationStage}"}
+      "Value": { "Fn::Sub":"https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${FunctionStage}"}
     }
   }
 }

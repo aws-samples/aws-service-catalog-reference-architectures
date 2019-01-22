@@ -5,15 +5,15 @@
     "ProductId":{
       "Type":"String"
     },
-    "ProductArtifcatName":{
+    "ProvisioningArtifactName":{
       "Type":"String",
       "Description":"The product's version name",
       "Default":"v1.0"
     },
-    "ApplicationName":{
+    "FunctionName":{
       "Type":"String"
     },
-    "ApplicationStage":{
+    "FunctionStage":{
       "Type":"String",
       "Description":"test, dev, prod, ..."
     },
@@ -50,6 +50,10 @@
         "Type":"Number",
         "Default" : 1024
     },
+    "FunctionTimeout":{
+        "Type":"Number",
+        "Default" : 5
+    },
     "LambdaVersionSHA256":{
         "Type":"String"
     }
@@ -59,18 +63,19 @@
       "Type" : "AWS::ServiceCatalog::CloudFormationProvisionedProduct",
       "Properties" : {
         "ProvisioningParameters" : [ 
-          {"Key":"ApplicationName"    , "Value": {"Ref":"ApplicationName"}     },
-          {"Key":"ApplicationStage"   , "Value": {"Ref":"ApplicationStage"}    },
           {"Key":"BucketName"         , "Value": {"Ref":"BucketName"}          },
           {"Key":"BucketKey"          , "Value": {"Ref":"BucketKey"}           },
+          {"Key":"FunctionName"       , "Value": {"Ref":"FunctionName"}        },
+          {"Key":"FunctionStage"      , "Value": {"Ref":"FunctionStage"}       },
           {"Key":"FunctionHandler"    , "Value": {"Ref":"FunctionHandler"}     },
           {"Key":"FunctionRuntime"    , "Value": {"Ref":"FunctionRuntime"}     },
           {"Key":"FunctionMemorySize" , "Value": {"Ref":"FunctionMemorySize"}  },
+          {"Key":"FunctionTimeout"    , "Value": {"Ref":"FunctionTimeout"}     },
           {"Key":"LambdaVersionSHA256", "Value": {"Ref":"LambdaVersionSHA256"} }        
         ],
-        "ProvisioningArtifactName" : {"Ref":"ProductArtifcatName"},
+        "ProvisioningArtifactName" : {"Ref":"ProductArtifactName"},
         "ProductId" : {"Ref":"ProductId"},
-        "ProvisionedProductName" : {"Fn::Sub":"provisionServerless-${ApplicationName}"}
+        "ProvisionedProductName" : {"Fn::Sub":"provisionServerless-${FunctionName}"}
       }
     }
   },
