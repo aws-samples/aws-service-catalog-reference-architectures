@@ -9,7 +9,7 @@ childAcc=""
 allACC="$ACC $childAcc"
 allregions="us-east-1 us-east-2 us-west-1"
 export AWS_DEFAULT_REGION=us-east-1
-echo "Using Account:$ACC  Region:$AWS_DEFAULT_REGION"
+echo "Using Account:$ACC  Region:$AWS_DEFAULT_REGION Child Accounts:$childAcc All Regions:$allregions"
 
 echo "Clearing out the Automation pipeline S3 buckets"
 aws s3 rb s3://servicesatalog-pipelineartifacts-$ACC --force
@@ -46,4 +46,4 @@ echo "Deleting the StackSet IAM roles."
 aws cloudformation delete-stack --stack-name IAM-StackSetAdministrator 
 aws cloudformation delete-stack --stack-name IAM-StackSetExecution 
 
-echo "Complete.  See CloudFormation Stacks and StackSets Console in each region us-east1, us-east2, us-west-1 to confirm all resources have been removed."
+echo "Complete.  See CloudFormation Stacks and StackSets Console in each region ($allregions) to confirm all resources have been removed."

@@ -8,7 +8,6 @@ This guide will help you deploy and manage your AWS ServiceCatalog using Infrast
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
  a launch constraint and linked roles for provisioning.  
-*You must create the IAM end user group and policy stack from the IAM section before launching any portfolio templates.
  * [IAM Templates](iam)
  * [Virtual Private Cloud (VPC)](vpc)
  * [Elastic Compute Cloud (EC2)](ec2)
@@ -22,12 +21,9 @@ The portfolio templates in each section will create a ServiceCatalog Portfolio w
 * You have the required admin permissions to manage ServiceCatalog: [Authentication and Access Control for AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/controlling_access.html)  
 
 ### Installation  
+To get started now, just sign in to your AWS account and click the button to create a Service Catalog Portfolio with sample EC2 products in your AWS account:
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json)  
 
-**Do this First and once per account:**  
-You must create the end user IAM group and policy with permissions to access ServiceCatalog and provision products.  
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-Endusers&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-enduser-iam.yml)  
-[Enduser IAM template](iam/sc-enduser-iam.yml)
- 
 To get started quickly in a single account and region you can click the "Launch Stack" button in each section.
  Or, if you wish to modify files and execute from your own S3 bucket then follow the instructions below. If you wish to use
  an automated pipeline in a multi-account multi-region setup look at the [codepipeline](codepipeline) section.  
