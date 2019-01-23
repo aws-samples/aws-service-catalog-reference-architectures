@@ -24,10 +24,10 @@ Launch the VPC portfolio stack:
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/vpc/sc-portfolio-vpc.json```  
 4. If this is the first portfolio you are creating, then leave _LaunchRoleName_ blank to allow CloudFormation to create the launchconstraint role for you.  
     * If you have already the EC2 template, then you will put the _output.LaunchRoleName_ from the completed LaunchConstraintRole stack in the _LaunchRoleName_ field (default is SCEC2LaunchRole).  
-5. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name if applicable.
-6. Set the "RepoRootURL" parameter to your bucket's root url:  
-  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```  
-
+5. Set the _LinkedRole1_ and _LinkedRole2_ parameters to any additional end user roles you may want to link to the Portfolio.
+6. Set the _CreateEndUsers_ parameter to No if you have already run a Portfolio stack from this repo (ServiceCatalogEndusers already exists).
+7. Change the _RepoRootURL_ parameter to your bucket's root url:  
+  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/``` 
 
 ### Multi-Availability Zone Architecture with Amazon Linux Bastion Instance
 

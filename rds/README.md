@@ -19,10 +19,12 @@ Launch the RDS portfolio stack:
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
 3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
   ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/rds/sc-portfolio-rds.json```  
-4. Set the _LinkedRole1_ parameter to your _SCProvisioningRole_ name.
-5. Change the "RepoRootURL" parameter to your bucket's root url:  
-  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/```
-
+5. Set the _LinkedRole1_ and _LinkedRole2_ parameters to any additional end user roles you may want to link to the Portfolio.
+6. Set the _CreateEndUsers_ parameter to No if you have already run a Portfolio stack from this repo (ServiceCatalogEndusers already exists).
+7. Change the _RepoRootURL_ parameter to your bucket's root url:  
+  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/``` 
+  
+  
 ### Single Instance Architecture  
 ![sc-rds-ra-architecture-multi-az.png](sc-rds-ra-architecture-single-instance.png)
 

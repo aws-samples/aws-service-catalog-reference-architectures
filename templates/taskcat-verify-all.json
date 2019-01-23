@@ -55,6 +55,7 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
+                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -69,6 +70,7 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": {"Fn::GetAtt":["STACKec2portfolio","Outputs.LaunchConstraintRoleName"]},
+                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -83,6 +85,7 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
+                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -97,6 +100,7 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
+                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -111,6 +115,7 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
+                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
