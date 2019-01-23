@@ -4,12 +4,6 @@
         "KeyName": {
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "WebServerSecurityGroup": {
-            "Type": "AWS::EC2::SecurityGroup::Id"
-        },
-        "PublicSubnet": {
-            "Type": "AWS::EC2::Subnet::Id"
-        },
         "InstanceType": {
             "Type": "String",
             "Default":"t3.micro",
@@ -22,9 +16,19 @@
     },
     
     "Resources": {
-        "WebServerInstance": {
+      "WebSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Enable HTTP and HTTPS access",
+          "SecurityGroupIngress" : [ 
+              { "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
+              { "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+          ]
+        }
+      }, 
+      "WebServerInstance": {
         "Type": "AWS::EC2::Instance",
-      "Metadata": {
+        "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
             "All": [
@@ -84,21 +88,7 @@
         "Tags" : [
           {"Key" : "Name", "Value" : {"Fn::Sub":"EC2-NGINX-${AWS::StackName}"} }
         ],
-        "NetworkInterfaces": [
-          {
-            "GroupSet": [
-              {
-                "Ref": "WebServerSecurityGroup"
-              }
-            ],
-            "AssociatePublicIpAddress": "true",
-            "DeviceIndex": "0",
-            "DeleteOnTermination": "true",
-            "SubnetId": {
-              "Ref": "PublicSubnet"
-            }
-          }
-        ],
+        "SecurityGroups":[{ "Ref": "WebSecurityGroup"}],
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
