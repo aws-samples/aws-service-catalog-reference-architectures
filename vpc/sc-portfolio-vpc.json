@@ -21,7 +21,8 @@
                     "Parameters": [
                         "LaunchRoleName",
                         "LinkedRole1",
-                        "LinkedRole2"
+                        "LinkedRole2",
+                        "CreateEndUsers"
                     ]
                 } ,
                 {
@@ -68,10 +69,17 @@
             "Type":"String",
             "Description":"Root url for the repo containing the product templates.",
             "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        },
+        "CreateEndUsers":{
+            "Type":"String",
+            "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
+             "AllowedValues": ["Yes","No"],
+             "Default":"Yes" 
         }
       },
       "Conditions":{
         "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondCreateEndUsers" : {"Fn::Equals" : [{"Ref" : "CreateEndUsers"}, "Yes"]},
         "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
     },
@@ -101,11 +109,24 @@
             "PortfolioId" : {"Ref":"SCVPCportfolio"},
             "PrincipalType" : "IAM"
           }
-        },
+        },        
+        "stackServiceCatalogEndusers": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CondCreateEndUsers",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },        
         "LinkEndusers":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Properties" : {
-            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" },
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
+                ]},
             "PortfolioId" : {"Ref":"SCVPCportfolio"},
             "PrincipalType" : "IAM"
           }
@@ -117,8 +138,7 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-ec2vpc-launchrole.yml"},
             "TimeoutInMinutes" : 5
           }
-        },
-        
+        },        
         "vpcproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
