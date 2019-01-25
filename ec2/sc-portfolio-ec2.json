@@ -192,6 +192,14 @@
         }
     },
     "Outputs": {
+		"EndUserGroupArn":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
+        },
+		"EndUserGroupName":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupName"]}
+        },		
         "LaunchConstraintRoleARN":{
           "Condition":"CreateLaunchConstraint",
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] } 
