@@ -38,7 +38,7 @@
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}serverless/sc-serverless-lambda.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }

@@ -140,16 +140,7 @@
         "IamRoleLambdaExecution"
       ]
     },
-    "AppLambdaVersion": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "AppLambdaFunction"
-        },
-        "CodeSha256": {"Ref":"LambdaVersionSHA256"}
-      }
-    },
+
     "ApiGatewayRestApi": {
       "Type": "AWS::ApiGateway::RestApi",
       "Properties": {
@@ -262,15 +253,10 @@
     }
   },
   "Outputs": {
-    "AppLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "AppLambdaVersion"
-      }
-    },
     "ServiceEndpoint": {
       "Description": "URL of the service endpoint",
-      "Value": { "Fn::Sub":"https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${FunctionStage}"}
+      "Value": { "Fn::Sub":"https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${FunctionStage}"},
+      "Export" : { "Name" : {"Fn::Sub": "${FunctionName}-ServiceEndpoint" }}
     }
   }
 }
