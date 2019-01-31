@@ -5,7 +5,23 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
  across multiple accounts and regions in ServiceCatalog.  The pipeline includes sample template validation and cfn_nag stages.
  Updating a ServiceCatalog becomes as easy as ```git push```
 
-The guide below assumes a multi-account multi-region setup for which you must choose a hub account and central region.
+
+## Setup for Single Account
+1. Create the Automated pipeline  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
+  [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)
+
+2. Create the IAM roles  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-IAC-automated-IAMroles&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-demosetup-iam.json)  
+  [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-demosetup-iam.json)
+  
+3. Create the Portfolio  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-IAC-automated-portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2VPC.json)  
+  [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2VPC.json)
+
+ 
+## Multi-Account Setup
+For a multi-account multi-region setup you must choose a hub account and central region.
  The IAM roles will be launched once in the central region in each account while the Portfolio templates will be launched
  in each region within each account. CloudFormation StackSets will be used to distribute stacks across accounts and regions. You may deploy Stacks using StackSets to specific accounts
  or to an AWS Organization OU. For more information aabout CloudFormation StackSets review the [user guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/stacksets-prereqs.html).  
@@ -15,8 +31,7 @@ The hub account id is needed to create the trust relationship in each spoke acco
  Your Account ID from the AWS cli it is the Account variable from the following command:  
  ```aws sts get-caller-identity```
 
- 
-## Express Setup using bash script
+### Express Setup using bash script
 1. Launch the StackSet Execution roles in each spoke account with the hub account's ID (Optional, for multi-account only)  
    [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/?region=us-east-1#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
    https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml  
@@ -27,7 +42,7 @@ The hub account id is needed to create the trust relationship in each spoke acco
    * windows users will need the Windows Subsystem for Linux installed.  Or, you can run this from an AWS Linux EC2 instance.
 
 
-## Manual Setup using console
+### Manual Setup using console
 1. Create the Automated pipeline in your hub account  
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)
