@@ -47,8 +47,17 @@
         "Default" : 6
     },
     "LambdaVersionSHA256":{
-        "Type":"String"
+        "Type":"String",
+        "Default" :""
+    },
+    "LambdaVersionSHA256update":{
+        "Type":"String",
+        "Default" :""
     }
+  },
+  "Conditions":{
+    "addlambdaversion" : {"Fn::Not": [{"Fn::Equals" : [{"Ref" : "LambdaVersionSHA256"}, ""]}] },
+    "updatelambdaversion" : {"Fn::Not": [{"Fn::Equals" : [{"Ref" : "LambdaVersionSHA256update"}, ""]}] },
   },
   "Resources": {
     "AppLogGroup": {
@@ -237,6 +246,24 @@
         "ApiGatewayMethodProxyVarAny"
       ]
     },
+    "AppLambdaVersion": {
+      "Type": "AWS::Lambda::Version",
+      "Condition":"addlambdaversion",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": { "Ref": "AppLambdaFunction"},
+        "CodeSha256": {"Ref":"LambdaVersionSHA256"}
+      }
+    },
+    "AppLambdaVersionupdate": {
+      "Type": "AWS::Lambda::Version",
+      "Condition":"updatelambdaversion",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": { "Ref": "AppLambdaFunction"},
+        "CodeSha256": {"Ref":"LambdaVersionSHA256update"}
+      }
+    },
     "AppLambdaPermissionApiGateway": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
@@ -253,6 +280,16 @@
     }
   },
   "Outputs": {
+    "LambdaVersionHash":{
+      "Description": "SHA256 hash of the latest lambda version",
+      "Value": { "Ref":"LambdaVersionSHA256"},
+      "Condition":"addlambdaversion"    
+    },  
+    "UpdatedLambdaVersionHash":{
+      "Description": "The new SHA256 hash of the latest lambda version",
+      "Value": { "Ref":"LambdaVersionSHA256update"},
+      "Condition":"updatelambdaversion"    
+    },  
     "ServiceEndpoint": {
       "Description": "URL of the service endpoint",
       "Value": { "Fn::Sub":"https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/${FunctionStage}"},
