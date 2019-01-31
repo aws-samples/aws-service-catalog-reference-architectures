@@ -1,0 +1,66 @@
+Description: "ServiceNow Connector - Service Catalog & IAM Setup v2.5 (fdp-1p5s1036o)"
+Resources:
+  SCPortfolioStack:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      Parameters:
+        LaunchRoleName: ""
+        CreateEndUsers: "Yes"
+        LinkedRole1: ""
+        LinkedRole2: ""
+        RepoRootURL: "https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+      TemplateURL: "https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json"
+      TimeoutInMinutes: 5
+    
+  SCSyncUser:
+    Type: 'AWS::IAM::User' 
+    Properties:
+      UserName: SCSyncUser
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/ServiceCatalogAdminReadOnlyAccess
+      Policies:
+        - PolicyName: SNOWSSMActionPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: SNOWSSMActionPolicySID
+                Effect: Allow
+                Action:
+                  - "servicecatalog:DeleteProduct"
+                  - "servicecatalog:DeleteConstraint"
+                  - "servicecatalog:DeleteProvisionedProductPlan"
+                  - "servicecatalog:DeleteProvisioningArtifact"
+                  - "servicecatalog:DisassociateProductFromPortfolio"                  
+                Resource: '*'
+      
+  SCSyncUserAccessKeys:
+    DependsOn: SCSyncUser
+    Type: "AWS::IAM::AccessKey"
+    Properties: 
+      Status: Active
+      UserName: SCSyncUser
+      
+  SCEndUser:
+    Type: 'AWS::IAM::User' 
+    DependsOn: SCPortfolioStack
+    Properties:
+      UserName: SCEndUser
+      Groups:
+        - !GetAtt SCPortfolioStack.Outputs.EndUserGroupName
+                
+  SCEndUserAccessKeys:
+    DependsOn: SCEndUser
+    Type: "AWS::IAM::AccessKey"
+    Properties: 
+      Status: Active
+      UserName: SCEndUser
+
+Outputs:
+  SCSyncUserAccessKey:
+    Value: !Ref SCSyncUserAccessKeys 
+  SCSyncUserSAK:
+    Value: !GetAtt SCSyncUserAccessKeys.SecretAccessKey 
+  SCEndUserAccessKey:
+    Value: !Ref SCEndUserAccessKeys 
+  SCEndUserSAK:
+    Value: !GetAtt SCEndUserAccessKeys.SecretAccessKey 
