@@ -31,6 +31,11 @@ Create EMR roles:
 Create RDS roles:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IAM-RDSRoles&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-rds-launchrole.yml)  
 
+Create CodeCommit User:  
+https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html  
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=IAM-CodeCommitUser&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-codecommit-iamuser.yml)  
+
+Create SNOW demo:  
 Create the ServiceNow example template. See the instructions here: https://aws.amazon.com/blogs/mt/how-to-install-and-configure-the-aws-service-catalog-connector-for-servicenow/   
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-SNOW-DEMO&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/SC-SNOW-demosetup.yml)  
 
