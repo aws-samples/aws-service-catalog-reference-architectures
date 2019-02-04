@@ -98,10 +98,10 @@
         "DBMasterUsername": {
             "Description": "The database admin account username",
             "Type": "String",
-            "MinLength": "8",
+            "MinLength": "5",
             "MaxLength": "16",
-            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
-            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+            "AllowedPattern": "^[\\w]+$",
+            "ConstraintDescription": "Minimum 5 characters must begin with a letter and contain only alphanumeric and underscore characters."
         },
         "DBMasterUserPassword": {
             "Description": "The password for the master user. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".",
@@ -109,8 +109,8 @@
             "Type": "String",
             "MinLength": "12",
             "MaxLength": "41",
-            "AllowedPattern": "[a-zA-Z0-9]+",
-            "ConstraintDescription": "must contain only alphanumeric characters."
+            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?\\W)(?=.*?\\s)?.{8,}$",
+            "ConstraintDescription": "Minimum 12 characters, at least one uppercase letter, one lowercase letter, one number, and one character."
         },
         "DBBackupRetentionPeriod": {
             "Description": "The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
