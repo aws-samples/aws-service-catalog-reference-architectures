@@ -86,13 +86,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
   cd SCPortfoliosRepo
   ```
 
-2. Edit the supplied config files for CodePipeline and [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
-  a. replace the text “YOUR-ACCOUNT-HERE” with your Account ID in the TaskCat config files: ci/sc-portfolio-ec2-defaults.json,
-  ci/taskcat.yml. Replace 1234567890 with your actaul Account ID in the command below:  
-  ```grep -rl YOUR-ACCOUNT-HERE ./ci | xargs sed -i 's/YOUR-ACCOUNT-HERE/1234567890/g'```  
-  b. update the regions and accounts in "buildspec.yml"  
-  c. Update “ci/sc-portfolio-ec2-defaults.json” to reflect any linked roles you set in the “codepiepline/buildspec.yml”
-  to allow TaskCat to validate the setup.  If you fill in the provided TaskCat parameter files with values from your account,
+2. Optionally edit the supplied config files for CodePipeline and [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
+  If you fill in the provided TaskCat parameter files with values from your account,
   then you can have TaskCat validate the ServiceCatalog products in each account and region.
   
 3. Commit the changes to your CodeCommit Repo and push!  
