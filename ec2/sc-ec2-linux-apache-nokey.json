@@ -1,13 +1,10 @@
 {
     "Description": "AWS EC2 Apache webserver (fdp-1p4dlgcpe)",
-    "Parameters": {
+    "Parameters": {        
         "VPC": {
             "Type": "AWS::EC2::VPC::Id",
             "Description": "Select the VPC where the EC2 instances will be created",
             "ConstraintDescription": "must be an existing VPC"
-        },
-        "KeyName": {
-            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "InstanceType": {
             "Type": "String",
@@ -83,9 +80,6 @@
           },
           "ImageId": {
             "Ref":"LatestAmiId"
-          },
-          "KeyName": {
-            "Ref": "KeyName"
           },
           "Tags" : [
             {"Key" : "Name", "Value" : {"Fn::Sub":"EC2-Apache-${AWS::StackName}"} }
