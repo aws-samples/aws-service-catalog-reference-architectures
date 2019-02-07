@@ -1,4 +1,9 @@
-Description: "ServiceNow Connector - Service Catalog & IAM Setup v2.5 (fdp-1p5s1036o)"
+Description: "ITSM Connector - Service Catalog & IAM Setup v2.5 (fdp-1p5s1036o)"
+Parameters:
+  LinkedRole1: 
+    Type: String
+    Default: ""
+    Description: (Optional) Role to be linked to the portfolio for provisioning.
 Resources:
   SCPortfolioStack:
     Type: "AWS::CloudFormation::Stack"
@@ -6,10 +11,10 @@ Resources:
       Parameters:
         LaunchRoleName: ""
         CreateEndUsers: "Yes"
-        LinkedRole1: ""
+        LinkedRole1: !Ref LinkedRole1
         LinkedRole2: ""
         RepoRootURL: "https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
-      TemplateURL: "https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json"
+      TemplateURL: "https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json"
       TimeoutInMinutes: 5
     
   SCSyncUser:
@@ -19,7 +24,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/ServiceCatalogAdminReadOnlyAccess
       Policies:
-        - PolicyName: SNOWSSMActionPolicy
+        - PolicyName: SCSSMActionPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
