@@ -15,7 +15,12 @@ Resources:
         Statement: 
           - Effect: "Allow"
             Action: 
-              - "servicecatalog:ProvisionProduct"               
+              - "servicecatalog:ProvisionProduct"
+              - "servicecatalog:UpdateProvisionedProduct"
+              - "servicecatalog:TerminateProvisionedProduct"
+              - "servicecatalog:ListServiceActionsForProvisioningArtifact"
+              - "servicecatalog:ExecuteProvisionedProductPlan"
+              - "servicecatalog:ExecuteProvisionedProductServiceAction"
             Resource: "*"
       PolicyName:  ServiceCatalogEndusers-AdditionalPermissions
       Groups:
