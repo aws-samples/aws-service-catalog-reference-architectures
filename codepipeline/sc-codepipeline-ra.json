@@ -188,9 +188,14 @@
                                     "iam:CreateInstanceProfile",
                                     "iam:DeleteInstanceProfile",
                                     "iam:RemoveRoleFromInstanceProfile",
+                                    "iam:PutRolePolicy",
+                                    "iam:DeleteRolePolicy",
                                     "iam:DetachRolePolicy",
-                                    "iam:AttachRolePolicy",
-                                    "iam:PutRolePolicy"
+                                    "iam:AttachRolePolicy",                                    
+                                    "iam:PutGroupPolicy",
+                                    "iam:DeleteGroupPolicy",
+                                    "iam:DetachGroupPolicy",
+                                    "iam:AttachGroupPolicy"
                                 ],
                                 "Resource": "*"
                             }
