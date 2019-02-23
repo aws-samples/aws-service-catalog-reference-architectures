@@ -15,6 +15,10 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-IAC-automated-portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json)  
   https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json
 
+3. Change the buildspec.yaml:  
+  remove the last 2 commands lines which start with "aws cloudformation update-stack-set ..."  
+  add line ```- /bin/bash codepipeline/run-cloudformationupdate.sh```  
+
  
 ## Multi-Account Setup
 For a multi-account multi-region setup you must choose a hub account and central region.
