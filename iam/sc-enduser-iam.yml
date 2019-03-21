@@ -21,6 +21,7 @@ Resources:
               - "servicecatalog:ListServiceActionsForProvisioningArtifact"
               - "servicecatalog:ExecuteProvisionedProductPlan"
               - "servicecatalog:ExecuteProvisionedProductServiceAction"
+              - "cloudformation:ListStackResources"
             Resource: "*"
       PolicyName:  ServiceCatalogEndusers-AdditionalPermissions
       Groups:

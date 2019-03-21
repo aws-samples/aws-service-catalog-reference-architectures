@@ -8,14 +8,15 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
 
 ## Setup for Single Account
 1. Create the Automated pipeline  
-  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json
 
 2. Create the Portfolio  
-  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-IAC-automated-portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json)  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-IAC-automated-portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json)  
   https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json
 
-3. Change the buildspec.yaml:  
+3. Follow the usage directions [below](#using-the-automated-codepipeline) 
+  Additionaly, before your first push you must also change the buildspec.yaml:  
   remove the last 2 commands lines which start with "aws cloudformation update-stack-set ..."  
   add line ```- /bin/bash codepipeline/run-cloudformationupdate.sh```  
 
@@ -33,7 +34,7 @@ The hub account id is needed to create the trust relationship in each spoke acco
 
 ### Express Setup using bash script
 1. Launch the StackSet Execution roles in each spoke account with the hub account's ID (Optional, for multi-account only)  
-   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/?region=us-east-1#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
+   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
    https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml  
 2. Setup AWS cli config for your hub account. 
 3. Run the install.sh script
@@ -44,20 +45,20 @@ The hub account id is needed to create the trust relationship in each spoke acco
 
 ### Manual Setup using console
 1. Create the Automated pipeline in your hub account  
-  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)
 
 2. Create the StackSet Admin role in the hub account.  
   Run once in the hub account.  
-  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/?region=us-east-1#/stacks/new?stackName=IAM-StackSetAdministrator&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml)  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=IAM-StackSetAdministrator&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml)  
   https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml  
   
 3. Create the StackSet Execution roles in the hub account and any spoke account.    
   Run once in each spoke account and the hub if you wish to use ServiceCatalog from the hub.  
-  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/?region=us-east-1#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
+  [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
   https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml
 
-4. Launch the ServiceCatalog IAM StackSet into each spoke account from the hub account in [CloudFormation StackSet Console](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacksets/create).  
+4. Launch the ServiceCatalog IAM StackSet into each spoke account from the hub account in [CloudFormation StackSet Console](https://console.aws.amazon.com/cloudformation).  
   a. make sure you are logged in to the hub account.  
   b. Template Source - Amazon S3 URL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/iam/sc-demosetup-iam.json  
   c. StackSet Name: SC-IAC-automated-IAMroles  
@@ -75,13 +76,14 @@ The hub account id is needed to create the trust relationship in each spoke acco
 ## Using The Automated CodePipeline  
   
 1. Copy this Repo into your new CodeCommit Repo.  
-  You will need a codecommit ssh user:   
+  You will need a codecommit user. You can use an existing user or create a new one with the supplied template. Pick either HTTPS or SSH for connecting.
     -Sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](../iam/sc-codecommit-iamuser.yml)  
+	-[Setting up HTTPS](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html)
     -[Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
   The repo clone address is the **CloneUrlSsh** output variable from the SC-RA-IACPipeline CloudFormation Stack
   ```
   git clone git@github.com:aws-service-catalog-reference-architectures.git
-  git clone YOUR-REPO-NAME-HERE
+  git clone https://YOUR-USERNAME@YOUR-REPO-NAME
   cp -r aws-service-catalog-reference-architectures/* SCPortfoliosRepo/
   cd SCPortfoliosRepo
   ```
