@@ -9,6 +9,7 @@ ACC=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
 # add child accounts as space delimited list. 
 # You will need to ensure StackSet IAM roles are correctly setup in each child account
 childAcc=""
+childAccComma=${childAcc// /,}
 allACC="$ACC $childAcc"
 allregions="us-east-1 us-east-2 us-west-1"
 LinkedRole1=""
@@ -26,7 +27,7 @@ aws cloudformation wait stack-create-complete --stack-name IAM-StackSetAdministr
 aws cloudformation wait stack-create-complete --stack-name IAM-StackSetExecution
 
 echo "creating the automation pipeline stack"
-aws cloudformation create-stack --region us-east-1 --stack-name SC-RA-IACPipeline --parameters "[{\"ParameterKey\":\"ChildAccountAccess\",\"ParameterValue\":\"$childAcc\"}]" --template-url "$S3RootURL/codepipeline/sc-codepipeline-ra.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack --region us-east-1 --stack-name SC-RA-IACPipeline --parameters "[{\"ParameterKey\":\"ChildAccountAccess\",\"ParameterValue\":\"$childAccComma\"}]" --template-url "$S3RootURL/codepipeline/sc-codepipeline-ra.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 
 echo "creating the ServiceCatalog IAM roles StackSet"
 aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-IAMroles --template-url "$S3RootURL/iam/sc-demosetup-iam.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
