@@ -3,8 +3,8 @@
 [AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html) allows you to centrally manage commonly deployed AWS services, and helps you achieve consistent governance which meets your compliance requirements, while enabling users to quickly deploy only the approved AWS services they need. 
 
 This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).
- Read the [User Guide](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
- for the full documentation on ServiceCatalog and CloudFormation.  
+ Read the [documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
+ for mor information on ServiceCatalog and CloudFormation.  
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
  a launch constraint and linked roles for provisioning.  
@@ -22,7 +22,7 @@ The portfolio templates in each section will create a ServiceCatalog Portfolio w
 
 ### Installation  
 To get started now, just sign in to your AWS account and click the button to create a Service Catalog Portfolio with sample EC2 products in your AWS account:
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json)  
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2.json)  
 
 To get started quickly in a single account and region you can click the "Launch Stack" button in each section.
  Or, if you wish to modify files and execute from your own S3 bucket then follow the instructions below. If you wish to use
