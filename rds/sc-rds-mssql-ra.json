@@ -109,8 +109,8 @@
             "Type": "String",
             "MinLength": "12",
             "MaxLength": "41",
-            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?\\W)(?=.*?\\s)?.{8,}$",
-            "ConstraintDescription": "Minimum 12 characters, at least one uppercase letter, one lowercase letter, one number, and one character."
+            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?_|\\W)(?=.*?\\s)?.{8,}$",
+            "ConstraintDescription": "Minimum 12 characters, at least one of each of the following: uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=."
         },
         "DBBackupRetentionPeriod": {
             "Description": "The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
