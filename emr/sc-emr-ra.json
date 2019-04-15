@@ -74,6 +74,7 @@
             "Type": "String",
             "Default": "m5.large",
             "AllowedValues": [
+                "m5.large",
                 "m5.xlarge",
                 "m5.2xlarge",
                 "m5.4xlarge",
@@ -88,6 +89,7 @@
             "Type": "String",
             "Default": "m5.large",
             "AllowedValues": [
+                "m5.large",
                 "m5.xlarge",
                 "m5.2xlarge",
                 "m5.4xlarge",
