@@ -213,9 +213,9 @@
           "Condition":"CondCreateEndUsers",
           "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
         },
-		"EndUserRoleName":{
+		"EndUserGroupName":{
           "Condition":"CondCreateEndUsers",
-          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleName"]}
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupName"]}
         },		
         "LaunchConstraintRoleARN":{
           "Condition":"CreateLaunchConstraint",

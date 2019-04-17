@@ -50,6 +50,8 @@ Resources:
     DependsOn: SCPortfolioStack
     Properties:
       UserName: SCEndUser
+      Groups:
+        - !GetAtt SCPortfolioStack.Outputs.EndUserGroupName
       Policies:
         - PolicyName: StsAssumeSC        
           PolicyDocument:
