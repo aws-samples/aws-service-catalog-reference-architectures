@@ -50,9 +50,16 @@ Resources:
     DependsOn: SCPortfolioStack
     Properties:
       UserName: SCEndUser
-      Groups:
-        - !GetAtt SCPortfolioStack.Outputs.EndUserGroupName
-                
+      Policies:
+        - PolicyName: StsAssumeSC        
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - Effect: "Allow"
+                Action: 
+                  - "sts:AssumeRole"
+                Resource: !GetAtt SCPortfolioStack.Outputs.EndUserRoleArn
+
   SCEndUserAccessKeys:
     DependsOn: SCEndUser
     Type: "AWS::IAM::AccessKey"

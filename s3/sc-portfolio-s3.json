@@ -119,7 +119,20 @@
             "TimeoutInMinutes" : 5
           }
         },        
-        "LinkEndusers":{
+        "LinkEndusersRole":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
+                ]},
+            "PortfolioId" : {"Ref":"SCS3portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Properties" : {
             "PrincipalARN" : 
