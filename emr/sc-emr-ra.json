@@ -72,8 +72,8 @@
         "MasterInstanceType": {
             "Description": "Select the master node instance type.",
             "Type": "String",
-            "Default": "m5.large",
-            "AllowedValues": [
+            "Default": "m5.xlarge",
+            "AllowedValues": [                
                 "m5.xlarge",
                 "m5.2xlarge",
                 "m5.4xlarge",
@@ -86,7 +86,7 @@
         "CoreInstanceType": {
             "Description": "Select the core node instance type.",
             "Type": "String",
-            "Default": "m5.large",
+            "Default": "m5.xlarge",
             "AllowedValues": [
                 "m5.xlarge",
                 "m5.2xlarge",

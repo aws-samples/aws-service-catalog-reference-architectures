@@ -124,7 +124,20 @@
             "TimeoutInMinutes" : 5
           }
         },        
-        "LinkEndusers":{
+        "LinkEndusersRole":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
+                ]},
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },        
+        "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Properties" : {
             "PrincipalARN" : 
@@ -192,13 +205,17 @@
         }
     },
     "Outputs": {
+        "EndUserRoleArn":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]}
+        },
         "EndUserGroupArn":{
           "Condition":"CondCreateEndUsers",
           "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
         },
-        "EndUserGroupName":{
+        "EndUserRoleName":{
           "Condition":"CondCreateEndUsers",
-          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupName"]}
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleName"]}
         },
         "LaunchConstraintRoleARN":{
           "Condition":"CreateLaunchConstraint",
