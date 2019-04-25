@@ -116,8 +116,9 @@
         "ReleaseLabel": {
             "Description": "Select the EMR Cluster release configuration.",
             "Type": "String",
-            "Default": "emr-5.22.0",
+            "Default": "emr-5.23.0",
             "AllowedValues": [
+                "emr-5.23.0",
                 "emr-5.22.0",
                 "emr-5.21.0",
                 "emr-5.20.0",
@@ -185,6 +186,7 @@
                     "Ref": "ClusterName"
                 },
                 "Instances": {
+                    "Ec2KeyName" : {"Ref":"KeyPair"},
                     "MasterInstanceGroup": {
                         "InstanceCount": 1,
                         "InstanceType": {

@@ -39,7 +39,7 @@
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}emr/sc-emr-ra.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }
