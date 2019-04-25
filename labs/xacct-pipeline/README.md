@@ -85,7 +85,7 @@ we want to share with our application team.
 Specify the account ID from above as the **SubAccountID** parameter and
 the S3 bucket above as **ProductArtifactLocation**.
 
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SCXacctPipelineMaster&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/xacct-pipeline/sc-master.yml)
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SCXacctPipelineMaster&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/xacct-pipeline/sc-master.yml)
 
 Once the CloudFormation template has completed successfully, navigate to
 the Stack Outputs tab and note the
@@ -142,7 +142,7 @@ the appropriate product to our local catalog. Use the values shown in
 the Outputs tab of the CloudFormation stack deployed within our Shared
 Services account.
 
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SCXacctPipelineApp&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/xacct-pipeline/sc-sub.yml)
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SCXacctPipelineApp&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/xacct-pipeline/sc-sub.yml)
 
 When this is finished, we will have successfully created our code
 pipeline within our target account. This pipeline can be invoked by
