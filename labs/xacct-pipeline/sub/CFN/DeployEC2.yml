@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: "2010-09-09"  
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+Resources:  
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.nano
+      ImageId: !Ref LatestAmiId
+      SecurityGroupIds: [ !ImportValue SCDemoSG ]
+      SubnetId: !Select [ 0, !Split [ ",", !ImportValue SCDemoPublicSubnet ] ]
+

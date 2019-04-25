@@ -1,0 +1,185 @@
+########################################################################################
+# Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.              #
+#                                                                                      #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this #
+# software and associated documentation files (the "Software"), to deal in the Software#
+# without restriction, including without limitation the rights to use, copy, modify,   #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to   #
+# permit persons to whom the Software is furnished to do so.                           #  
+#                                                                                      #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,  #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A        #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT   #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION    #
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE       # 
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                               #
+########################################################################################
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Service Catalog cross-account development pipeline master template'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Portfolio Sharing"
+        Parameters:
+          - SubAccountID
+      -
+        Label:
+          default: "Master Service Catalog Portfolio Details"
+        Parameters:
+          - PortfolioDisplayName
+          - PortfolioProviderName
+          - PortfolioDescription
+      -
+        Label:
+          default: "Master Service Catalog Product Details"
+        Parameters:
+          - SCProductName
+          - SCProductDescription
+          - SCProductOwner
+          - SCSupportEmail
+          - SCSupportUrl
+      -
+        Label:
+          default: "Master Service Catalog Product CloudFormation Template Details"
+        Parameters:
+          - ProductArtifactName
+          - ProductArtifactLocation
+          - ProvisioningArtifactNameParameter
+          - ProvisioningArtifactDescriptionParameter
+
+Parameters:
+
+# AccountId
+  SubAccountID:
+    Description:    Please specify the Account with which the portfolio will be shared.
+    Type:           String
+    Default:        "XXXXXXXXXXXX"
+
+# Portfolio
+  PortfolioDisplayName:
+    Description:    Please specify the Portfolio Description.
+    Type:           String
+    Default:        "SCMasterPortfolio"
+
+# Portfolio Provider
+  PortfolioProviderName:
+    Description:    Please specify the Portfolio Provider Name.
+    Type:           String
+    Default:        "Cloud CoE"
+
+# Portfolio Description
+  PortfolioDescription:
+    Description:    Please specify the Portfolio Description.
+    Type:           String
+    Default:        "Cloud CoE compliant network definition"
+
+# ServiceCatalog Product Name
+  SCProductName:
+    Description:    Please specify ServiceCatalog Product Name.
+    Type:           String
+    Default:        "VPCProduct"
+
+# ServiceCatalog Product Name Description
+  SCProductDescription:
+    Description:    Please specify ServiceCatalog Product Name Description.
+    Type:           String
+    Default:        "Cloud CoE VPC template"
+
+# ServiceCatalog Product Name Owner
+  SCProductOwner:
+    Description:    Please specify ServiceCatalog Product Owner.
+    Type:           String
+    Default:        "Cloud CoE"
+
+# ServiceCatalog Product Support Email
+  SCSupportEmail:
+    Description:    Please specify ServiceCatalog Product Support Email.
+    Type:           String
+    Default:        "cloudteam@example.com"
+
+# ServiceCatalog Product Support URL
+  SCSupportUrl:
+    Description:    Please specify ServiceCatalog Product Support URL.
+    Type:           String
+    Default:        "http://www.cloudteam.example.com"
+
+# ServiceCatalog Product Artifact Name
+  ProductArtifactName:
+    Description:    Please specify ServiceCatalog Product Artifact Name.
+    Type:           String
+    Default:        "VPC.yml"
+
+# ServiceCatalog Product Artifact Location
+  ProductArtifactLocation:
+    Description:    Please specify ServiceCatalog Product Artifact Location.
+    Type:           String
+    Default:        "https://s3.amazonaws.com/XXXXXXXXX"
+
+# ServiceCatalog Product Artifact Name
+  ProvisioningArtifactNameParameter:
+    Description:    Please specify ServiceCatalog Product Artifact Name.
+    Type:           String
+    Default:        "VPCv1"
+
+# ServiceCatalog Product Artifact Description
+  ProvisioningArtifactDescriptionParameter:
+    Description:    Please specify ServiceCatalog Product Artifact Description.
+    Type:           String
+    Default:        "VPC definition version 1"
+
+Resources:
+
+  ServiceCatalogPortfolio:
+    Type: "AWS::ServiceCatalog::Portfolio"
+    Properties:
+      ProviderName: !Ref 'PortfolioProviderName'
+      Description: !Ref 'PortfolioDescription'
+      DisplayName: !Ref 'PortfolioDisplayName'
+      Tags:
+        - Key:    Name
+          Value:  !Sub '${PortfolioDisplayName}'
+
+  ServiceCatalogCloudFormationProduct:
+    Type: "AWS::ServiceCatalog::CloudFormationProduct"
+    Properties:
+      Name: !Ref 'SCProductName'
+      Description: !Ref 'SCProductDescription'
+      Owner: !Ref 'SCProductOwner'
+      SupportEmail:  !Ref 'SCSupportEmail'
+      SupportUrl: !Sub '${SCSupportUrl}'
+      ProvisioningArtifactParameters:
+        -
+          Name: !Sub '${ProvisioningArtifactNameParameter}'
+          Description: !Sub '${ProvisioningArtifactDescriptionParameter}'
+          Info:
+            LoadTemplateFromURL: !Sub "${ProductArtifactLocation}/${ProductArtifactName}"
+
+  ServiceCatalogPortfolioProductAssociation:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    DependsOn: ServiceCatalogCloudFormationProduct
+    Properties:
+      PortfolioId: !Ref 'ServiceCatalogPortfolio'
+      ProductId: !Ref 'ServiceCatalogCloudFormationProduct'
+
+  ServiceCatalogPortfolioShare:
+    Type: "AWS::ServiceCatalog::PortfolioShare"
+    Properties:
+      AccountId: !Ref 'SubAccountID'
+      PortfolioId: !Ref 'ServiceCatalogPortfolio'
+
+Outputs:
+
+  ServiceCatalogPortfolio:
+    Value:    !Ref 'ServiceCatalogPortfolio'
+    Description: Service Catalog portfolio ID
+
+  ServiceCatalogCloudFormationProduct:
+    Value:    !Ref 'ServiceCatalogCloudFormationProduct'
+    Description: Service Catalog VPC product ID
+
+  ServiceCatalogProductArtifact:
+    Value:    !GetAtt 'ServiceCatalogCloudFormationProduct.ProvisioningArtifactIds'
+    Description: Service Catalog VPC product version ID

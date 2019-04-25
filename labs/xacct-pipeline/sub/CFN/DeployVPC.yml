@@ -1,0 +1,20 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+ EnvironmentName:
+  Description: Environment Name
+  Type: String
+  Default: "SCBlogEnv"
+
+Resources:
+ VPC:
+  Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+  Properties:
+   # from aws servicecatalog search-products-as-admin
+   ProductId: !ImportValue ProductID
+   # from aws servicecatalog describe-product-as-admin --id
+   ProvisioningArtifactId: !ImportValue ArtifactID
+   ProvisioningParameters:
+    - Key: "EnvironmentName"
+      Value: !Ref EnvironmentName
+      
