@@ -1,0 +1,311 @@
+########################################################################################
+# Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.              #
+#                                                                                      #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this #
+# software and associated documentation files (the "Software"), to deal in the Software#
+# without restriction, including without limitation the rights to use, copy, modify,   #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to   #
+# permit persons to whom the Software is furnished to do so.                           #  
+#                                                                                      #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,  #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A        #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT   #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION    #
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE       # 
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                               #
+########################################################################################
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS Service Catalog cross-account development pipeline application account template'
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Service Catalog Details"
+        Parameters:
+          - PortfolioID
+          - ProductID
+          - ArtifactID
+      -
+        Label:
+          default: "CodePipeline Details"
+        Parameters:
+          - PipelineName
+          - SourceS3Key
+      -
+        Label:
+          default: "VPC/EC2 Details"
+        Parameters:
+          - VPCStackName
+          - VPCStackCFN
+          - EC2StackName
+          - EC2StackCFN
+
+Parameters:
+
+  PortfolioID:
+    Description:    Please specify the master account Portfolio ID.
+    Type:           String
+    Default:        "port-xxxxxxxxxxxx"
+
+  ProductID:
+    Description:    Please specify the master account Product ID.
+    Type:           String
+    Default:        "prod-xxxxxxxxxxxx"
+
+  ArtifactID:
+    Description:    Please specify the master account Artifact ID.
+    Type:           String
+    Default:        "pa-xxxxxxxxxxxx"
+
+  PipelineName:
+    Description:    Please specify a the Pipeline Name.
+    Type:           String
+    Default:        "scDemoPipeline"
+
+  SourceS3Key:
+    Description:    Please specify the source artifact.  This is the .zip file containing our VPC and EC2 templates.
+    Type:           String
+    Default:        "scblog.zip"
+
+  VPCStackName:
+    Description:    Please specify the VPC stack name.
+    Type:           String
+    Default:        "SCBlogVPCStack"
+
+  VPCStackCFN:
+    Description:    Please specify the VPC CloudFormation artifact location.
+    Type:           String
+    Default:        "CFN/DeployVPC.yml"
+
+  EC2StackName:
+    Description:    Please specify the EC2 VPC stack name.
+    Type:           String
+    Default:        "SCBlogEC2Stack"
+
+  EC2StackCFN:
+    Description:    Please specify the EC2 CloudFormation artifact location.
+    Type:           String
+    Default:        "CFN/DeployEC2.yml"
+
+Resources:
+  AcceptedPortfolioShare:
+    Type: "AWS::ServiceCatalog::AcceptedPortfolioShare"
+    Properties:
+      AcceptLanguage: "en"
+      PortfolioId: !Ref 'PortfolioID'
+
+  VPCPortfolio:
+    Type: "AWS::ServiceCatalog::Portfolio"
+    DependsOn: AcceptedPortfolioShare
+    Properties:
+      AcceptLanguage: "en"
+      Description: "This portfolio will host the shared VPC product"
+      DisplayName: "Local-VPC-Portfolio"
+      ProviderName: "CloudCoE"
+
+  CFNPortfolioPrincipalAssociation:
+    Type: "AWS::ServiceCatalog::PortfolioPrincipalAssociation"
+    Properties:
+      AcceptLanguage: "en"
+      PortfolioId: !Ref VPCPortfolio
+      PrincipalARN: !GetAtt CFNLaunchRole.Arn
+      PrincipalType: "IAM"
+
+  PortfolioProductAssociation:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      AcceptLanguage: "en"
+      PortfolioId: !Ref VPCPortfolio
+      ProductId: !Ref 'ProductID'
+      SourcePortfolioId: !Ref 'PortfolioID'
+
+  SCVPCLaunchConstraint:
+    Type: "AWS::ServiceCatalog::LaunchRoleConstraint"
+    DependsOn:
+      - VPCPortfolio
+    Properties:
+      AcceptLanguage: "en"
+      Description: "This launch constraint ensures that VPC will be launched in local account"
+      PortfolioId: !Ref VPCPortfolio
+      ProductId: !Ref 'ProductID'
+      RoleArn: !GetAtt SCProductLaunchRole.Arn
+
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    DependsOn:
+      - VPCPortfolio
+      - CFNLaunchRole
+      - ArtifactStoreBucket
+
+    Properties:
+      ArtifactStore:
+        Location: !Ref ArtifactStoreBucket
+        Type: S3
+      DisableInboundStageTransitions: []
+      Name: !Ref 'PipelineName'
+      RoleArn: !GetAtt [PipelineRole, Arn]
+      Stages:
+        - Name: S3Source
+          Actions:
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                S3Bucket: !Ref ArtifactStoreBucket
+                S3ObjectKey: !Ref 'SourceS3Key'
+              OutputArtifacts:
+                - Name: SourceArtifact
+              RunOrder: '1'
+        - Name: DeployVPC
+          Actions:
+            - Name: CreateVPC
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CFNLaunchRole.Arn
+                StackName: !Ref VPCStackName
+                TemplatePath: !Sub "SourceArtifact::${VPCStackCFN}"
+              RunOrder: '1'
+        - Name: DeployEC2
+          Actions:
+            - Name: CreateEC2
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: SourceArtifact
+              Configuration:
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CFNLaunchRole.Arn
+                StackName: !Ref EC2StackName
+                TemplatePath: !Sub "SourceArtifact::${EC2StackCFN}"
+              RunOrder: '1'
+              
+  SCProductLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: SCVPCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: VPCLaunchPolicyConstraint
+                Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:DeleteStack'
+                  - 'cloudformation:DescribeStackEvents'
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:GetTemplateSummary'
+                  - 'cloudformation:SetStackPolicy'
+                  - 'cloudformation:ValidateTemplate'
+                  - 'cloudformation:UpdateStack'
+                  - 'ec2:*'
+                  - 's3:GetObject'
+                  - 'servicecatalog:*'
+                  - 'sns:*'
+                Resource: '*'
+
+  CFNLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - cloudformation.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: CFNLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: VPCLaunchPolicyConstraint
+                Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodePipelineAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
+                - 'ec2:*'
+                - 'cloudformation:CreateStack'
+                - 'cloudformation:DescribeStacks'
+                - 'cloudformation:DeleteStack'
+                - 'cloudformation:UpdateStack'
+                - 'cloudformation:CreateChangeSet'
+                - 'cloudformation:ExecuteChangeSet'
+                - 'cloudformation:DeleteChangeSet'
+                - 'cloudformation:DescribeChangeSet'
+                - 'cloudformation:SetStackPolicy'
+                - 'iam:PassRole'
+                - 'sns:Publish'
+                Effect: Allow
+                Resource: '*'
+
+Outputs:
+  ProductID:
+    Description: A reference to the created Product ID
+    Value: !Ref ProductID
+    Export:
+      Name: ProductID
+
+  PortfolioID:
+    Description: A reference to the created Portfolio ID
+    Value: !Ref PortfolioID
+    Export:
+      Name: PortfolioID
+
+  ArtifactID:
+    Description: A reference to the created Artifact ID
+    Value: !Ref ArtifactID
+    Export:
+      Name: ArtifactID
