@@ -1,0 +1,274 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Best Practice EMR Cluster for Spark or S3 backed Hbase",
+  "Mappings" : {
+    "InstanceMap": {
+      "Small" : {
+        "InstanceType": "m1.medium"
+      },
+      "Medium" : {
+        "InstanceType": "c4.large"
+      },
+      "Large" : {
+        "InstanceType": "c4.8xlarge"
+      }
+    }
+    },
+  "Parameters": {
+    "EMRClusterName": {
+      "Description": "Name of the cluster",
+      "Type": "String",
+      "Default": "myemrcluster"
+    },
+    "KeyName": {
+      "Description": "Enter the key name of the EC2 Key pair you will use to access the EC2 instances in the cluster",
+      "Type": "AWS::EC2::KeyPair::KeyName"
+    },
+    "InstanceSize": {
+      "Description": "Instance type to be used for the master instance.",
+      "Type": "String",
+      "AllowedValues": ["Small","Medium","Large"]
+    },
+    "NumberOfCoreInstances": {
+      "Description": "Must be a valid number",
+      "Type": "Number",
+      "Default": 2
+    },
+    "SubnetID": {
+      "Description": "Must be Valid public subnet ID",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "ReleaseLabel": {
+      "Description": "Must be a valid EMR release  version",
+      "Default":"emr-5.7.0",
+      "AllowedValues": ["emr-5.7.0","emr-5.23.0"],
+      "Type": "String"
+    },
+    "Applications": {
+      "Description": "Please select which application will be installed on the cluster this would be either Ganglia and spark, or Ganglia and s3 acked Hbase",
+      "Type": "String",
+      "AllowedValues": [
+        "Spark",
+        "Hbase"
+      ]
+    }
+  },
+  "Conditions": {
+    "Spark": {
+      "Fn::Equals": [
+        {
+          "Ref": "Applications"
+        },
+        "Spark"
+      ]
+    },
+    "Hbase": {
+      "Fn::Equals": [
+        {
+          "Ref": "Applications"
+        },
+        "Hbase"
+      ]
+    }
+  },
+  "Resources": {
+    "EMRS3Bucket":{
+      "Type": "AWS::S3::Bucket"
+    },
+    "EMRCluster": {
+      "DependsOn": [
+        "EMRClusterServiceRole",
+        "EMRClusterinstanceProfileRole",
+        "EMRClusterinstanceProfile",
+        "EMRS3Bucket"
+      ],
+      "Type": "AWS::EMR::Cluster",
+      "Properties": {
+        "Applications": [
+          {
+            "Name": "Ganglia"
+          },
+          {
+            "Fn::If": [
+              "Spark",
+              {
+                "Name": "Spark"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          },
+          {
+            "Fn::If": [
+              "Hbase",
+              {
+                "Name": "Hbase"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          }
+        ],
+        "Configurations": [
+          {
+            "Classification": "hbase-site",
+            "ConfigurationProperties": {
+              "hbase.rootdir":{
+                "Fn::Join": [
+                    "", [
+                      "s3://",
+                      {
+                        "Ref": "EMRS3Bucket"
+                      },
+                      "/data",
+                    ]
+                  ]
+              }
+            }
+          },
+          {
+            "Classification": "hbase",
+            "ConfigurationProperties": {
+              "hbase.emr.storageMode": "s3"
+            }
+          }
+        ],
+        "Instances": {
+          "Ec2KeyName": {
+            "Ref": "KeyName"
+          },
+          "Ec2SubnetId": {
+            "Ref": "SubnetID"
+          },
+          "MasterInstanceGroup": {
+            "InstanceCount": 1,
+            "InstanceType": { "Fn::FindInMap" : [ "InstanceMap", { "Ref" : "InstanceSize" }, "InstanceType" ]},
+            "Market": "ON_DEMAND",
+            "Name": "Master"
+          },
+          "CoreInstanceGroup": {
+            "InstanceCount": {
+              "Ref": "NumberOfCoreInstances"
+            },
+            "InstanceType": { "Fn::FindInMap" : [ "InstanceMap", { "Ref" : "InstanceSize" }, "InstanceType" ]},
+            "Market": "ON_DEMAND",
+            "Name": "Core"
+          },
+          "TerminationProtected": false
+        },
+        "VisibleToAllUsers": true,
+        "JobFlowRole": {
+          "Ref": "EMRClusterinstanceProfile"
+        },
+        "ReleaseLabel": {
+          "Ref": "ReleaseLabel"
+        },
+        "LogUri": {
+          "Fn::Join": [
+              "", [
+                "s3://",
+                {
+                  "Ref": "EMRS3Bucket"
+                },
+                "/log",
+              ]
+            ]
+        },
+        "Name": {
+          "Ref": "EMRClusterName"
+        },
+        "AutoScalingRole": "EMR_AutoScaling_DefaultRole",
+        "ServiceRole": {
+          "Ref": "EMRClusterServiceRole"
+        }
+      }
+    },
+    "EMRClusterServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "elasticmapreduce.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceRole"
+        ],
+        "Path": "/"
+      }
+    },
+    "EMRClusterinstanceProfileRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonElasticMapReduceforEC2Role"
+        ],
+        "Path": "/"
+      }
+    },
+    "EMRClusterinstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "EMRClusterinstanceProfileRole"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "MasterNodeIP": {
+            "Description": "IP address of EMR cluster MasterNode",
+            "Value": {
+                "Fn::GetAtt": [
+                    "EMRCluster",
+                    "MasterPublicDNS"
+                ]
+            }
+        },
+    "EMRClusterID": {
+            "Description": "Cluster ID of the EMR cluster",
+            "Value": {
+                "Ref": "EMRCluster"
+            }
+        },
+
+    "EMRS3Bucket": {
+            "Description": "Bucket name of the S3 bucket created for cluster artifacts",
+            "Value": {
+                "Ref": "EMRS3Bucket"
+            }
+    }
+  }
+}
