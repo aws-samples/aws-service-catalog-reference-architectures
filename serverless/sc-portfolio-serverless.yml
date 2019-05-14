@@ -16,6 +16,7 @@ Metadata:
       - LaunchRoleName
       - LinkedRole1
       - LinkedRole2
+      - ServiceCatalogEndUsers
       - CreateEndUsersGroup
     - Label:
         default: Product Settings
@@ -53,6 +54,7 @@ Parameters:
   RepoRootURL:
     Type: String
     Description: Root url for the repo containing the product templates.
+    Default: 'https://s3.amazonaws.com/aws-service-catalog-reference-architectures/'
   CreateEndUsersGroup:
     Type: String
     Description: Select Yes to Create the ServiceCatalogEndUsers IAM group. No if
@@ -92,6 +94,10 @@ Conditions:
       - Ref: LinkedRole2
       - ''
 Resources:
+  serverlessFrameworkDeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties : 
+        BucketName: !Sub "serverless-src-${AWS::AccountId}"
   SCServerlessPortfolio:
     Type: AWS::ServiceCatalog::Portfolio
     Properties:
@@ -148,7 +154,7 @@ Resources:
       PrincipalType: IAM
   AddUsersToGroup:
     Type: AWS::IAM::UserToGroupAddition
-    Condition: CondCreateEndUsersGroup
+    Condition: CondHasEndUsers
     Properties: 
       GroupName: 
         !GetAtt
@@ -214,3 +220,6 @@ Outputs:
     Description: The name of the portfolio admin
     Value:
       Ref: PortfolioProvider
+  ServerlessDeploymentBucket:
+    Description: The bucket housing the lambda code for deployment
+    Value: !Ref serverlessFrameworkDeploymentBucket

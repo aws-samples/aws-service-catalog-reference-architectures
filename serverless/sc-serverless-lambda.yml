@@ -191,24 +191,6 @@ Resources:
     DependsOn:
     - ApiGatewayMethodAny
     - ApiGatewayMethodProxyVarAny
-  AppLambdaVersion:
-    Type: AWS::Lambda::Version
-    Condition: addlambdaversion
-    DeletionPolicy: Retain
-    Properties:
-      FunctionName:
-        Ref: AppLambdaFunction
-      CodeSha256:
-        Ref: LambdaVersionSHA256
-  AppLambdaVersionupdate:
-    Type: AWS::Lambda::Version
-    Condition: updatelambdaversion
-    DeletionPolicy: Retain
-    Properties:
-      FunctionName:
-        Ref: AppLambdaFunction
-      CodeSha256:
-        Ref: LambdaVersionSHA256update
   AppLambdaPermissionApiGateway:
     Type: AWS::Lambda::Permission
     Properties:
@@ -222,16 +204,6 @@ Resources:
       SourceArn:
         Fn::Sub: arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*
 Outputs:
-  LambdaVersionHash:
-    Description: SHA256 hash of the latest lambda version
-    Value:
-      Ref: LambdaVersionSHA256
-    Condition: addlambdaversion
-  UpdatedLambdaVersionHash:
-    Description: The new SHA256 hash of the latest lambda version
-    Value:
-      Ref: LambdaVersionSHA256update
-    Condition: updatelambdaversion
   ServiceEndpoint:
     Description: URL of the service endpoint
     Value:

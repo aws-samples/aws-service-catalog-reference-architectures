@@ -33,7 +33,7 @@ Resources:
         Info:
           LoadTemplateFromURL:
             Fn::Sub: "${RepoRootURL}serverless/sc-serverless-lambda.yml"
-        Name: v1.1
+        Name: v1.2
   Associatelambda:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties:
