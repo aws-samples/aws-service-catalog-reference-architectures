@@ -5,11 +5,11 @@
         "pipelineartifactsBucketName": {
             "Type":"String",
             "Description":"Bucket name for the codepipeline artifacts container",
-            "Default":"servicesatalog-pipelineartifacts"
+            "Default":"servicecatalog-pipelineartifacts"
         },"DeployedTemplatesBucketName": {
             "Type":"String",
             "Description":"Bucket name for the Deployed Templates container",
-            "Default":"servicesatalog-deployedtemplates"
+            "Default":"servicecatalog-deployedtemplates"
         },"CodeCommitRepoName": {
             "Type":"String",
             "Description":"The project name, also the CodeCommit Repository name",
