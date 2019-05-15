@@ -24,8 +24,8 @@
         "WebserverProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Amazon Elastic Compute Cloud (EC2) Linux Webserver",
-                "Description": "This product builds one Amazon Linux EC2 webserver (Apache or NGINX) instance.",
+                "Name": "Demo Linux Webserver",
+                "Description": "This product builds a webserver (Apache or NGINX) EC2 instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -100,6 +100,13 @@
           "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
           "Properties" : {
             "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagChargeBackDBs"]},
+            "ResourceId" : {"Ref":"WebserverProduct"}
+          }
+        },     
+        "tagassocccbacc": {
+          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+          "Properties" : {
+            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagChargeBackAcc"]},
             "ResourceId" : {"Ref":"WebserverProduct"}
           }
         }

@@ -471,16 +471,6 @@
                    ]]},
           "Description": "S3 bucket url for deployed templates."
         },
-        "TaskCatTemplatesBucket": {
-          "Value": { "Ref": "TaskCatTempBucket"},
-          "Description": "S3 bucket name for temporary taskcat artifacts."
-        },
-        "TaskCatTemplatesBucketURL": {
-          "Value": { "Fn::Join": [ "", [
-                        "https://",{ "Fn::GetAtt": ["TaskCatTempBucket","DomainName"] },"/",{"Ref":"CodeCommitRepoName"}
-                   ]]},
-          "Description": "S3 bucket url for temporary taskcat artifacts."
-        },
         "CloneUrlSsh": {
           "Value": { "Fn::GetAtt": ["SCPortfoliosRepo","CloneUrlSsh"] },
           "Description": "URL for ssh cloning the Product Repo"

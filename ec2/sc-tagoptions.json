@@ -64,6 +64,11 @@
       "Value": {
         "Ref":"ChargeBackDBs"
       }
+    },
+    "TagChargeBackAcc": {
+      "Value": {
+        "Ref":"ChargeBackAccounting"
+      }
     }
             
     }
