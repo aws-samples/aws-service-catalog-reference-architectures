@@ -1,0 +1,98 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ServiceCatalog Resource provisioning template for Serverless application
+  (fdp-1p5rtpgld)
+Parameters:
+  ProductId:
+    Type: String
+  ProvisioningArtifactName:
+    Type: String
+    Description: The product's version name
+    Default: v1.0
+  FunctionName:
+    Type: String
+  FunctionStage:
+    Type: String
+    Description: test, dev, prod, ...
+  BucketName:
+    Type: String
+  BucketKey:
+    Type: String
+    Description: The full key of the lambda package path in S3 without the bucket
+      name.
+  FunctionHandler:
+    Type: String
+    Default: wsgi.handler
+  FunctionRuntime:
+    Type: String
+    Default: python2.7
+    AllowedValues:
+    - nodejs
+    - nodejs4.3
+    - nodejs6.10
+    - nodejs8.10
+    - nodejs4.3-edge
+    - java8
+    - python2.7
+    - python3.6
+    - dotnetcore1.0
+    - dotnetcore2.0
+    - dotnetcore2.1
+    - go1.x
+  FunctionMemorySize:
+    Type: Number
+    Default: 1024
+  FunctionTimeout:
+    Type: Number
+    Default: 5
+  LambdaVersionSHA256:
+    Type: String
+Resources:
+  SCprovisionServerless:
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    Properties:
+      ProvisioningParameters:
+      - Key: BucketName
+        Value:
+          Ref: BucketName
+      - Key: BucketKey
+        Value:
+          Ref: BucketKey
+      - Key: FunctionName
+        Value:
+          Ref: FunctionName
+      - Key: FunctionStage
+        Value:
+          Ref: FunctionStage
+      - Key: FunctionHandler
+        Value:
+          Ref: FunctionHandler
+      - Key: FunctionRuntime
+        Value:
+          Ref: FunctionRuntime
+      - Key: FunctionMemorySize
+        Value:
+          Ref: FunctionMemorySize
+      - Key: FunctionTimeout
+        Value:
+          Ref: FunctionTimeout
+      - Key: LambdaVersionSHA256
+        Value:
+          Ref: LambdaVersionSHA256
+      ProvisioningArtifactName:
+        Ref: ProductArtifactName
+      ProductId:
+        Ref: ProductId
+      ProvisionedProductName:
+        Fn::Sub: provisionServerless-${FunctionName}
+Outputs:
+  CloudformationStackArn:
+    Description: The Cloudformation stack that was created for the product
+    Value:
+      Fn::GetAtt:
+      - SCprovisionServerless
+      - CloudformationStackArn
+  ProvisionedProductID:
+    Description: Provisioned product ID
+    Value:
+      Ref: SCprovisionServerless

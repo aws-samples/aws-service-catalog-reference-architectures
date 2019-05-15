@@ -20,6 +20,7 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
   remove the last 2 commands lines which start with "aws cloudformation update-stack-set ..."  
   add line ```- /bin/bash codepipeline/run-cloudformationupdate.sh```  
 
+
  
 ## Multi-Account Setup
 For a multi-account multi-region setup you must choose a hub account and central region.
