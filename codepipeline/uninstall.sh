@@ -14,7 +14,6 @@ echo "Using Account:$ACC  Region:$AWS_DEFAULT_REGION Child Accounts:$childAcc Al
 echo "Clearing out the Automation pipeline S3 buckets"
 aws s3 rb s3://servicecatalog-pipelineartifacts-$ACC --force
 aws s3 rb s3://servicecatalog-deployedtemplates-$ACC --force
-aws s3 rb s3://taskcat-tempbucket-$ACC --force
 
 # multi account multi region, CF StackSet
 echo "Deleting the ServiceCatalog Portfolio StackSet, this make take a while."

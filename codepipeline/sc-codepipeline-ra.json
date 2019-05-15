@@ -37,19 +37,6 @@
                 "BucketName" : {"Fn::Sub":"${DeployedTemplatesBucketName}-${AWS::AccountId}"}
             }
         },
-        "TaskCatTempBucket": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "AccessControl": "Private",
-                "BucketName" : {"Fn::Sub":"taskcat-tempbucket-${AWS::AccountId}"}
-            }
-        },
-        "ScratchBucket": {
-            "Type": "AWS::S3::Bucket",
-            "Properties": {
-                "AccessControl": "Private"
-            }
-        },
         "DeployedTemplatesBucketPolicy":{
            "Type" : "AWS::S3::BucketPolicy",
            "Condition":"CreateBucketPolicy",
