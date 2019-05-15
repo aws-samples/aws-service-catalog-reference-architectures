@@ -169,6 +169,23 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}emr/sc-product-emr.json"},
             "TimeoutInMinutes" : 5
           }
+        },        
+        "emrsparkhbaseproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEMRportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}emr/sc-product-emrsparkhbase.json"},
+            "TimeoutInMinutes" : 5
+          }
         }
 
     }  

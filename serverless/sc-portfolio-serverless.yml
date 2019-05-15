@@ -1,0 +1,225 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Serverless Portfolio for Service Catalog. (fdp-1p5s1036d)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Portfolio Information
+      Parameters:
+      - PorfolioName
+      - PortfolioProvider
+      - PorfolioDescription
+    - Label:
+        default: IAM Settings
+      Parameters:
+      - LaunchRoleName
+      - LinkedRole1
+      - LinkedRole2
+      - ServiceCatalogEndUsers
+      - CreateEndUsersGroup
+    - Label:
+        default: Product Settings
+      Parameters:
+      - RepoRootURL
+Parameters:
+  PortfolioProvider:
+    Type: String
+    Description: Provider Name
+    Default: IT Services
+  PorfolioName:
+    Type: String
+    Description: Portfolio Name
+    Default: Service Catalog Serverless Reference Architecture
+  PorfolioDescription:
+    Type: String
+    Description: Portfolio Description
+    Default: Service Catalog Portfolio that contains reference architecture products
+      for Serverless Framework.
+  LaunchRoleName:
+    Type: String
+    Description: Name of the launch constraint role for Serverless products. leave
+      this blank to create the role.
+    Default: ''
+  LinkedRole1:
+    Type: String
+    Description: "(Optional) The name of a role which can execute products in this
+      portfolio."
+    Default: ''
+  LinkedRole2:
+    Type: String
+    Description: "(Optional) The name of a second role which can execute products
+      in this portfolio."
+    Default: ''
+  RepoRootURL:
+    Type: String
+    Description: Root url for the repo containing the product templates.
+    Default: 'https://s3.amazonaws.com/aws-service-catalog-reference-architectures/'
+  CreateEndUsersGroup:
+    Type: String
+    Description: Select Yes to Create the ServiceCatalogEndUsers IAM group. No if
+      you have already created the group
+    AllowedValues:
+    - 'Yes'
+    - 'No'
+    Default: 'Yes'
+  ServiceCatalogEndUsers:
+    Type: CommaDelimitedList
+    Description: (Optional) Users to add ServiceCatalogEndUsers.
+    Default: ''
+Conditions:
+  CreateLaunchConstraint:
+    Fn::Equals:
+    - Ref: LaunchRoleName
+    - ''
+  CondCreateEndUsersGroup:
+    Fn::Equals:
+    - Ref: CreateEndUsersGroup
+    - 'Yes'
+  CondHasEndUsers: 
+    Fn::Not:
+    - Fn::Equals:
+      - Fn::Join:
+        - ''
+        - Ref: ServiceCatalogEndUsers
+      - ''
+  CondLinkRole1:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: LinkedRole1
+      - ''
+  CondLinkRole2:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: LinkedRole2
+      - ''
+Resources:
+  serverlessFrameworkDeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties : 
+        BucketName: !Sub "serverless-src-${AWS::AccountId}"
+  SCServerlessPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      ProviderName:
+        Ref: PortfolioProvider
+      Description:
+        Ref: PorfolioDescription
+      DisplayName:
+        Ref: PorfolioName
+  addrole1:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: CondLinkRole1
+    Properties:
+      PrincipalARN:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}
+      PortfolioId:
+        Ref: SCServerlessPortfolio
+      PrincipalType: IAM
+  addrole2:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: CondLinkRole2
+    Properties:
+      PrincipalARN:
+        Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}
+      PortfolioId:
+        Ref: SCServerlessPortfolio
+      PrincipalType: IAM
+  LaunchConstraintRole:
+    Type: AWS::CloudFormation::Stack
+    Condition: CreateLaunchConstraint
+    Properties:
+      TemplateURL:
+        Fn::Sub: "${RepoRootURL}iam/sc-serverless-launchrole.yml"
+      TimeoutInMinutes: 5
+  stackServiceCatalogEndUsers:
+    Type: AWS::CloudFormation::Stack
+    Condition: CondCreateEndUsersGroup
+    Properties:
+      TemplateURL:
+        Fn::Sub: "${RepoRootURL}iam/sc-enduser-iam.yml"
+      TimeoutInMinutes: 5
+  LinkEndusers:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PrincipalARN:
+        Fn::If:
+        - CondCreateEndUsersGroup
+        - Fn::GetAtt:
+          - stackServiceCatalogEndUsers
+          - Outputs.EndUserGroupArn
+        - Fn::Sub: arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndUsers
+      PortfolioId:
+        Ref: SCServerlessPortfolio
+      PrincipalType: IAM
+  AddUsersToGroup:
+    Type: AWS::IAM::UserToGroupAddition
+    Condition: CondHasEndUsers
+    Properties: 
+      GroupName: 
+        !GetAtt
+        - stackServiceCatalogEndUsers
+        - Outputs.EndUserGroupName
+      Users:
+        Ref: ServiceCatalogEndUsers
+    DependsOn: stackServiceCatalogEndUsers
+  serverlessproduct:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        PortfolioProvider:
+          Ref: PortfolioProvider
+        LaunchConstraintARN:
+          Fn::If:
+          - CreateLaunchConstraint
+          - Fn::GetAtt:
+            - LaunchConstraintRole
+            - Outputs.LaunchRoleArn
+          - Fn::Sub: arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}
+        PortfolioId:
+          Ref: SCServerlessPortfolio
+        RepoRootURL:
+          Ref: RepoRootURL
+      TemplateURL:
+        Fn::Sub: "${RepoRootURL}serverless/sc-product-serverless-lambda.yml"
+      TimeoutInMinutes: 5
+Outputs:
+  PortfolioId:
+    Description: The Service Catalog portfolioId
+    Value:
+      Ref: SCServerlessPortfolio
+  LaunchConstraintRoleARN:
+    Condition: CreateLaunchConstraint
+    Value:
+      Fn::GetAtt:
+      - LaunchConstraintRole
+      - Outputs.LaunchRoleArn
+  LaunchConstraintRoleName:
+    Condition: CreateLaunchConstraint
+    Value:
+      Fn::GetAtt:
+      - LaunchConstraintRole
+      - Outputs.LaunchRoleName
+  serverlessProductId:
+    Description: The Service Catalog Lambda productId.
+    Value:
+      Fn::GetAtt:
+      - serverlessproduct
+      - Outputs.ProductId
+  serverlessProvisioningArtifactIds:
+    Value:
+      Fn::GetAtt:
+      - serverlessproduct
+      - Outputs.ProvisioningArtifactIds
+  serverlessProvisioningArtifactNames:
+    Value:
+      Fn::GetAtt:
+      - serverlessproduct
+      - Outputs.ProvisioningArtifactNames
+  PortfolioProvider:
+    Description: The name of the portfolio admin
+    Value:
+      Ref: PortfolioProvider
+  ServerlessDeploymentBucket:
+    Description: The bucket housing the lambda code for deployment
+    Value: !Ref serverlessFrameworkDeploymentBucket

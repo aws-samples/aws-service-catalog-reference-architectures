@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "AWS Lambda Service Catalog product (fdp-1p5rtpgls)",
+    "Description": "EMR Spark Hbase ServiceCatalog product. (fdp-1p4dlgco4)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -9,7 +9,7 @@
         },
         "LaunchConstraintARN": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for EC2 products."
+            "Description":"ARN of the launch constraint role for EMR products."
         },
         "PortfolioId":{
             "Type":"String",
@@ -19,13 +19,14 @@
             "Type":"String",
             "Description":"Root url for the repo containing the product templates."
         }
+        
       },
     "Resources": {
-        "lambdaproduct": {
+        "scemrproduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Amazon Lambda APIGateway Endpoint",
-                "Description": "This product builds one Amazon Lambda function and APIGateway endpoint",
+                "Name": "EMR cluster for Spark or S3 backed Hbase",
+                "Description": "This product builds an Amazon Elastic MapReduce cluster for Spark or S3 backed Hbase best practices.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -36,34 +37,29 @@
                     {
                         "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}serverless/sc-serverless-lambda.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}emr/sc-emr-SparkHbase.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }
         },
-        "Associatelambda":{
+        "Associateemr":{
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"lambdaproduct"}
+            "ProductId" :   {"Ref":"scemrproduct"}
           }
         },
-        "constraintlambda":{
+        "constraintecemr":{
           "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
-          "DependsOn" : "Associatelambda",
+          "DependsOn" : "Associateemr",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"lambdaproduct"},
+            "ProductId" :   {"Ref":"scemrproduct"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
-    },
-    "Outputs": {
-        "ProductId":{"Value": { "Ref":"lambdaproduct" } },
-        "ProvisioningArtifactIds":{"Value": { "Fn::GetAtt":["lambdaproduct","ProvisioningArtifactIds"] } },
-        "ProvisioningArtifactNames":{"Value": { "Fn::GetAtt":["lambdaproduct","ProvisioningArtifactNames"] } }
     }
-}
+}    
