@@ -72,33 +72,29 @@
         "MasterInstanceType": {
             "Description": "Select the master node instance type.",
             "Type": "String",
-            "Default": "m4.large",
-            "AllowedValues": [
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "c4.large",
-                "c4.xlarge",
-                "c4.2xlarge",
-                "c4.4xlarge"
+            "Default": "m5.xlarge",
+            "AllowedValues": [                
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge",
+                "c5.xlarge",
+                "c5.2xlarge",
+                "c5.4xlarge"
             ]
         },
         "CoreInstanceType": {
             "Description": "Select the core node instance type.",
             "Type": "String",
-            "Default": "m4.large",
+            "Default": "m5.xlarge",
             "AllowedValues": [
-                "m4.large",
-                "m4.xlarge",
-                "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "c4.large",
-                "c4.xlarge",
-                "c4.2xlarge",
-                "c4.4xlarge"
+                "m5.xlarge",
+                "m5.2xlarge",
+                "m5.4xlarge",
+                "m5.12xlarge",
+                "c5.xlarge",
+                "c5.2xlarge",
+                "c5.4xlarge"
             ]
         },
         "CoreNodeCount": {
@@ -120,8 +116,19 @@
         "ReleaseLabel": {
             "Description": "Select the EMR Cluster release configuration.",
             "Type": "String",
-            "Default": "emr-5.12.0",
+            "Default": "emr-5.23.0",
             "AllowedValues": [
+                "emr-5.23.0",
+                "emr-5.22.0",
+                "emr-5.21.0",
+                "emr-5.20.0",
+                "emr-5.19.0",                
+                "emr-5.18.0",
+                "emr-5.17.0",
+                "emr-5.16.0",
+                "emr-5.15.0",
+                "emr-5.14.0",
+                "emr-5.13.0",                
                 "emr-5.12.0",
                 "emr-5.11.1",
                 "emr-5.11.0",
@@ -179,6 +186,7 @@
                     "Ref": "ClusterName"
                 },
                 "Instances": {
+                    "Ec2KeyName" : {"Ref":"KeyPair"},
                     "MasterInstanceGroup": {
                         "InstanceCount": 1,
                         "InstanceType": {

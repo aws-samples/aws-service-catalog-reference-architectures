@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "EC2 and VPC Portfolio for Service Catalog. (fdp-1p4da46nc)",
+    "Description": "EC2 Demo Portfolio for Service Catalog. (fdp-1p4da46nc)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -13,18 +13,17 @@
                         "PortfolioProvider",
                         "PorfolioDescription"
                     ]
-                },
-                {
+                },{
                     "Label": {
                         "default": "IAM Settings"
                     },
                     "Parameters": [
                         "LaunchRoleName",
                         "LinkedRole1",
-                        "LinkedRole2"
+                        "LinkedRole2",
+                        "CreateEndUsers"
                     ]
-                } ,
-                {
+                },{
                     "Label": {
                         "default": "Product Settings"
                     },
@@ -66,14 +65,14 @@
         },       
         "RepoRootURL": {
             "Type":"String",
-            "Description":"Root url for the repo containing the product templates.",
+            "Description":"S3 root url for the repository containing the product templates.",
             "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
         },
         "CreateEndUsers":{
             "Type":"String",
             "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
              "AllowedValues": ["Yes","No"],
-             "Default":"No" 
+             "Default":"Yes" 
         }
       },
       "Conditions":{
@@ -154,7 +153,7 @@
         "ec2linuxproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
-            "Parameters" : {
+            "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
                 "LaunchConstraintARN": {"Fn::If" : [
                     "CreateLaunchConstraint",
@@ -172,7 +171,7 @@
         "ec2webserverproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
-            "Parameters" : {
+            "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
                 "LaunchConstraintARN": {"Fn::If" : [
                     "CreateLaunchConstraint",
@@ -182,7 +181,7 @@
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-webserver.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-demowebserver.json"},
             "TimeoutInMinutes" : 5
           }
         },
@@ -203,38 +202,31 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
             "TimeoutInMinutes" : 5
           }
-        },
-        
-        "vpcproduct": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Properties" : {
-            "Parameters" : {
-                "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
-                    "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
-                ]},
-                "PortfolioId":{"Ref":"SCEC2portfolio"},
-                "RepoRootURL":{"Ref":"RepoRootURL"}
-            },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}vpc/sc-product-vpc.json"},
-            "TimeoutInMinutes" : 5
-          }
         }
     },
     "Outputs": {
+		"EndUserRoleArn":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]}
+        },
+        "EndUserGroupArn":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
+        },
+		"EndUserGroupName":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupName"]}
+        },		
         "LaunchConstraintRoleARN":{
           "Condition":"CreateLaunchConstraint",
-          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] }
+          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] } 
         },
         "LaunchConstraintRoleName":{
           "Condition":"CreateLaunchConstraint",
-          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] }
+          "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] } 
         },
-        "ec2windowsproductId":{"Value": { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
-        "ec2webserverproductId":{"Value": { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
-        "ec2linuxproductId":{"Value": { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} },
-        "vpcproductId":{"Value": { "Fn::GetAtt":["vpcproduct","Outputs.ProductId"]} }
+        "ec2windowsproductId":{"Value":     { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
+        "ec2webserverproductId":{"Value":     { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
+        "ec2linuxproductId":{"Value":         { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} }
     }
 }

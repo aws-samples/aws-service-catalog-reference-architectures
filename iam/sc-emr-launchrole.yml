@@ -24,6 +24,8 @@ Resources:
               - Sid: SCLaunchPolicySID
                 Effect: Allow
                 Action:                  
+                  - "servicecatalog:ListServiceActionsForProvisioningArtifact"
+                  - "servicecatalog:ExecuteprovisionedProductServiceAction"
                   - "iam:ListRolePolicies"
                   - "iam:ListPolicies"
                   - "iam:CreateRole"

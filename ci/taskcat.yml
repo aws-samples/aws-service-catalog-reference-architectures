@@ -7,7 +7,6 @@ global:
     - us-east-2
     - us-west-1    
   reporting: true
-  s3bucket: taskcat-tempbucket-YOUR-ACCOUNT-HERE
 tests:
   ec2-portfolio:
     template_file: sc-portfolio-ec2.json

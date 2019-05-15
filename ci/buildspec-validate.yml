@@ -21,9 +21,8 @@ phases:
     commands:
       - echo Entered the build phase...
       - taskcat -c $PROJECTNAME/ci/taskcat.yml
-      - echo Zipping and uploading report to $ARTIFACT_BUCKET S3 bucket
-      - zip -r taskcat_report.zip taskcat_outputs
-      - aws s3 cp taskcat_report.zip s3://$ARTIFACT_BUCKET/taskcat_reports/$CODEBUILD_BUILD_ID.zip
+      - echo uploading report to $ARTIFACT_BUCKET S3 bucket
+      - aws s3 sync taskcat_outputs s3://$ARTIFACT_BUCKET/taskcat_reports/$CODEBUILD_BUILD_ID
       - |
         if $(grep -Fq "CREATE_FAILED" taskcat_outputs/index.html)
         then

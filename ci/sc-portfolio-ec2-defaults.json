@@ -20,5 +20,8 @@
     },{
         "ParameterKey": "RepoRootURL",
         "ParameterValue": "https://s3.amazonaws.com/$[taskcat_autobucket]/SCPortfoliosRepo/"
+    },{
+        "ParameterKey": "CreateEndUsers",
+        "ParameterValue": "No"
     }
 ]

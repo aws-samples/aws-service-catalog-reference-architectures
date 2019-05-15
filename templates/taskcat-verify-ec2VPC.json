@@ -126,6 +126,14 @@
             "PrincipalType" : "IAM"
           }
         },
+        "LinkEndusers":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::GetAtt":["IAMenduser","Outputs.EndUserRoleArn"]},
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
         "ec2linuxproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
