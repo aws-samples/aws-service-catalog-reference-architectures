@@ -15,12 +15,12 @@ phases:
       - echo Directory name $dirname
       - cd ..
       - mv $dirname $PROJECTNAME
-      - echo Configuring aws cli...
-      - aws configure set default.region us-east-1
   build:
     commands:
       - echo Entered the build phase...
       - taskcat -c $PROJECTNAME/ci/taskcat.yml
+  post_build:
+    commands:
       - echo uploading report to $ARTIFACT_BUCKET S3 bucket
       - aws s3 sync taskcat_outputs s3://$ARTIFACT_BUCKET/taskcat_reports/$CODEBUILD_BUILD_ID
       - |
