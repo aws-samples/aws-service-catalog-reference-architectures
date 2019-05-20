@@ -1,0 +1,41 @@
+{
+  "Parameters": {
+    "PorfolioStack": "var.portfolioCfn",
+    "ProductName": "elasticache",
+    "ProductDescription": "ElastiCache",
+    "ProductVersion": "1.0",
+    "ProductVersionDescription": "Initial Version",
+    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/elasticache/sc-elasticache.yml",
+    "ProductRoleName": "sc-elasticache-product-role",
+    "ProductPolicyName": "var.policy",
+    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/elasticache/sc-elasticache-products-role.yml",
+    "TemplateRuleConstraint": {
+      "NodeType": {
+        "Assertions": [
+          {
+            "Assert": {
+              "Fn::Contains": [
+                [
+                  "cache.t2.micro",
+                  "cache.t2.small",
+                  "cache.t2.medium",
+                  "cache.m4.large",
+                  "cache.m4.xlarge",
+                  "cache.r5.large",
+                  "cache.r5.xlarge"
+                ],
+                {
+                  "Ref": "NodeType"
+                }
+              ]
+            },
+            "AssertDescription": "Elasticache Node Type"
+          }
+        ]
+      }
+    },
+    "DeploymentBucket": "var.deploymentBucket",
+    "DeployUpdatePipeline": "true",
+    "UpdateConfigFileName": "sc-elasticache-update"
+  }
+}

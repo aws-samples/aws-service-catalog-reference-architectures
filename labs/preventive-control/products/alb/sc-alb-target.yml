@@ -1,0 +1,112 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog ALB Target Group Product
+Parameters:
+  ALBTargetName:
+    Description: ALB Target Name
+    Type: String
+  HealthCheckIntervalSeconds:
+    Description: 'The approximate number of seconds between health checks for an individual target.'
+    Type: Number
+  HealthCheckPath:
+    Description: 'The ping path destination where Elastic Load Balancing sends health check requests.'
+    Type: String
+  HealthCheckPort:
+    Description: 'The port that the load balancer uses when performing health checks on the targets.'
+    Type: String
+  HealthCheckProtocol:
+    Description: 'The protocol that the load balancer uses when performing health checks on the targets'
+    Type: String
+  HealthCheckTimeoutSeconds:
+    Description: 'The number of seconds to wait for a response before considering that a health check has failed.'
+    Type: Number
+  HealthyThresholdCount:
+    Description: 'The number of consecutive successful health checks that are required before an unhealthy target is considered healthy'
+    Type: Number
+    MinValue: 2
+    MaxValue: 10
+    Default: 5
+  AppPort:
+    Description: 'Application Port'
+    Type: String
+    Default: 443
+    AllowedValues:
+      - 443
+      - 8443
+  UnhealthyThresholdCount:
+    Description: 'The number of consecutive failed health checks that are required before a target is considered unhealthy'
+    Type: Number
+    MinValue: 2
+    MaxValue: 10
+    Default: 5
+  VpcId:
+    Description: VPC Id
+    Type: String
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+Conditions:
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  ALBTarget:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      Name: !Ref ALBTargetName
+      HealthCheckIntervalSeconds: !Ref HealthCheckIntervalSeconds
+      HealthCheckPath: !Ref HealthCheckPath
+      HealthCheckPort: !Ref HealthCheckPort
+      HealthCheckProtocol: !Ref HealthCheckProtocol
+      HealthCheckTimeoutSeconds: !Ref HealthCheckTimeoutSeconds
+      HealthyThresholdCount: !Ref HealthyThresholdCount
+      Matcher:
+        HttpCode: '200'
+      Port: !Ref AppPort
+      Protocol: 'HTTPS'
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: '20'
+      UnhealthyThresholdCount: !Ref UnhealthyThresholdCount
+      VpcId: !Ref VpcId
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+
+Outputs:
+  ALBTargetId:
+    Value: !Ref ALBTarget
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBTargetId
+  ALBTargetGroupName:
+    Value: !GetAtt ALBTarget.TargetGroupName
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBTargetGroupName
+  ALBTargetGroupFullName:
+    Value: !GetAtt ALBTarget.TargetGroupFullName
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBTargetGroupFullName

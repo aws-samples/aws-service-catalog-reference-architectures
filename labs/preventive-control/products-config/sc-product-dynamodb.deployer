@@ -1,0 +1,17 @@
+{
+  "Parameters" : {
+    "PorfolioStack" : "var.portfolioCfn",
+    "ProductName" : "dynamodb",
+    "ProductDescription" : "Amazon DynamoDB",
+    "ProductVersion" : "1.0",
+    "ProductVersionDescription" : "Initial Version",
+    "ProductTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/dynamodb/sc-dynamodb.yml",
+    "ProductRoleName" : "sc-dynamodb-product-role",
+    "ProductPolicyName" : "var.policy",
+    "ProductRoleTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/dynamodb/sc-dynamodb-products-role.yml",
+    "TemplateRuleConstraint" : "",
+    "DeploymentBucket" : "var.deploymentBucket",
+    "DeployUpdatePipeline":"true",
+    "UpdateConfigFileName": "sc-dynamodb-update"
+  }
+}

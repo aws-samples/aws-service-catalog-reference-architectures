@@ -1,0 +1,202 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog ElasticSearch Product
+Parameters:
+  DomainName:
+    Description: User defined Elasticsearch Domain name
+    Type: String
+  ElasticsearchVersion:
+    Description: User defined Elasticsearch Version
+    Type: String
+    Default: '6.2'
+  InstanceType:
+    Type: String
+    Description: Elastic Search Instance Type
+  InstanceCount:
+      Type: Number
+      MinValue: 1
+      MaxValue: 4
+      Default: 1
+  DedicatedMasterType:
+    Type: String
+    Description: Elastic Search Master Instance Type
+    Default: 'm4.large.elasticsearch'
+  DedicatedMasterCount:
+      Type: Number
+      MinValue: 0
+      MaxValue: 2
+      Default: 0
+  VolumeSize:
+    Description: 'EBS Volume Size'
+    Type: Number
+    MinValue: 10
+    MaxValue: 100
+    Default: 10
+  EnableZoneAwareness:
+    Description: 'Enable ES zone awareness'
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ESAccessPrincipalFull:
+    Description: 'Elastic Search Full Access Policy Principal'
+    Type: String
+    Default: '*'
+  ESAccessPrincipalReadOnly:
+    Description: 'Elastic Search ReadOnly Access Policy Principal'
+    Type: String
+    Default: 'None'
+  KMSId:
+    Description: KMS Encryption Key Id
+    Type: String
+  SubnetIds:
+    Description: VPC Subnets Ids as comma separated list
+    Type: CommaDelimitedList
+  SecurityGroupIds:
+    Description: VPC Security Groups Ids as comma separated list
+    Type: CommaDelimitedList
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+Conditions:
+  ZoneAwareness: !Equals [!Ref EnableZoneAwareness, true]
+  DedicatedMaster: !Not [!Equals [!Ref DedicatedMasterCount, 0]]
+  FullAccess: !Not [!Equals [!Ref ESAccessPrincipalFull, None]]
+  ReadAccess: !Not [!Equals [!Ref ESAccessPrincipalReadOnly, None]]
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  ESFullAccess:
+      Type: "Custom::ResourceCompliance"
+      Condition : FullAccess
+      Version: "1.0"
+      Properties:
+        ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+        Action:
+          Name: principal
+          Parameters:
+            Principal: !Ref ESAccessPrincipalFull
+            Account: !Ref AWS::AccountId
+  ESReadAccess:
+      Type: "Custom::ResourceCompliance"
+      Condition : ReadAccess
+      Version: "1.0"
+      Properties:
+        ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+        Action:
+          Name: principal
+          Parameters:
+            Principal: !Ref ESAccessPrincipalReadOnly
+            Account: !Ref AWS::AccountId
+  ElasticsearchDomain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      DomainName: !Ref DomainName
+      ElasticsearchVersion: !Ref ElasticsearchVersion
+      ElasticsearchClusterConfig:
+        InstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        ZoneAwarenessEnabled: !Ref EnableZoneAwareness
+        DedicatedMasterCount: !If [DedicatedMaster, !Ref DedicatedMasterCount, !Ref "AWS::NoValue"]
+        DedicatedMasterType: !If [DedicatedMaster, !Ref DedicatedMasterType, !Ref "AWS::NoValue"]
+        DedicatedMasterEnabled: !If [DedicatedMaster, true, false]
+      EBSOptions:
+        EBSEnabled: 'true'
+        Iops: 0
+        VolumeSize: !Ref VolumeSize
+        VolumeType: gp2
+      SnapshotOptions:
+        AutomatedSnapshotStartHour: '0'
+      EncryptionAtRestOptions:
+        Enabled: 'true'
+        KmsKeyId: !Ref KMSId
+      AccessPolicies:
+        Version: 2012-10-17
+        Statement:
+          - !If
+              - FullAccess
+              -
+                Effect: Allow
+                Principal:
+                  AWS: !Split [',', !GetAtt ESFullAccess.Principal]
+                Action:
+                  - es:ESHttpDelete
+                  - es:ESHttpGet
+                  - es:ESHttpPost
+                  - es:ESHttpPut
+                  - es:ESHttpHead
+                Resource:
+                  !Join
+                    - ''
+                    - - 'arn:aws:es:'
+                      - !Ref AWS::Region
+                      - ':'
+                      - !Ref AWS::AccountId
+                      - ':domain/'
+                      - !Ref DomainName
+                      - '/*'
+              - !Ref "AWS::NoValue"
+          - !If
+              - ReadAccess
+              -
+                Effect: Allow
+                Principal:
+                  AWS: !Split [',', !GetAtt ESReadAccess.Principal]
+                Action:
+                  - es:ESHttpGet
+                  - es:ESHttpHead
+                Resource:
+                  !Join
+                    - ''
+                    - - 'arn:aws:es:'
+                      - !Ref AWS::Region
+                      - ':'
+                      - !Ref AWS::AccountId
+                      - ':domain/'
+                      - !Ref DomainName
+                      - '/*'
+              - !Ref "AWS::NoValue"
+      AdvancedOptions:
+        rest.action.multi.allow_explicit_index: 'true'
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+      VPCOptions:
+        SubnetIds: !Ref SubnetIds
+        SecurityGroupIds: !Ref SecurityGroupIds
+
+Outputs:
+  DomainArn:
+    Value: !GetAtt ElasticsearchDomain.DomainArn
+    Export:
+      Name: !Sub ${AWS::StackName}-DomainArn
+  DomainEndpoint:
+    Value: !GetAtt ElasticsearchDomain.DomainEndpoint
+    Export:
+      Name: !Sub ${AWS::StackName}-DomainEndpoint

@@ -1,0 +1,58 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog ALB Listener Product
+Parameters:
+  CertificateArn:
+    Description: ARN of ACM Certificate to apply to ALB
+    Type: String
+    Default: ""
+  ALBTargetGroupStack:
+    Description: ALB Target Group ARN
+    Type: String
+  ALBStack:
+    Description: ALB ARN
+    Type: String
+  AppPort:
+    Description: 'Application Port'
+    Type: String
+    Default: 443
+    AllowedValues:
+      - 443
+      - 8443
+
+Resources:
+  ALBListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      Certificates:
+        - CertificateArn: !Ref CertificateArn
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn:
+            Fn::ImportValue:
+              !Sub "${ALBTargetGroupStack}-ALBTargetId"
+      LoadBalancerArn:
+        Fn::ImportValue:
+          !Sub "${ALBStack}-ALBArn"
+      Port: !Ref AppPort
+      Protocol: HTTPS
+
+Outputs:
+  ALBListenerArn:
+    Value: !Ref ALBListener
+    Export:
+      Name: !Sub ${AWS::StackName}-ALBListenerArn

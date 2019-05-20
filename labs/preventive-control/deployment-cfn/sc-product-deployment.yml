@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Deploy Service Catalog Product
+Parameters:
+  PorfolioStack:
+    Description: Name of CloudFormation Stack used to Deploy Service Catalog Resources
+    Type: String
+  ProductName:
+    Description: Product Name
+    Type: String
+  ProductDescription:
+    Description: Product Description
+    Type: String
+  ProductVersion:
+    Description: Product Version
+    Type: String
+  ProductVersionDescription:
+    Description: Product Version Description
+    Type: String
+  ProductTemplateUrl:
+    Description: S3 URL to Product CFN Template
+    Type: String
+  ProductRoleName:
+    Description: Product IAM Role Name
+    Type: String
+  ProductPolicyName:
+    Description: Product IAM Policy Name
+    Type: String
+  ProductRoleTemplateUrl:
+    Description: S3 URL to Product IAM Role CFN Template
+    Type: String
+  TemplateRuleConstraint:
+    Description: S3 URL to Product IAM Role CFN Template
+    Type: String
+    Default: ''
+  DeploymentBucket:
+    Description: Name of S3 Deployment Bucket
+    Type: String
+  DeployUpdatePipeline:
+    Description: Create Codepipeline to handle Service Catalog products updates
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+  UpdateConfigFileName:
+    Description: Name of Product Update Configuration File without Extension
+    Type: String
+    Default: ''
+Conditions:
+  HasTemplateConstraint: !Not [!Equals [!Ref TemplateRuleConstraint, '']]
+  DeployPipeline: !And
+    - !Equals [!Ref DeployUpdatePipeline, 'true']
+    - !Not [!Equals [!Ref UpdateConfigFileName, '']]
+Resources:
+  ProductRole:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        ProductRoleName: !Ref ProductRoleName
+        ProductPolicyName: !Ref ProductPolicyName
+      TemplateURL: !Ref ProductRoleTemplateUrl
+  DeployProduct:
+    DependsOn: ProductRole
+    Type: "AWS::ServiceCatalog::CloudFormationProduct"
+    Properties:
+      Owner: 'My Organization'
+      Description: !Ref ProductDescription
+      Distributor: 'My Organization'
+      SupportEmail: 'support@company.com'
+      Name: !Sub 'sc-${ProductName}-product'
+      ProvisioningArtifactParameters:
+        -
+          Description: !Ref ProductVersionDescription
+          Info:
+            LoadTemplateFromURL: !Ref ProductTemplateUrl
+          Name: !Ref ProductVersion
+  AssociateProduct:
+    DependsOn: DeployProduct
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId:
+        Fn::ImportValue:
+          !Sub "${PorfolioStack}-PortfolioId"
+      ProductId: !Ref DeployProduct
+  RoleConstraint:
+    Type: "AWS::ServiceCatalog::LaunchRoleConstraint"
+    Properties:
+      Description: !Sub 'Role Constraint for ${ProductName}'
+      PortfolioId:
+        Fn::ImportValue:
+          !Sub "${PorfolioStack}-PortfolioId"
+      ProductId: !Ref DeployProduct
+      RoleArn: !GetAtt ProductRole.Outputs.ProductRoleArn
+    DependsOn: AssociateProduct
+  TemplateConstraint:
+    Type: "AWS::ServiceCatalog::LaunchTemplateConstraint"
+    Condition: HasTemplateConstraint
+    Properties:
+      Description: !Sub 'Template Constraint for ${ProductName}'
+      PortfolioId:
+        Fn::ImportValue:
+          !Sub "${PorfolioStack}-PortfolioId"
+      ProductId: !Ref DeployProduct
+      Rules: !Ref TemplateRuleConstraint
+    DependsOn: AssociateProduct
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Condition: DeployPipeline
+    Properties:
+      RoleArn:
+        Fn::ImportValue:
+          !Sub "${PorfolioStack}-PipelineRoleArn"
+      Name: !Sub 'sc-${ProductName}-product-pipeline'
+      ArtifactStore:
+        Location: !Ref DeploymentBucket
+        Type: S3
+      Stages:
+      -
+        Name: Source
+        Actions:
+          -
+            Name: SourceAction
+            ActionTypeId:
+              Category: Source
+              Owner: AWS
+              Version: 1
+              Provider: S3
+            OutputArtifacts:
+              -
+                Name: SourceOutput
+            Configuration:
+              S3Bucket:
+                Ref: DeploymentBucket
+              S3ObjectKey: !Sub 'deployment-cfg/${UpdateConfigFileName}.zip'
+            RunOrder: 1
+      -
+        Name: Release
+        Actions:
+          -
+            Name: ReleaseAction
+            InputArtifacts:
+              -
+                Name: SourceOutput
+            ActionTypeId:
+              Category: Deploy
+              Owner: AWS
+              Version: 1
+              Provider: ServiceCatalog
+            Configuration:
+              ProductId: !Ref DeployProduct
+              ConfigurationFilePath: !Sub '${UpdateConfigFileName}.json'
+            RunOrder: 1
+
+Outputs:
+  ProductId:
+    Value: !Ref DeployProduct
+    Export:
+      Name: !Sub ${AWS::StackName}-ProductId

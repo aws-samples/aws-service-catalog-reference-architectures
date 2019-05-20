@@ -1,0 +1,194 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog S3 Product
+Parameters:
+  BucketName:
+    Type: String
+    Description: Bucket name, must be globaly unique.  If not provided CFT will make a unique name. Commented for testing
+    Default: ''
+
+  KMSId:
+    Description: KMS Encryption Key Id
+    Type: String
+    Default: ''
+
+  #BlockPublicParam:
+  #  Description: Used to enable the Block Public Configuration
+  #  Type: String
+  #  AllowedValues: [True, False, true, false]
+  #  Default: True
+
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+  #TopicParam:
+  #  Description: SNS Topic to send notifications to
+  #  Type: String
+
+  VersioningParam:
+    Description: Determine if versioning is enabled for the bucket
+    Type: String
+    AllowedValues: [Enabled, Suspended]
+    Default: "Enabled"
+
+Conditions:
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+  HasBucketName: !Not [!Equals [!Ref BucketName, '']]
+  UseKMSEncryption: !Not [!Equals [!Ref KMSId, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition: HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'#
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      # Not implemented; AWS recommends Bucket Policies / IAM Policies to grant access
+      # More info: https://aws.amazon.com/blogs/security/iam-policies-and-bucket-policies-and-acls-oh-my-controlling-access-to-s3-resources/
+      # AccessControl: String
+
+      # Not in scope for this soluton
+      AccelerateConfiguration:
+        AccelerationStatus: Enabled
+      #  AccelerationStatus: Suspended
+
+      # Not in scope for this soluton
+      #AnalyticsConfigurations:
+      #  - Id: AnalyticsConfigurationId
+      #    StorageClassAnalysis:
+      #      DataExport:
+      #        Destination:
+      #          BucketArn: !GetAtt
+      #            - Helper
+      #            - Arn
+      #          Format: CSV
+      #          Prefix: AnalyticsDestinationPrefix
+      #        OutputSchemaVersion: V_1
+      #    Prefix: AnalyticsConfigurationPrefix
+      #    TagFilters:
+      #      - Key: AnalyticsTagKey
+      #        Value: AnalyticsTagValue
+
+      BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: !If [UseKMSEncryption, "aws:kms", "AES256"]
+                KMSMasterKeyID: !If [UseKMSEncryption, !Ref KMSId, !Ref "AWS::NoValue"]
+
+      # If BucketName is not supplied it will be randomly generated
+      BucketName: !If [HasBucketName, !Ref BucketName, !Ref "AWS::NoValue"]
+
+      # Out of scope for this solution
+      # CorsConfiguration:
+
+      # Out of scope for this solution
+      #InventoryConfigurations:
+      #  - Id: InventoryConfigurationId
+      #    Destination:
+      #      BucketArn: !GetAtt
+      #        - Helper
+      #        - Arn
+      #      Format: CSV
+      #      Prefix: InventoryDestinationPrefix
+      #    Enabled: 'true'
+      #    IncludedObjectVersions: Current
+      #    Prefix: InventoryConfigurationPrefix
+      #    ScheduleFrequency: Weekly
+
+     # Out of scope for this solution
+      #LifecycleConfiguration:
+      #  Rules:
+      #  - Id: GlacierRule
+      #    Prefix: glacier
+      #    Status: Enabled
+      #    ExpirationInDays: '365'
+      #    Transitions:
+      #      - TransitionInDays: '1'
+      #        StorageClass: Glacier
+
+      # Out of scope for this solution
+      # LoggingConfiguration:
+      #  DestinationBucketName: !Ref 'LoggingBucket'
+      #  LogFilePrefix: testing-logs
+
+      MetricsConfigurations:
+        - Id: EntireBucket
+        # Omit prefix assumes the whole bucket
+        # Prefix: String
+        # TagFilters:
+        #  - TagFilter
+
+      # Out of scope for this solution
+      # NotificationConfiguration:
+      #   TopicConfigurations:
+      #     - Event: "s3:ReducedRedundancyLostObject"
+      #       Topic: !Ref TopicParam
+
+      PublicAccessBlockConfiguration:
+        # Specifies whether Amazon S3 should block public access control lists (ACLs) for this bucket and objects in this bucket. Setting this element to TRUE causes the following behavior:
+        #    PUT Bucket acl and PUT Object acl calls fail if the specified ACL is public.
+        #    PUT Object calls fail if the request includes a public ACL.
+        # BlockPublicAcls: !Ref BlockPublicParam
+        BlockPublicAcls: True
+        # Specifies whether Amazon S3 should block public bucket policies for this bucket. Setting this element to TRUE causes Amazon S3 to reject calls to PUT Bucket policy if the specified bucket policy allows public access.
+        # BlockPublicPolicy: !Ref BlockPublicParam
+        BlockPublicPolicy: True
+        # Specifies whether Amazon S3 should ignore public ACLs for this bucket and objects in this bucket. Setting this element to TRUE causes Amazon S3 to ignore all public ACLs on this bucket and objects in this bucket.
+        # IgnorePublicAcls: !Ref BlockPublicParam
+        IgnorePublicAcls: True
+        # Specifies whether Amazon S3 should restrict public bucket policies for this bucket. Setting this element to TRUE restricts access to this bucket to only AWS services and authorized users within this account if the bucket has a public policy.
+        # RestrictPublicBuckets: !Ref BlockPublicParam
+        RestrictPublicBuckets: True
+
+      # Out of scope for this solution
+      #  ReplicationConfiguration:
+      #    ReplicationConfiguration
+
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+
+      # Out of scope for this solution
+      VersioningConfiguration:
+        Status: !Ref VersioningParam
+      #  Status: Suspended
+
+      # Out of scope for this solution
+      #  WebsiteConfiguration:
+      #    WebsiteConfiguration
+
+Outputs:
+  S3BucketName:
+    Value: !Ref S3Bucket
+    Export:
+        Name: !Sub ${AWS::StackName}-S3BucketName
+  S3BucketArn:
+    Value: !GetAtt S3Bucket.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-S3BucketArn
+  S3BucketDomainName:
+    Value: !GetAtt S3Bucket.DomainName
+    Export:
+      Name: !Sub ${AWS::StackName}-S3BucketDomainName

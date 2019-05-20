@@ -1,0 +1,99 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Elasticache Product
+Parameters:
+  ClusterName:
+    Description: Cluster Name
+    Type: String
+  NodeType:
+    Description: Elasticache Node Type
+    Type: String
+  NumberClusters:
+    Description: Number of Cache Clusters
+    Type: Number
+    MinValue: 1
+    MaxValue: 6
+    Default: 2
+    ConstraintDescription: Value must be between 1-6
+  AuthToken:
+    Description: The password that's used to access a password-protected server
+    Type: String
+    NoEcho: true
+    Default: ''
+  SNSTopicArn:
+    Description: SNS Notification Topic Arn
+    Type: String
+    Default: ''
+  CacheSubnetGroupName:
+    Description: Cache Subnet Group Name
+    Type: String
+  SecurityGroupIds:
+    Description: Security Groups Ids
+    Type: CommaDelimitedList
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''    
+
+Conditions:
+  NoSNS: !Equals [!Ref SNSTopicArn, '']
+  NoAuthToken: !Equals [!Ref AuthToken, '']
+  IsT2: !Or [!Equals [!Ref NodeType, 'cache.t2.micro'], !Equals [!Ref NodeType, 'cache.t2.small'], !Equals [!Ref NodeType, 'cache.t2.medium']]
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  ElastiCache:
+    Type: AWS::ElastiCache::ReplicationGroup
+    Properties:
+      AtRestEncryptionEnabled: True
+      TransitEncryptionEnabled: True
+      AuthToken: !If [NoAuthToken, !Ref "AWS::NoValue", !Ref AuthToken]
+      AutoMinorVersionUpgrade: False
+      AutomaticFailoverEnabled: !If [IsT2, False, True]
+      CacheNodeType: !Ref NodeType
+      CacheParameterGroupName: default.redis4.0
+      CacheSubnetGroupName: !Ref CacheSubnetGroupName
+      Engine: redis
+      EngineVersion: '4.0.10'
+      NotificationTopicArn: !If [NoSNS, !Ref "AWS::NoValue", !Ref SNSTopicArn]
+      NumCacheClusters: !Ref NumberClusters
+      Port: 6379
+      ReplicationGroupDescription: 'AMT Redis Cluster'
+      ReplicationGroupId: !Ref ClusterName
+      SecurityGroupIds: !Ref SecurityGroupIds
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+
+Outputs:
+  PrimaryEndPoint:
+    Value: !GetAtt ElastiCache.PrimaryEndPoint.Address
+    Export:
+      Name: !Sub ${AWS::StackName}-PrimaryEndPoint
+  ElastiCacheId:
+    Value: !Ref ElastiCache
+    Export:
+      Name: !Sub ${AWS::StackName}-ElastiCacheId
