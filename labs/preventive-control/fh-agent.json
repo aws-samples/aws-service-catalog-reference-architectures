@@ -1,0 +1,10 @@
+{
+    "cloudwatch.emitMetrics": false,
+    "firehose.endpoint": "https://firehose.us-east-1.amazonaws.com",
+    "flows": [
+        {
+            "filePattern": "/var/log/httpd/*_log",
+            "deliveryStream": "sc-lab-kinesis-fh-stream"
+        }
+    ]
+}

@@ -1,0 +1,225 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog AutoScaling Product
+Parameters:
+  ALBTargetGroupStack:
+    Description: ALB Target Group ARN
+    Type: String
+  AppInstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.medium
+  AppEC2IAMRole:
+    Description: The name of EC2 Instance profile
+    Type: String
+    Default: ''
+  AppHealthCheckGracePeriod:
+    Description: Number of seconds after instance launch ALB begins health checks
+    Type: Number
+    MinValue: 40
+    MaxValue: 5000
+    Default: 300
+    ConstraintDescription: Value must be between 40-5000 seconds
+  HealthCheckType:
+    Description: The service you want the health status from, Amazon EC2 or Elastic Load Balancer
+    Type: String
+    Default: ELB
+    AllowedValues:
+      - ELB
+      - EC2
+  AppMinCount:
+    Description: 'Minimum EC2 Instances count'
+    Type: Number
+    MinValue: 0
+    MaxValue: 5
+    Default: 1
+  AppMaxCount:
+    Description: 'Maximum EC2 Instances count'
+    Type: Number
+    MinValue: 0
+    MaxValue: 10
+    Default: 1
+  SNSTopicARN:
+    Description: Notification Topic ARN
+    Type: String
+    Default: ''
+  SNSTopicStackName:
+    Description: Notification Topic Service Catalog SNS Stack
+    Type: String
+    Default: ''
+  EnableScalePolicy:
+    Description: Enable Auto Scaling Policy
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ScaleOutCooldown:
+    Description: The amount of time, in seconds, after a scale-out activity completes before another scale-out activity can start.
+    Type: String
+    Default: 3600
+  ScaleOutAdjustment:
+    Description: The number of instances by which to scale-out
+    Type: Number
+    MinValue: 1
+    MaxValue: 5
+    Default: 1
+  ScaleInCooldown:
+    Description: The amount of time, in seconds, after a scale-in activity completes before another scale in activity can start
+    Type: String
+    Default: 1200
+  ScaleInAdjustment:
+    Description: The number of instances by which to scale-in
+    Type: Number
+    MinValue: -5
+    MaxValue: -1
+    Default: -1
+  ImageId:
+    Description: ImageId
+    Type: String
+  SecurityGroupIds:
+    Description: VPC Security Groups Ids as comma separated list
+    Type: CommaDelimitedList
+  SubnetIds:
+    Description: VPC Subnets Ids as comma separated list
+    Type: CommaDelimitedList
+  UserData:
+    Description: User Data
+    Type: String
+    Default: ''
+  KeyName:
+    Description: User Data
+    Type: String
+    Default: ''
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+Conditions:
+  IsMinZero: !Equals [!Ref AppMinCount, 0]
+  IsSNSStack: !Not [!Equals [!Ref SNSTopicStackName, ""]]
+  IsSNSArn: !Not [!Equals [!Ref SNSTopicARN, ""]]
+  EnablePolicy: !Equals [!Ref EnableScalePolicy, true]
+  HasEC2Role: !Not [!Equals [!Ref AppEC2IAMRole, ""]]
+  HasUserData: !Not [!Equals [!Ref UserData, ""]]
+  HasKeyName: !Not [!Equals [!Ref KeyName, ""]]
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  LaunchConfig:
+    Type: 'AWS::AutoScaling::LaunchConfiguration'
+    Properties:
+      InstanceMonitoring: true
+      ImageId: !Ref ImageId
+      SecurityGroups: !Ref SecurityGroupIds
+      InstanceType: !Ref AppInstanceType
+      IamInstanceProfile:
+        !If
+          - HasEC2Role
+          - !Sub 'arn:aws:iam::${AWS::AccountId}:instance-profile/${AppEC2IAMRole}'
+          - !Ref AWS::NoValue
+      KeyName: !If [HasKeyName, !Ref KeyName, !Ref "AWS::NoValue"]
+      UserData:
+        !If
+          - HasUserData
+          - !Ref UserData
+          - !Ref AWS::NoValue
+
+  AppASG:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      NotificationConfigurations:
+        - !If
+            - IsSNSArn
+            - TopicARN:
+                !Ref SNSTopicARN
+              NotificationTypes:
+                - autoscaling:EC2_INSTANCE_LAUNCH
+                - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+                - autoscaling:EC2_INSTANCE_TERMINATE
+                - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+            - !If
+              - IsSNSStack
+              - TopicARN:
+                  Fn::ImportValue:
+                      !Sub "${SNSTopicStackName}-SNSArn"
+                NotificationTypes:
+                  - autoscaling:EC2_INSTANCE_LAUNCH
+                  - autoscaling:EC2_INSTANCE_LAUNCH_ERROR
+                  - autoscaling:EC2_INSTANCE_TERMINATE
+                  - autoscaling:EC2_INSTANCE_TERMINATE_ERROR
+              - !Ref "AWS::NoValue"
+      TerminationPolicies:
+        - OldestInstance
+      DesiredCapacity: !If [IsMinZero, 1, !Ref AppMinCount]
+      HealthCheckGracePeriod: !Ref AppHealthCheckGracePeriod
+      HealthCheckType: !Ref HealthCheckType
+      TargetGroupARNs:
+        - Fn::ImportValue:
+            !Sub "${ALBTargetGroupStack}-ALBTargetId"
+      LaunchConfigurationName: !Ref LaunchConfig
+      MaxSize: !Ref AppMaxCount
+      MetricsCollection:
+        - Granularity: 1Minute
+      MinSize: !Ref AppMinCount
+      VPCZoneIdentifier: !Ref SubnetIds
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+  ScaleOutPolicy:
+    Condition: EnablePolicy
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AppASG
+      Cooldown: !Ref ScaleOutCooldown
+      ScalingAdjustment: !Ref ScaleOutAdjustment
+      PolicyType: SimpleScaling
+  ScaleInPolicy:
+    Condition: EnablePolicy
+    Type: 'AWS::AutoScaling::ScalingPolicy'
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: !Ref AppASG
+      Cooldown: !Ref ScaleInCooldown
+      ScalingAdjustment: !Ref ScaleInAdjustment
+      PolicyType: SimpleScaling
+Outputs:
+  AppASGName:
+    Value: !Ref AppASG
+    Export:
+      Name: !Sub ${AWS::StackName}-AppASGName
+  ScaleOutPolicy:
+    Value: !Ref ScaleOutPolicy
+    Condition : EnablePolicy
+    Export:
+      Name: !Sub ${AWS::StackName}-ScaleOutPolicy
+  ScaleInPolicy:
+    Value: !Ref ScaleInPolicy
+    Condition : EnablePolicy
+    Export:
+      Name: !Sub ${AWS::StackName}-ScaleInPolicy

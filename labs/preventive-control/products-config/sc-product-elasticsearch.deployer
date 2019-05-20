@@ -1,0 +1,88 @@
+{
+  "Parameters": {
+    "PorfolioStack": "var.portfolioCfn",
+    "ProductName": "elasticsearch",
+    "ProductDescription": "ElasticSearch",
+    "ProductVersion": "1.0",
+    "ProductVersionDescription": "Initial Version",
+    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/elasticsearch/sc-elasticsearch.yml",
+    "ProductRoleName": "sc-elasticsearch-product-role",
+    "ProductPolicyName": "var.policy",
+    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/elasticsearch/sc-elasticsearch-products-role.yml",
+    "TemplateRuleConstraint": {
+      "ZoneAwareness": {
+        "Assertions": [
+          {
+            "Assert": {
+              "Fn::Or": [
+                {
+                  "Fn::Equals": [
+                    {
+                      "Ref": "EnableZoneAwareness"
+                    },
+                    "false"
+                  ]
+                },
+                {
+                  "Fn::Contains": [
+                    [
+                      "2",
+                      "4"
+                    ],
+                    {
+                      "Ref": "InstanceCount"
+                    }
+                  ]
+                }
+              ]
+            },
+            "AssertDescription": "When zone awareness enabled, the count of instance has to be 2 or 4"
+          }
+        ]
+      },
+      "InstanceType": {
+        "Assertions": [
+          {
+            "Assert": {
+              "Fn::Contains": [
+                [
+                  "m4.large.elasticsearch",
+                  "m4.xlarge.elasticsearch",
+                  "r4.large.elasticsearch",
+                  "r4.xlarge.elasticsearch"
+                ],
+                {
+                  "Ref": "InstanceType"
+                }
+              ]
+            },
+            "AssertDescription": "Elastic Search Instance Type"
+          }
+        ]
+      },
+      "DedicatedMasterType": {
+        "Assertions": [
+          {
+            "Assert": {
+              "Fn::Contains": [
+                [
+                  "m4.large.elasticsearch",
+                  "m4.xlarge.elasticsearch",
+                  "r4.large.elasticsearch",
+                  "r4.xlarge.elasticsearch"
+                ],
+                {
+                  "Ref": "DedicatedMasterType"
+                }
+              ]
+            },
+            "AssertDescription": "Elastic Search Master Instance Type"
+          }
+        ]
+      }
+    },
+    "DeploymentBucket": "var.deploymentBucket",
+    "DeployUpdatePipeline": "true",
+    "UpdateConfigFileName": "sc-elasticsearch-update"
+  }
+}

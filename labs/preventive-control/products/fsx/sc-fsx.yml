@@ -1,0 +1,89 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog FSx For Windows Product
+Parameters:
+  KMSId:
+    Description: KMS Encryption Key Id
+    Type: String
+  StorageCapacity:
+    Description: The storage capacity of the file system
+    Type: Number
+    MinValue: 300
+    MaxValue: 65536
+    Default: 300
+  SubnetIds:
+    Description: VPC Subnets Ids as comma separated list
+    Type: CommaDelimitedList
+  SecurityGroupIds:
+    Description: VPC Security Groups Ids as comma separated list
+    Type: CommaDelimitedList
+  ActiveDirectoryId:
+    Description: The ID for an existing Microsoft Active Directory
+    Type: String
+  ThroughputCapacity:
+    Description: The throughput of an Amazon FSx file system, measured in megabytes per second
+    Type: Number
+    MinValue: 8
+    MaxValue: 2048
+    Default: 8
+  AutomaticBackupRetentionDays:
+    Description: The number of days to retain automatic backups. Setting this to 0 disables automatic backups
+    Type: Number
+    MinValue: 0
+    MaxValue: 35
+    Default: 0
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+Conditions:
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+
+  WindowsFileSystem:
+    Type: "AWS::FSx::FileSystem"
+    Properties:
+      FileSystemType: "WINDOWS"
+      StorageCapacity: !Ref StorageCapacity
+      KmsKeyId: !Ref KMSId
+      SubnetIds: !Ref SubnetIds
+      SecurityGroupIds: !Ref SecurityGroupIds
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+      WindowsConfiguration:
+        ActiveDirectoryId: !Ref ActiveDirectoryId
+        ThroughputCapacity: !Ref ThroughputCapacity
+        AutomaticBackupRetentionDays: !Ref AutomaticBackupRetentionDays
+        CopyTagsToBackups: true
+
+Outputs:
+  FSxId:
+    Value: !Ref WindowsFileSystem
+    Export:
+      Name: !Sub ${AWS::StackName}-FSxId

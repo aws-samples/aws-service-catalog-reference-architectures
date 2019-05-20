@@ -1,0 +1,80 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog SNS Product
+Parameters:
+  TopicName:
+    Description: SNS Topic Name
+    Type: String
+  KMSId:
+    Description: KMS Encryption Key Id
+    Type: String
+  PolicyPrincipal:
+    Description: SNS Policy Principals separated by comma
+    Type: String
+    Default: ''
+  PolicyAction:
+    Description: SNS Policy Actions separated by comma
+    Type: String
+    Default: ''
+
+Conditions:
+  HasPolicy: !And
+    - !Not [!Equals [!Ref PolicyPrincipal, ""]]
+    - !Not [!Equals [!Ref PolicyAction, ""]]
+
+Resources:
+  PolicyPrincipalAccess:
+      Type: "Custom::ResourceCompliance"
+      Condition : HasPolicy
+      Version: "1.0"
+      Properties:
+        ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+        Action:
+          Name: principal
+          Parameters:
+            Principal: !Ref PolicyPrincipal
+            Account: !Ref AWS::AccountId
+  SNS:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Ref TopicName
+      TopicName: !Ref TopicName
+      KmsMasterKeyId: !Ref KMSId
+  Policy:
+    Type: AWS::SNS::TopicPolicy
+    Condition: HasPolicy
+    DependsOn: SNS
+    Properties:
+      PolicyDocument:
+        Version: "2008-10-17"
+        Id: "CustomPolicyId"
+        Statement:
+          -
+            Sid: "CustomPolicy"
+            Effect: "Allow"
+            Principal:
+              AWS: !Split [',', !GetAtt PolicyPrincipalAccess.Principal]
+            Action: !Split [ "," , !Ref PolicyAction ]
+            Resource: !Ref SNS
+      Topics:
+        - !Ref SNS
+
+Outputs:
+  SNSArn:
+    Value: !Ref SNS
+    Export:
+      Name: !Sub ${AWS::StackName}-SNSArn

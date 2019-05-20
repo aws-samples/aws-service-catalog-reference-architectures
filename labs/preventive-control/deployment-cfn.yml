@@ -1,0 +1,139 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Lab - Deployment Stack
+Parameters:
+  PolicyName:
+    Description: Service Catalog Product Policy Name
+    Type: String
+    Default: 'service-catalog-product-policy'
+  DeploymentBucketName:
+    Description: Name of S3 Deploymenbt Bucket
+    Type: String
+  PortfolioDescription:
+    Description: Service Catalog Portfolio Description
+    Type: String
+    Default: 'Security Product Whitelisted for Developers'
+  PortfolioName:
+    Description: Service Catalog Portfolio Name
+    Type: String
+    Default: 'security-products'
+  AccessRoleName:
+    Description: Name of IAM Role that will have access to products in portfolio
+    Type: String
+    Default: 'Admin'
+  DeploymentLambdaRoleName:
+    Description: Deploymnet Lambda Function Role Name
+    Type: String
+    Default: 'sc-product-deployment-lambda-role'
+  ProductSelectorLambdaRoleName:
+    Description: Product Selector Lambda Function Role Name
+    Type: String
+    Default: 'sc-product-selector-lambda-role'
+  ResourceSelectorLambdaRoleName:
+    Description: Resource Selector Lambda Function Role Name
+    Type: String
+    Default: 'sc-resource-selector-lambda-role'
+  ResourceComplianceLambdaRoleName:
+    Description: Resource Compliance Lambda Function Role Name
+    Type: String
+    Default: 'sc-resource-compliance-lambda-role'
+  PipelineRoleName:
+    Description: Pipeline Role Name
+    Type: String
+    Default: 'sc-product-update-codepipeline-role'
+  DeploymentLambdaFunctionName:
+    Description: Service Catalog Product Policy Name
+    Type: String
+    Default: 'sc-product-deployment'
+  DeploymentConfigSuffix:
+    Description: Deployment Configuration file suffix e.g. deployer
+    Type: String
+    Default: 'deployer'
+
+Resources:
+  SCResources:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        PolicyName: !Ref PolicyName
+        DeploymentBucketName: !Ref DeploymentBucketName
+        PortfolioDescription: !Ref PortfolioDescription
+        PortfolioName: !Ref PortfolioName
+        AccessRoleName: !Ref AccessRoleName
+        DeploymentLambdaRoleName: !Ref DeploymentLambdaRoleName
+        ProductSelectorLambdaRoleName: !Ref ProductSelectorLambdaRoleName
+        ResourceSelectorLambdaRoleName: !Ref ResourceSelectorLambdaRoleName
+        ResourceComplianceLambdaRoleName: !Ref ResourceComplianceLambdaRoleName
+        PipelineRoleName: !Ref PipelineRoleName
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-resource-cfn"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-product-resources-cfn.yml
+
+  SCLambdas:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SCResources
+    Properties:
+      Parameters:
+        DeploymentLambdaFunctionName: !Ref DeploymentLambdaFunctionName
+        DeploymentLambdaRoleName: !Ref DeploymentLambdaRoleName
+        ProductSelectorLambdaRoleName: !Ref ProductSelectorLambdaRoleName
+        ResourceSelectorLambdaRoleName: !Ref ResourceSelectorLambdaRoleName
+        ResourceComplianceLambdaRoleName: !Ref ResourceComplianceLambdaRoleName
+        DeploymentBucketName: !Ref DeploymentBucketName
+        DeploymentConfigSuffix: !Ref DeploymentConfigSuffix
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-lambdas-cfn"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-lambdas-cfn.yml
+
+  SCNetworks:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: SCLambdas
+    Properties:
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-network-cfn"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-networks-cfn.yml
+
+  S3Notification:
+    Type: "Custom::ResourceCompliance"
+    DependsOn: SCNetworks
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: S3Notification
+        Parameters:
+          Bucket: !Ref DeploymentBucketName
+          Lambda: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${DeploymentLambdaFunctionName}'
+          FilterRules:
+            -
+              Name: suffix
+              Value: !Ref DeploymentConfigSuffix

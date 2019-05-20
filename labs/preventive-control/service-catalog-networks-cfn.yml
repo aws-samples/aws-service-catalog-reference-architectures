@@ -1,0 +1,241 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Service Catalog Lab - Networks
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 172.16.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: Name
+          Value: sc-lab-vpc
+
+  SubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 172.16.1.0/24
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: sdlc
+          Value: web
+        - Key: Name
+          Value: sc-lab-web-subnet-1
+
+  SubnetB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 172.16.2.0/24
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: sdlc
+          Value: web
+        - Key: Name
+          Value: sc-lab-web-subnet-2
+
+  SubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: 172.16.3.0/24
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: sdlc
+          Value: app
+        - Key: Name
+          Value: sc-lab-app-subnet-1
+
+  SubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: 172.16.4.0/24
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: sdlc
+          Value: app
+        - Key: Name
+          Value: sc-lab-app-subnet-2
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: sc-lab-route-table
+      - Key: Env
+        Value: lab
+
+  SubnetRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetA
+      RouteTableId:
+        Ref: RouteTable
+
+  SubnetRouteTableAssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetB
+      RouteTableId:
+        Ref: RouteTable
+
+  SubnetRouteTableAssociationC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetC
+      RouteTableId:
+        Ref: RouteTable
+
+  SubnetRouteTableAssociationD:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetD
+      RouteTableId:
+        Ref: RouteTable
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SC Lab Web Security Group
+      GroupName: sc-lab-web-sg
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Env
+          Value: lab
+        - Key: sdlc
+          Value: web
+        - Key: Name
+          Value: sc-lab-web-sg
+
+  HTTPSInbound:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref WebSecurityGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 172.16.0.0/16
+
+  S3Endpoint:
+    Type: AWS::EC2::VPCEndpoint
+    DependsOn: RouteTable
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action:
+              - 's3:GetObject'
+            Resource:
+              - '*'
+      RouteTableIds:
+        - !Ref RouteTable
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref 'AWS::Region'
+          - .s3
+      VpcId: !Ref VPC
+
+  FirehoseEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    DependsOn: RouteTable
+    Properties:
+      PrivateDnsEnabled: true
+      VpcId: !Ref VPC
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref 'AWS::Region'
+          - .kinesis-firehose
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: '*'
+            Resource: '*'
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref SubnetA
+        - !Ref SubnetB
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+
+  KinesisEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    DependsOn: RouteTable
+    Properties:
+      PrivateDnsEnabled: true
+      VpcId: !Ref VPC
+      ServiceName: !Join
+        - ''
+        - - com.amazonaws.
+          - !Ref 'AWS::Region'
+          - .kinesis-streams
+      VpcEndpointType: Interface
+      SubnetIds:
+        - !Ref SubnetA
+        - !Ref SubnetB
+      SecurityGroupIds:
+        - !Ref WebSecurityGroup
+
+Outputs:
+  VPCId:
+    Value: !Ref VPC
+  SubnetA:
+    Value: !Ref SubnetA
+  SubnetB:
+    Value: !Ref SubnetB
+  SubnetC:
+    Value: !Ref SubnetC
+  SubnetD:
+    Value: !Ref SubnetD
+  CoreSG:
+    Value: !Ref WebSecurityGroup

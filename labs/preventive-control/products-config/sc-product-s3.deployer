@@ -1,0 +1,17 @@
+{
+  "Parameters" : {
+    "PorfolioStack" : "var.portfolioCfn",
+    "ProductName" : "s3",
+    "ProductDescription" : "S3 Bucket",
+    "ProductVersion" : "1.0",
+    "ProductVersionDescription" : "Initial Version",
+    "ProductTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/s3/sc-s3.yml",
+    "ProductRoleName" : "sc-s3-product-role",
+    "ProductPolicyName" : "var.policy",
+    "ProductRoleTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/s3/sc-s3-products-role.yml",
+    "TemplateRuleConstraint" : "",
+    "DeploymentBucket" : "var.deploymentBucket",
+    "DeployUpdatePipeline":"true",
+    "UpdateConfigFileName": "sc-s3-update"
+  }
+}

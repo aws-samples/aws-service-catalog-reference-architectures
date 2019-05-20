@@ -1,0 +1,56 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Lab - Provision Kinesis Firehose Stream
+Parameters:
+  KinesisRole:
+    Description: Kinesis IAM Role Arn
+    Type: String
+  S3StackName:
+    Description: Arn of S3 bucket to store failed documents
+    Type: String
+  KMSEncryptionKeyArn:
+    Description: Arn of KMS key use to encrypt content on S3
+    Type: String
+
+Resources:
+  Kinesis:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: sc-lab-kinesis-fh-stream
+      DeliveryStreamType: DirectPut
+      S3DestinationConfiguration:
+        BucketARN:
+          Fn::ImportValue:
+            !Sub "${S3StackName}-S3BucketArn"          
+        RoleARN: !Ref KinesisRole
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !Ref KMSEncryptionKeyArn
+        BufferingHints:
+          IntervalInSeconds: 60
+          SizeInMBs: 2
+        CompressionFormat: GZIP
+
+Outputs:
+  KinesisArn:
+    Value: !GetAtt Kinesis.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-KinesisArn
+  KinesisId:
+    Value: !Ref Kinesis
+    Export:
+      Name: !Sub ${AWS::StackName}-KinesisId

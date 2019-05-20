@@ -1,0 +1,35 @@
+{
+  "Parameters": {
+    "PorfolioStack": "var.portfolioCfn",
+    "ProductName": "dmsendpoint",
+    "ProductDescription": "DMS Endpoint",
+    "ProductVersion": "1.0",
+    "ProductVersionDescription": "Initial Version",
+    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/dmsendpoint/sc-dmsendpoint.yml",
+    "ProductRoleName": "sc-dms-endpoint-product-role",
+    "ProductPolicyName": "var.policy",
+    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/dmsendpoint/sc-dmsendpoint-products-role.yml",
+    "TemplateRuleConstraint": {
+      "EngineName": {
+        "Assertions": [
+          {
+            "Assert": {
+              "Fn::Contains": [
+                [
+                  "oracle"
+                ],
+                {
+                  "Ref": "EngineName"
+                }
+              ]
+            },
+            "AssertDescription": "Engine Name"
+          }
+        ]
+      }
+    },
+    "DeploymentBucket": "var.deploymentBucket",
+    "DeployUpdatePipeline": "true",
+    "UpdateConfigFileName": "sc-dmsendpoint-update"
+  }
+}

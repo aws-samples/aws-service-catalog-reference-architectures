@@ -1,0 +1,17 @@
+{
+  "Parameters" : {
+    "PorfolioStack" : "var.portfolioCfn",
+    "ProductName" : "kinesis",
+    "ProductDescription" : "Kinesis",
+    "ProductVersion" : "1.0",
+    "ProductVersionDescription" : "Initial Version",
+    "ProductTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/kinesis/sc-kinesis.yml",
+    "ProductRoleName" : "sc-kinesis-product-role",
+    "ProductPolicyName" : "var.policy",
+    "ProductRoleTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/kinesis/sc-kinesis-products-role.yml",
+    "TemplateRuleConstraint" : "",
+    "DeploymentBucket" : "var.deploymentBucket",
+    "DeployUpdatePipeline":"true",
+    "UpdateConfigFileName": "sc-kinesis-update"
+  }
+}

@@ -1,0 +1,121 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Service Catalog Lab - Lambdas
+Parameters:
+  DeploymentLambdaFunctionName:
+    Description: Service Catalog Product Policy Name
+    Type: String
+  DeploymentLambdaRoleName:
+    Description: Deploymnet Lambda Function Role Name
+    Type: String
+  ProductSelectorLambdaRoleName:
+    Description: Product Selector Lambda Function Role Name
+    Type: String
+  ResourceSelectorLambdaRoleName:
+    Description: Resource Selector Lambda Function Role Name
+    Type: String
+  ResourceComplianceLambdaRoleName:
+    Description: Resource Compliance Lambda Function Role Name
+    Type: String
+  DeploymentBucketName:
+    Description: S3 Bucket Name
+    Type: String
+  DeploymentConfigSuffix:
+    Description: Deployment Configuration file suffix e.g. deployer
+    Type: String
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref DeploymentBucketName
+      AccessControl: BucketOwnerFullControl
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-deployment-bucket"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+  DeploymentLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    DependsOn: S3Bucket
+    Properties:
+      FunctionName: !Ref DeploymentLambdaFunctionName
+      Handler: handler.lambda_handler
+      Runtime: python3.6
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${DeploymentLambdaRoleName}'
+      Timeout: 20
+      Code:
+        S3Bucket: aws-service-catalog-reference-architectures
+        S3Key: preventive-control/deployment-lambda.zip
+      Environment:
+        Variables:
+          cfnUrl: 'aws-service-catalog-reference-architectures/preventive-control/deployment-cfn/sc-product-deployment.yml'
+
+  ProductSelectorLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    DependsOn: DeploymentLambdaFunction
+    Properties:
+      FunctionName: sc-product-selector
+      Handler: handler.lambda_handler
+      Runtime: python3.6
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${ProductSelectorLambdaRoleName}'
+      Timeout: 300
+      Code:
+        S3Bucket: aws-service-catalog-reference-architectures
+        S3Key: preventive-control/product-selector-lambda.zip
+  ResourceSelectorLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    DependsOn: ProductSelectorLambdaFunction
+    Properties:
+      FunctionName: sc-resource-selector
+      Handler: handler.lambda_handler
+      Runtime: python3.6
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${ResourceSelectorLambdaRoleName}'
+      Timeout: 120
+      Code:
+        S3Bucket: aws-service-catalog-reference-architectures
+        S3Key: preventive-control/resource-selector-lambda.zip
+  ResourceComplianceLambdaFunction:
+    Type: "AWS::Lambda::Function"
+    DependsOn: ResourceSelectorLambdaFunction
+    Properties:
+      FunctionName: sc-resource-compliance
+      Handler: handler.lambda_handler
+      Runtime: python3.6
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${ResourceComplianceLambdaRoleName}'
+      Timeout: 120
+      Code:
+        S3Bucket: aws-service-catalog-reference-architectures
+        S3Key: preventive-control/resource-compliance-lambda.zip
+Outputs:
+  DeploymentLambdaArn:
+    Value: !GetAtt DeploymentLambdaFunction.Arn
+  ProductSelectorLambdaArn:
+    Value: !GetAtt ProductSelectorLambdaFunction.Arn
+  ResourceSelectorLambdaArn:
+    Value: !GetAtt ResourceSelectorLambdaFunction.Arn
+  ResourceComplianceLambdaArn:
+    Value: !GetAtt ResourceComplianceLambdaFunction.Arn
+  BucketArn:
+    Value: !GetAtt S3Bucket.Arn
+  BucketName:
+    Value: !Ref S3Bucket

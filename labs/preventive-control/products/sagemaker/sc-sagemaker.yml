@@ -1,0 +1,80 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog SageMaker Product
+Parameters:
+  KMSId:
+    Description: KMS Encryption Key Id
+    Type: String
+  InstanceType:
+    Description: The type of ML compute instance to launch for the notebook instance
+    Type: String
+  NotebookInstanceName:
+    Description: The name of the new notebook instance.
+    Type: String
+  RoleArn:
+    Description: ARN of SageMaker IAM Role.
+    Type: String
+  SubnetId:
+    Description: The ID of the subnet in a VPC to which you would like to have a connectivity from your ML compute instance
+    Type: String
+  SecurityGroupIds:
+    Description: VPC Security Groups Ids as comma separated list
+    Type: CommaDelimitedList
+  VolumeSizeInGB:
+      Description: The size, in GB, of the ML storage volume to attach to the notebook instance
+      Type: Number
+      MinValue: 5
+      MaxValue: 16384
+      Default: 5
+  Tags:
+    Description: The tags to be applied to the resource.
+    Type: String
+    Default: ''
+
+Conditions:
+  HasTags: !Not [!Equals [!Ref Tags, '']]
+
+Resources:
+  GetTags:
+    Type: "Custom::ResourceCompliance"
+    Condition : HasTags
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-compliance'
+      Action:
+        Name: json
+        Parameters:
+          JSON: !Ref Tags
+          Type: Tags
+  NotebookInstance:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      DirectInternetAccess: Disabled
+      InstanceType: !Ref InstanceType
+      KmsKeyId: !Ref KMSId
+      NotebookInstanceName: !Ref NotebookInstanceName
+      RoleArn: !Ref RoleArn
+      SecurityGroupIds: !Ref SecurityGroupIds
+      SubnetId: !Ref SubnetId
+      Tags: !If [HasTags, !GetAtt GetTags.Json, !Ref "AWS::NoValue"]
+      VolumeSizeInGB: !Ref VolumeSizeInGB
+
+Outputs:
+  NotebookArn:
+    Value: !Ref NotebookInstance
+    Export:
+      Name: !Sub ${AWS::StackName}-NotebookArn

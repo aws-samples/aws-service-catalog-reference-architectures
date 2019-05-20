@@ -1,0 +1,17 @@
+{
+  "Parameters" : {
+    "PorfolioStack" : "var.portfolioCfn",
+    "ProductName" : "efs",
+    "ProductDescription" : "Elastic File System",
+    "ProductVersion" : "1.0",
+    "ProductVersionDescription" : "Initial Version",
+    "ProductTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/efs/sc-efs.yml",
+    "ProductRoleName" : "sc-efs-product-role",
+    "ProductPolicyName" : "var.policy",
+    "ProductRoleTemplateUrl" : "aws-service-catalog-reference-architectures/preventive-control/products/efs/sc-efs-products-role.yml",
+    "TemplateRuleConstraint" : "",
+    "DeploymentBucket" : "var.deploymentBucket",
+    "DeployUpdatePipeline":"true",
+    "UpdateConfigFileName": "sc-efs-update"
+  }
+}

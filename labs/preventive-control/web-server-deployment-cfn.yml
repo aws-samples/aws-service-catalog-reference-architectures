@@ -1,0 +1,475 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Lab - Provision Web Server from Service Catalog
+Parameters:
+  TopicName:
+    Description: Notification Topic
+    Type: String
+    Default: 'sc-lab-sns-topic'
+  PortList:
+    Description: 'Comma-delimited list if ALB ports: WebALBIn,WebEC2In'
+    Type: CommaDelimitedList
+    Default: 443,443
+  ALBHealthCheckList:
+    Description: 'Comma delimited list of ALB health check: path,port,protocol'
+    Type: CommaDelimitedList
+    Default: /healthcheck.html,443,HTTPS
+  ALBHealthCheckThresholdsList:
+    Description: 'Comma delimited list of ALB health check thresholds: HealthyThreshold,UnhealthyThreshold,IntervalThreshold,TimeoutThreshold'
+    Type: CommaDelimitedList
+    Default: 2,5,5,2
+  AppInstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.medium
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+  AppHealthCheckGracePeriod:
+    Description: Number of seconds after instance launch ALB begins health checks
+    Type: Number
+    MinValue: 40
+    MaxValue: 5000
+    Default: 300
+    ConstraintDescription: Value must be between 40-5000 seconds
+  HealthCheckType:
+    Description: The service you want the health status from, Amazon EC2 or Elastic Load Balancer
+    Type: String
+    Default: ELB
+    AllowedValues:
+      - ELB
+      - EC2
+  AppMinMaxCount:
+    Description: 'Comma delimited list of min then max number of EC2 instances for ASG: min,max'
+    Type: CommaDelimitedList
+    Default: 1,2
+  ScalePolicyList:
+    Description: 'Comma delimited list of AutoScaling policy: ScaleOutCooldown,ScaleOutAdjustment,ScaleInCooldown,ScaleInAdjustment'
+    Type: CommaDelimitedList
+    Default: 3600,1,1200,-1
+  EnableScalePolicy:
+    Description: Enable Auto Scaling Policy
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  ImageId:
+    Description: AMI ImageId
+    Type: String
+    Default: 'ami-0de53d8956e8dcf80'
+  DomainName:
+    Description: Domain Name
+    Type: String
+    Default: 'www.example.com'
+  BucketName:
+    Description: S3 Bucket Name
+    Type: String
+
+Resources:
+  WebResourceSelector:
+    Type: "Custom::ResourceSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-selector'
+      Options:
+        OnError: failed
+      Resources:
+        vpc:
+          Tags:
+            - Key: Env
+              Value: lab
+            - Key: Name
+              Value: sc-lab-vpc
+          Options:
+            Match: all
+            Output: single
+        subnet:
+          Tags:
+            - Key: Env
+              Value: lab
+            - Key: sdlc
+              Value: web
+            - Key: Name
+              Value: sc-lab-web-subnet
+          Options:
+            Match: all
+            Output: all
+        sg:
+          Tags:
+            - Key: Env
+              Value: lab
+            - Key: sdlc
+              Value: web
+            - Key: Name
+              Value: sc-lab-web-sg
+          Options:
+            Match: all
+            Output: single
+            GroupName: sc-lab-web-sg
+        acm:
+          Tags:
+            - Key: Env
+              Value: lab
+            - Key: Name
+              Value: sc-lab
+          Options:
+            Match: all
+            Output: single
+            Domain: !Ref DomainName
+
+  ProductSelectorALB:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: alb
+  ProductSelectorALBTarget:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: albtarget
+  ProductSelectorALBListener:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: alblistener
+  ProductSelectorAutoScaling:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: autoscaling
+  ProductSelectorSNS:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: sns
+  ProductSelectorES:
+    Type: "Custom::ProductSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: elasticsearch
+  ProductSelectorS3:
+    Type: "Custom::ProductSelector"
+    Version: "1.0"
+    Properties:
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: 's3'
+
+  KinesisRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 'sc-lab-kinesis-role'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "firehose.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "FH"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - logs:PutLogEvents
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - s3:*
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketName}'
+                  - !Sub 'arn:aws:s3:::${BucketName}/*'
+
+  EC2Role:
+    Type: "AWS::IAM::Role"
+    DependsOn: KinesisRole
+    Properties:
+      RoleName: 'sc-lab-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "Stream"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - firehose:DeleteDeliveryStream
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                  - firehose:UpdateDestination
+                Resource: "*"
+
+  EC2InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    DependsOn: EC2Role
+    Properties:
+      Path: "/"
+      InstanceProfileName: sc-lab-ec2-role
+      Roles:
+        -
+          Ref: "EC2Role"
+
+  LabKMSKey:
+    Type: AWS::KMS::Key
+    DependsOn: EC2InstanceProfile
+    Properties:
+      Description: SC Lab KMS key
+      Enabled: 'true'
+      EnableKeyRotation: 'true'
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: key-default-1
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-elasticsearch-product-role'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-sns-product-role'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-autoscaling-product-role'
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling'
+                - !GetAtt KinesisRole.Arn
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: 'sc-lab-key'
+
+  LabKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    DependsOn: LabKMSKey
+    Properties:
+      AliasName: alias/sc-lab-key
+      TargetKeyId: !Ref LabKMSKey
+
+  S3Bucket:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: LabKMSKey
+    Properties:
+      ProvisionedProductName: 'sc-lab-s3'
+      ProvisioningParameters:
+        - Key: BucketName
+          Value: !Ref BucketName
+        - Key: KMSId
+          Value: !Ref LabKMSKey
+      ProductId: !GetAtt ProductSelectorS3.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorS3.ArtifactId
+
+  Kinesis:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: S3Bucket
+    Properties:
+      Parameters:
+        KinesisRole: !GetAtt  KinesisRole.Arn
+        KMSEncryptionKeyArn: !GetAtt LabKMSKey.Arn
+        S3StackName: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt S3Bucket.CloudformationStackArn ]]]]
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-kinesis-cfn"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/kinesis-deployment-cfn.yml
+
+  SNS:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: Kinesis
+    Properties:
+      ProvisionedProductName: 'sc-lab-sns'
+      ProvisioningParameters:
+        - Key: TopicName
+          Value: !Ref TopicName
+        - Key: KMSId
+          Value: !Ref LabKMSKey
+        - Key: PolicyPrincipal
+          Value: !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling'
+        - Key: PolicyAction
+          Value: "SNS:Publish"
+      ProductId: !GetAtt ProductSelectorSNS.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorSNS.ArtifactId
+
+  ALB:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: SNS
+    Properties:
+      ProvisionedProductName: 'sc-lab-alb'
+      ProvisioningParameters:
+        - Key: ALBName
+          Value: sc-lab-alb
+        - Key: SecurityGroupIds
+          Value: !GetAtt WebResourceSelector.sg
+        - Key: SubnetIds
+          Value: !GetAtt WebResourceSelector.subnet
+      ProductId: !GetAtt ProductSelectorALB.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorALB.ArtifactId
+
+  ALBTarget:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: ALB
+    Properties:
+      ProvisionedProductName: 'sc-lab-alb-target'
+      ProvisioningParameters:
+        - Key: ALBTargetName
+          Value: sc-lab-alb-target
+        - Key: HealthCheckIntervalSeconds
+          Value: !Select [2, !Ref ALBHealthCheckThresholdsList]
+        - Key: HealthCheckPath
+          Value: !Select [0, !Ref ALBHealthCheckList]
+        - Key: HealthCheckPort
+          Value: !Select [1, !Ref ALBHealthCheckList]
+        - Key: HealthCheckProtocol
+          Value: !Select [2, !Ref ALBHealthCheckList]
+        - Key: HealthCheckTimeoutSeconds
+          Value: !Select [3, !Ref ALBHealthCheckThresholdsList]
+        - Key: HealthyThresholdCount
+          Value: !Select [1, !Ref ALBHealthCheckThresholdsList]
+        - Key: AppPort
+          Value: !Select [1, !Ref PortList]
+        - Key: UnhealthyThresholdCount
+          Value: !Select [0, !Ref ALBHealthCheckThresholdsList]
+        - Key: VpcId
+          Value: !GetAtt WebResourceSelector.vpc
+      ProductId: !GetAtt ProductSelectorALBTarget.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorALBTarget.ArtifactId
+
+  ALBListener:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: ALBTarget
+    Properties:
+      ProvisionedProductName: 'sc-lab-alb-listener'
+      ProvisioningParameters:
+        - Key: CertificateArn
+          Value: !GetAtt WebResourceSelector.acm
+        - Key: ALBTargetGroupStack
+          Value: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt ALBTarget.CloudformationStackArn ]]]]
+        - Key: ALBStack
+          Value: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt ALB.CloudformationStackArn ]]]]
+        - Key: AppPort
+          Value: !Select [0, !Ref PortList]
+      ProductId: !GetAtt ProductSelectorALBListener.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorALBListener.ArtifactId
+
+  ASC:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    DependsOn: ALBListener
+    Properties:
+      ProvisionedProductName: 'sc-lab-autoscaling'
+      ProvisioningParameters:
+        - Key: ALBTargetGroupStack
+          Value: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt ALBTarget.CloudformationStackArn ]]]]
+        - Key: AppInstanceType
+          Value: !Ref AppInstanceType
+        - Key: AppEC2IAMRole
+          Value: !Ref EC2Role
+        - Key: AppHealthCheckGracePeriod
+          Value: !Ref AppHealthCheckGracePeriod
+        - Key: HealthCheckType
+          Value: !Ref HealthCheckType
+        - Key: AppMinCount
+          Value: !Select [0, !Ref AppMinMaxCount]
+        - Key: AppMaxCount
+          Value: !Select [1, !Ref AppMinMaxCount]
+        - Key: SNSTopicStackName
+          Value: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt SNS.CloudformationStackArn ]]]]
+        - Key: EnableScalePolicy
+          Value: !Ref EnableScalePolicy
+        - Key: ScaleOutCooldown
+          Value: !Select [0, !Ref ScalePolicyList]
+        - Key: ScaleOutAdjustment
+          Value: !Select [1, !Ref ScalePolicyList]
+        - Key: ScaleInCooldown
+          Value: !Select [2, !Ref ScalePolicyList]
+        - Key: ScaleInAdjustment
+          Value: !Select [3, !Ref ScalePolicyList]
+        - Key: ImageId
+          Value: !Ref ImageId
+        - Key: SecurityGroupIds
+          Value: !GetAtt WebResourceSelector.sg
+        - Key: SubnetIds
+          Value: !GetAtt WebResourceSelector.subnet
+        - Key: KeyName
+          Value: RemekDev
+        - Key: UserData
+          Value:
+            Fn::Base64:
+              !Sub |
+                #!/bin/bash
+                yum update -y;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/httpd.conf -O /tmp/httpd.conf;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/ssl.conf -O /tmp/ssl.conf;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/fh-agent.json -O /tmp/fh-agent.json;
+                yum install https://s3.amazonaws.com/streaming-data-agent/aws-kinesis-agent-latest.amzn1.noarch.rpm -y;
+                yum install httpd mod_ssl -y;
+                echo "<html>Success</html>" >> /var/www/html/healthcheck.html;
+                chmod 755 /var/www;
+                chgrp -R apache /var/log/httpd;
+                chmod -R g+wr /var/log/httpd;
+                mv /etc/httpd/conf/httpd.conf /etc/httpd/conf/httpd.bak || true;
+                cp /tmp/httpd.conf /etc/httpd/conf/httpd.conf;
+                mv /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/ssl.bak || true;
+                cp /tmp/ssl.conf /etc/httpd/conf.d/ssl.conf;
+                sed -i "s/localhost/${DomainName}/g" /etc/httpd/conf.d/ssl.conf;
+                mkdir /etc/pki/tls/apache;
+                cd /etc/pki/tls/apache;
+                chgrp -R apache /etc/pki/tls/apache;
+                chmod -R g+wr /etc/pki/tls/apache;
+                openssl req -newkey rsa:2048 -nodes -x509 -keyout ./myown.key -out ./myselfsigned.crt -days 180 -subj "/C=US/ST=Massachusetts/L=Boston/O=AmTech/CN=${DomainName}";
+                service httpd start;
+                chkconfig httpd on;
+                mv /etc/aws-kinesis/agent.json /etc/aws-kinesis/agent.bak || true;
+                cp /tmp/fh-agent.json /etc/aws-kinesis/agent.json;
+                chmod 777 /var/log/httpd;
+                service aws-kinesis-agent start;
+                ab -n 50000 -c 20 https://localhost/healthcheck.html
+
+      ProductId: !GetAtt ProductSelectorAutoScaling.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorAutoScaling.ArtifactId
