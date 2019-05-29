@@ -11,8 +11,7 @@
                     "Parameters": [
                         "DBVPC",
                         "DBSecurityGroupName",
-                        "DBSubnetOne",
-                        "DBSubnetTwo",
+                        "DBSubnets",
                         "DBSubnetGroupName",
                         "DBInputCIDR"
                     ]
@@ -63,20 +62,15 @@
             "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
             "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
         },
-        "DBSubnetOne": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "Select one subnet to include in the database subnet group",
+        "DBSubnets": {
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Description": "Select at least 2 subnets across 2 AZs to include in the database subnet group",
             "ConstraintDescription": "must be an existing subnet"
-        },
-        "DBSubnetTwo": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "Select one subnet to include in the database subnet group",
-            "ConstraintDescription": "must be an existing subnet"
-        },
+        },        
         "DBSecurityGroupName": {
             "Description": "The name of the security group to be created",
             "Type": "String",
-            "MinLength": "8",
+            "MinLength": "1",
             "MaxLength": "255",
             "ConstraintDescription": "Cannot start with sg-. Up to 255 characters in length."
         },
@@ -119,16 +113,16 @@
             "Type": "String",
             "MinLength": "12",
             "MaxLength": "41",
-            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?_|\\W)(?=.*?\\s)?.{8,}$",
-            "ConstraintDescription": "Minimum 12 characters, at least one of each of the following: uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=."
+            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?(_|\\W))(?=.*?\\s)?.{8,}$",
+            "ConstraintDescription": "Minimum 12 characters, at least one of each of the following: uppercase, lowercase, number, and symbol character such as !#$%^&*()<>[]{}|_+-=."
         },
         "DBBackupRetentionPeriod": {
-            "Description": "The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
+            "Description": "The number of days for which automated backups are retained. Allowed values 0-10. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
             "Default": "1",
             "Type": "Number",
             "MinValue": "0",
-            "MaxValue": "7",
-            "ConstraintDescription": "must be a number between 0 and 7."
+            "MaxValue": "10",
+            "ConstraintDescription": "must be a number between 0 and 10."
         },
         "DBAllocatedStorage": {
             "Default": "20",
@@ -141,31 +135,22 @@
         "DBEngineVersion": {
             "Description": "The database engine version",
             "Type": "String",
-            "Default": "9.6.5",
+            "Default": "11.2",
             "AllowedValues": [
-                "9.6.6",
-                "9.6.5",
-                "9.6.3",
-                "9.6.2",
-                "9.6.1",
-                "9.5.10",
-                "9.5.9",
-                "9.5.7",
-                "9.5.6",
-                "9.5.4",
-                "9.5.2",
-                "9.4.15",
-                "9.4.14",
-                "9.4.12",
-                "9.4.11",
-                "9.4.9",
-                "9.4.7",
-                "9.3.20",
-                "9.3.19",
-                "9.3.17",
-                "9.3.16",
-                "9.3.14",
-                "9.3.12"
+                "11.2",
+                "11.1",
+                "10.7",
+                "10.6",
+                "10.5",
+                "10.4",
+                "10.3",
+                "10.1",
+                "9.6.12",
+                "9.6.11",
+                "9.6.10",
+                "9.6.9",
+                "9.6.8",
+                "9.6.6"
             ]
         },
         "DBInstanceClass": {
@@ -179,6 +164,12 @@
                 "db.t2.large",
                 "db.t2.xlarge",
                 "db.t2.xlarge",
+                "db.m5.24xlarge",
+                "db.m5.12xlarge",
+                "db.m5.4xlarge",
+                "db.m5.2xlarge", 
+                "db.m5.xlarge", 
+                "db.m5.large", 	
                 "db.m4.large",
                 "db.m4.xlarge",
                 "db.m4.2xlarge",
@@ -222,14 +213,7 @@
                     "Ref": "DBSubnetGroupName"
                 },
                 "DBSubnetGroupDescription": "PostgreSQL RDS Subnet Group",
-                "SubnetIds": [
-                    {
-                        "Ref": "DBSubnetOne"
-                    },
-                    {
-                        "Ref": "DBSubnetTwo"
-                    }
-                ]
+                "SubnetIds": { "Ref": "DBSubnets" }
             }
         },
         "DBEC2SecurityGroup": {
