@@ -11,8 +11,7 @@
                     "Parameters": [
                         "DBVPC",
                         "DBSecurityGroupName",
-                        "DBSubnetOne",
-                        "DBSubnetTwo",
+                        "DBSubnets",
                         "DBSubnetGroupName",
                         "DBInputCIDR"
                     ]
@@ -65,18 +64,13 @@
         "DBSecurityGroupName": {
             "Description": "The name of the security group to be created",
             "Type": "String",
-            "MinLength": "5",
+            "MinLength": "1",
             "MaxLength": "255",
             "ConstraintDescription": "Cannot start with sg-. Up to 255 characters in length."
         },
-        "DBSubnetOne": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "Select one subnet to include in the database subnet group",
-            "ConstraintDescription": "must be an existing subnet"
-        },
-        "DBSubnetTwo": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "Select one subnet to include in the database subnet group",
+        "DBSubnets": {
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Description": "Select at least 2 subnets across 2 AZs to include in the database subnet group",
             "ConstraintDescription": "must be an existing subnet"
         },
         "DBSubnetGroupName": {
@@ -109,16 +103,16 @@
             "Type": "String",
             "MinLength": "12",
             "MaxLength": "41",
-            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?_|\\W)(?=.*?\\s)?.{8,}$",
+            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?(_|\\W))(?=.*?\\s)?.{8,}$",
             "ConstraintDescription": "Minimum 12 characters, at least one of each of the following: uppercase, lowercase, number, and symbol character such as !@#$%^&*()<>[]{}|_+-=."
         },
         "DBBackupRetentionPeriod": {
-            "Description": "The number of days for which automated backups are retained. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
+            "Description": "The number of days for which automated backups are retained. Allowed values 0-10. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
             "Default": "1",
             "Type": "Number",
             "MinValue": "0",
-            "MaxValue": "7",
-            "ConstraintDescription": "must be a number between 0 and 7."
+            "MaxValue": "10",
+            "ConstraintDescription": "must be a number between 0 and 10."
         },
         "DBAllocatedStorage": {
             "Default": "200",
@@ -131,12 +125,12 @@
         "DBEngineVersion": {
             "Description": "The database engine version",
             "Type": "String",
-            "Default": "13.00.4451.0.v1",
+            "Default": "14.00.3049.1.v1",
             "AllowedValues": [
-                "14.00.1000.169.v1",
-                "13.00.4451.0.v1",
-                "13.00.4422.0.v1",
-                "13.00.2164.0.v1"
+                "14.00.3049.1.v1",
+                "14.00.3015.40.v1",                
+                "13.00.5216.0.v1",
+                "12.00.5571.0.v1"
             ],
             "ConstraintDescription": "must select a valid database engine version."
         },
@@ -145,7 +139,10 @@
             "Type": "String",
             "Default": "sqlserver-se",
             "AllowedValues": [
-                "sqlserver-se"
+                "sqlserver-ee",
+                "sqlserver-se",
+                "sqlserver-ex",
+                "sqlserver-web"
             ],
             "ConstraintDescription": "must select a valid database engine."
         },
@@ -154,6 +151,12 @@
             "Type": "String",
             "Default": "db.m4.large",
             "AllowedValues": [
+                "db.m5.24xlarge",
+                "db.m5.12xlarge",
+                "db.m5.4xlarge",
+                "db.m5.2xlarge", 
+                "db.m5.xlarge", 
+                "db.m5.large", 	
                 "db.m4.large",
                 "db.m4.xlarge",
                 "db.m4.2xlarge",
@@ -187,14 +190,7 @@
                     "Ref": "DBSubnetGroupName"
                 },
                 "DBSubnetGroupDescription": "Amazon RDS Microsoft SQL Subnet Group",
-                "SubnetIds": [
-                    {
-                        "Ref": "DBSubnetOne"
-                    },
-                    {
-                        "Ref": "DBSubnetTwo"
-                    }
-                ]
+                "SubnetIds": { "Ref": "DBSubnets" }
             }
         },
         "DBEC2SecurityGroup": {
