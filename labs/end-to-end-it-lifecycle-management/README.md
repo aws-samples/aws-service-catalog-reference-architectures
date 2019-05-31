@@ -1,4 +1,4 @@
-# Building an end-to-end IT Lifecycle flow
+# Build end-to-end IT lifecycle management on AWS
 
 ## **Setup**
 *maybe create a markdown for each of these items*
