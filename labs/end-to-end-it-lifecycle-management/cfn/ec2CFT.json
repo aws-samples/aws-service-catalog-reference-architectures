@@ -1,0 +1,60 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation base Template for launching an EC2 instance.",
+  "Parameters" : {
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "AllowedValues" : [   "t2.micro", "t2.medium" ],
+      "ConstraintDescription" : "Must be a valid EC2 instance type."
+    },
+    "SubnetID" : {
+      "Type" : "AWS::EC2::Subnet::Id",
+      "Description" : "Id of an existing subnet (for the primary network) in your Virtual Private Cloud (VPC)",
+      "ConstraintDescription" : "Must be an existing subnet in the selected Virtual Private Cloud."
+    },
+      "SecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup::Id",
+      "Description" : "Id of an existing security group (for the primary network) in your Virtual Private Cloud (VPC)",
+      "ConstraintDescription" : "Must be an existing security group in the selected Virtual Private Cloud."
+    },
+      "AMI" : {
+      "Type" : "String",
+      "Description" : "AMI ID"
+    },
+      "KeyName" : {
+      "Type" : "AWS::EC2::KeyPair::KeyName",
+      "Description" : "Keypair"
+    }
+  },
+ 
+  "Resources" : {
+    "EC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "InstanceType" : {
+          "Ref" : "InstanceType"
+        },
+        "ImageId" : {"Ref":"AMI"},
+        "KeyName":{"Ref":"KeyName"},
+        "NetworkInterfaces" : [ {
+          "DeviceIndex" : "0",
+          "GroupSet" : [ {
+            "Ref" : "SecurityGroup"
+          } ],
+          "SubnetId" : {
+            "Ref" : "SubnetID"
+          }
+        } ]
+      }
+    }
+  },
+  "Outputs" : {
+    "InstanceName" : {
+      "Value" : {
+        "Ref" : "EC2Instance"
+      },
+      "Description" : "EC2 instance name"
+    }
+  }
+} 

@@ -1,0 +1,4 @@
+Issues:
+1. Keys are open in outputs- maybe store in SSM Param store as securestring, or ask user to create
+2. Add step to create a new key pair
+3. Don't end SNOW admin password with an @
