@@ -11,14 +11,10 @@
 - A **portfolio** is a collection of products, together with the configuration information. You can use portfolios to manage the user access to specific products.
 - **Constraints** control the way users can deploy a product.
     * _Launch Constraints_
-    With launchconstraints,youcanspecifyarolethattheAWS
-Service Catalog can assume to launch a product from the portfolio. This means that you don’t need to give permissions necessary to deploy the resource to your IAM user.
-o NotificationConstraints-AnotificationconstraintspecifiesanAmazonSNStopicto receive notifications about stack events.
-o TemplateConstraints-Tolimittheoptionsthatareavailabletoenduserswhenthey launch a product, you apply template constraints.
-• User roles:
-            
-o ServiceCatalogAdministrator-ThisuserhasAWSServiceCatalogAdminFullAccess policy associated with it. You will use this user for configuring your AWS Service Catalog.
-o ServiceCatalogEnduser-ThisuserhasAWSServiceCatalogEndUserFullAccess policy associated with it. You will use this user for launching products from available catalog.
+    <br>With launchconstraints,you can specify a role that the AWS
+    Service Catalog can assume to launch a product from the portfolio. This means that you don’t need to give permissions necessary to deploy the resource to your IAM user.
+    * _Notification Constraints_ <br>AnotificationconstraintspecifiesanAmazonSNStopicto receive notifications about stack events.
+    *_Template Constraints_ <br>To limit the options that are available to end users when they launch a product, you apply template constraints.
 
 ### What are we doing in this lab?
 AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. AWS Service Catalog allows you to centrally manage commonly deployed IT services in AWS, and helps you achieve consistent governance and meet your compliance requirements while enabling users to quickly deploy only the approved IT services they need.
@@ -87,8 +83,6 @@ You will need to setup your AWS account with the required infrastructure to run 
 ![Stack Complete](/labs/end-to-end-it-lifecycle-management/resources/stack-complete.png)
 
 
-
-
 ### ServiceNow instance setup and configuration.
 **Please skip this step if you are doing this as a part of AWS re:inforce 2019. We will provide you with a pre-configured ServiceNow instance for this event.** <br />
 As a part of this lab, you will be connecting your `AWS account` with a `ServiceNow` instance. If you haven't been provided a `ServiceNow` instance, you can follow the [AWS Service Catalog-ServiceNow Connector Setup](README-PREREQ-SNOW.md) to set up a `ServiceNow` instance with the `AWS Service Catalog connector for ServiceNow` and a scoped app for setting up `SNS notifications`.
@@ -98,7 +92,12 @@ As a part of this lab, you will be connecting your `AWS account` with a `Service
 
 
 ## **C. Lab Execution**
-
+In this lab, we have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
+* User roles
+    - ServiceCatalogAdministrator
+    <br> This role has AWSServiceCatalogAdminFullAccess policy associated with it. You can use this user for configuring and managing your AWS Service Catalog.
+    - ServiceCatalogEnduser
+    <br> This role has AWSServiceCatalogEndUserFullAccess policy associated with it. You will use this user for launching products from available catalog.
 ### Task 1.1- Provisioning EC2 from the EC2 console 
 
 1. Log in using the Service Catalog end user in your AWS account. To do this, use the link provided in the CloudFormation `Outputs` from the *Lab Setup* section for the key `SwitchRoleSCEndUser`.
@@ -107,7 +106,8 @@ As a part of this lab, you will be connecting your `AWS account` with a `Service
 4. Select the instance size of `t2.micro` and click `Review and Launch`.
 5. On the `Review Instance Launch` page, click `Launch`.
 6. Select an existing key pair, or create a new key pair for your instance, and click `Launch Instances`.
-7. At this time, you will notice that the `Launch Instances` button is **disabled**. This is by design, and proves that your Service Catalog end user does not have the permissions to launch EC2 instances from the EC2 console.
+7. At this time, you will get the `Launch Failed` error. This is by design, and proves that your Service Catalog end user does not have the permissions to launch EC2 instances from the EC2 console.
+(/labs/end-to-end-it-lifecycle-management/resources/ec2-fail.png)
 
 In the next task, we will see how this user can launch an EC2 instance in a secure, and governed manner using AWS Service Catalog.
 
