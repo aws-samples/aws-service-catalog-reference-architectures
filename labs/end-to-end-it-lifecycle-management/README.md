@@ -36,7 +36,7 @@ You will need to setup your AWS account with the required infrastructure to run 
     - Canada (ca-central-1)
 <br />_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
 2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account.
-<br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/labs/end-to-end-it-lifecycle-management/cfn/lab.json)
+<br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://marketplace-sa-resources.s3.amazonaws.com/lab.json)
 3. On the `Create Stack` page, verify that you have selected one of the regions from _Step 1_ and Click `Next`.
 6.	On the `Specify Details` page, enter `SC-SNOW-<your-name>` in the `Stack Name` text box, and then click `Next`. Do not change the parameter value for `PWD`. 
 >todo- need to change the param name PWD or add explanation 
@@ -80,10 +80,17 @@ As a part of this lab, you will be connecting your `AWS account` with a `Service
 
 ## **C. Lab Execution**
 
-### Objective: Show the value prop of AWS SC
+### Task 1.1- Provisioning EC2 from the EC2 console 
 
-1. Try to launch an EC2 instance from the console--get error
-2. Launch through Service Catalog in a controlled fashion--shows value prop of AWS SC
+1. Log in using the Service Catalog end user in your AWS account. To do this, use the link provided in the CloudFormation `Outputs` from the *Lab Setup* section for the key `SwitchRoleSCEndUser`.
+2. From the AWS Management Console, click on `Services`, and select `EC2`
+3. Click on the `Launch Instance` button, and then click on `Select` for any of the listed Amazon Machine Images (AMI).
+4. Select the instance size of `t2.micro` and click `Review and Launch`.
+5. On the `Review Instance Launch` page, click `Launch`.
+6. Select an existing key pair, or create a new key pair for your instance, and click `Launch Instances`.
+7. At this time, you will notice that the `Launch Instances` button is **disabled**. This is by design, and proves that your Service Catalog end user does not have the permissions to launch EC2 instances from the EC2 console.
+
+In the next task, we will see how this user can launch an EC2 instance in a secure, and governed manner using AWS Service Catalog.
 
 ### Objective: Show the value prop of SNOW integration
 
