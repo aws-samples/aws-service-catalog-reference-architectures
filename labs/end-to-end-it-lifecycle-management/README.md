@@ -44,6 +44,7 @@ You will need to setup your AWS account with the required infrastructure to run 
 8.	On the `Review` page, select `"I acknowledge that AWS CloudFormation might create IAM resources with custom names."` checkbox and then click `Create`.
 9.	Once status of the stack changes to `CREATE COMPLETE`, click on the stack and open the `Outputs` tab to see the output values.
 10.	Copy the key and value column contents of the `Outputs` section and save it in a text file. You would be referring to these output values throughout the lab. Here are the keys that you will find in the output:
+    ```
     - AMI         
     - ConfigBucket        
     - ConfigServiceRole
@@ -62,8 +63,8 @@ You will need to setup your AWS account with the required infrastructure to run 
     - SwitchRoleSCAdmin   
     - SwitchRoleSCEndUser 
     - T2MicroConfigRuleTopic    
-    - T2MicroConfigRuleTopic       
-
+    - T2MicroConfigRuleTopic 
+    ```
 ![Stack Complete](/labs/end-to-end-it-lifecycle-management/resources/stack-complete.png)
 
 
@@ -96,9 +97,6 @@ As a part of this lab, you will be connecting your `AWS account` with a `Service
 Needs updates
 
 ## Clean Up
-
-[(Back to top)](#table-of-contents)
-
 >todo
 
 ```sh
@@ -106,13 +104,9 @@ sample code
 ```
 
 ## Contributing
-[(Back to top)](#table-of-contents)
 >todo
 
 Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first. :tada:
 
 ## License
-
-[(Back to top)](#table-of-contents)
-
->todo
+This sample code is made available under a modified MIT license. See the LICENSE file.
