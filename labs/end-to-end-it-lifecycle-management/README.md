@@ -13,8 +13,8 @@
     * _Launch Constraints_
     <br>With launchconstraints,you can specify a role that the AWS
     Service Catalog can assume to launch a product from the portfolio. This means that you don’t need to give permissions necessary to deploy the resource to your IAM user.
-    * _Notification Constraints_ <br>AnotificationconstraintspecifiesanAmazonSNStopicto receive notifications about stack events.
-    *_Template Constraints_ <br>To limit the options that are available to end users when they launch a product, you apply template constraints.
+    * _Notification Constraints_ <br>A notification constraint specifies an Amazon SNS topic to receive notifications about stack events.
+    * _Template Constraints_ <br>To limit the options that are available to end users when they launch a product, you apply template constraints.
 
 ### What are we doing in this lab?
 AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. AWS Service Catalog allows you to centrally manage commonly deployed IT services in AWS, and helps you achieve consistent governance and meet your compliance requirements while enabling users to quickly deploy only the approved IT services they need.
