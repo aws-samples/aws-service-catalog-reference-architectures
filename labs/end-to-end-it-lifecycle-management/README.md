@@ -15,7 +15,7 @@ You will need to setup your AWS account with the required infrastructure to run 
     - Canada (ca-central-1)
 <br />_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
 2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account.
-[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/labs/end-to-end-it-lifecycle-management/cfn/lab.json)
+<br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/labs/end-to-end-it-lifecycle-management/cfn/lab.json)
 3. On the `Create Stack` page, verify that you have selected one of the regions from _Step 1_ and Click `Next`.
 6.	On the `Specify Details` page, enter `SC-SNOW-<your-name>` in the `Stack Name` text box, and then click `Next`. Do not change the parameter value for `PWD`. 
 >todo- need to change the param name PWD or add explanation 
