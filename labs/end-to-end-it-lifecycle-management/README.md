@@ -13,7 +13,7 @@ You will need to setup your AWS account with the required infrastructure to run 
     - Ireland (eu-west-1)
     - Singapore (ap-southeast-1)
     - Canada (ca-central-1)
-_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
+<br />_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
 2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account.
 [![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/labs/end-to-end-it-lifecycle-management/cfn/lab.json)
 3. On the `Create Stack` page, verify that you have selected one of the regions from _Step 1_ and Click `Next`.
