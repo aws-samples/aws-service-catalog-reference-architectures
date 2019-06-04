@@ -107,7 +107,7 @@ In this lab, we have set up pre-provisioned roles for you in the *Lab Setup* sec
 5. On the `Review Instance Launch` page, click `Launch`.
 6. Select an existing key pair, or create a new key pair for your instance, and click `Launch Instances`.
 7. At this time, you will get the `Launch Failed` error. This is by design, and proves that your Service Catalog end user does not have the permissions to launch EC2 instances from the EC2 console.
-(/labs/end-to-end-it-lifecycle-management/resources/ec2-fail.png)
+![ec2-launch-fail](/labs/end-to-end-it-lifecycle-management/resources/ec2-fail.png)
 
 In the next task, we will see how this user can launch an EC2 instance in a secure, and governed manner using AWS Service Catalog.
 
