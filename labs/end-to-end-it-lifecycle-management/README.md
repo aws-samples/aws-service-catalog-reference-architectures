@@ -5,6 +5,9 @@
 ### What is AWS Service Catalog?
 AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. These IT services can include everything from virtual machine images, servers, software, and databases to complete multi-tier application architectures. AWS Service Catalog allows you to centrally manage commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need.
 
+### What is ServiceNow?
+ServiceNow is an enterprise service management platform that places a service oriented lens on the activities, tasks, and processes that make up day to day work life to enable a modern work environment. ServiceNow has a Service Catalog, which is a self-service application that end users can use to order IT services based on request fulfillment approvals and workflows.
+
 **Service Catalog Concepts**
 - A **product** is an IT service that you want to make available for deployment on AWS. You create a product by importing a CloudFormation template.
 - A **provisioned product** is a CloudFormation stack. When an end user launches a product, the AWS Service Catalog provisions the product in form of a CloudFormation stack.
@@ -115,20 +118,23 @@ In the next task, we will see how this user can launch an EC2 instance in a secu
 >todo - add from pdf
 
 ### Task 2.1- Configure ServiceNow with access for your AWS account
->todo - add from pdf
+In this task, you will add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps. 
+[Configure your AWS accounts in ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md) 
 
 ### Task 2.2- Provisioning an AWS Service Catalog for EC2 from ServiceNow
->todo - add from pdf
+In this task, you will provision an AWS Service Catalog product for launching an EC2 instance from ServiceNow. 
+Refer to the following page to go through these steps: 
+[Provisioning AWS Services using ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
 
 ### Task 3.1- Configure AWS to create incidents in ServiceNow
->todo - add from pdf
+In this task, you will configure your AWS account to send an SNS notification to ServiceNow. 
+We have preconfigured the AWS Config rule to evaluate if an EC2 instance other than size t2.micro is launc hed in your AWS account. You will enable this rule and set up an AWS CloudWatch events rule to trigger SNS notifications to ServiceNow from your account. 
+Refer to the following page to go through the steps to enable notifications based on AWS Config: 
+[Set up AWS notifications to ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
 
 ### Task 3.2- Create an incident in ServiceNow by provisioning a disallowed EC2 instance size
->todo - add from pdf
-
-
-
-
+In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size t2.micro. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. Refer to the following page to go through the steps to trigger incident creation in ServiceNow: 
+[Trigger incident creation in ServiceNow from AWS](README-SNOW-INCIDENT-CREATION.md)
 
 
 ***
@@ -144,7 +150,7 @@ sample code
 ## Contributing
 >todo
 
-Your contributions are always welcome! Please have a look at the [contribution guidelines](CONTRIBUTING.md) first. :tada:
+Your contributions are always welcome! Please have a look at the [contribution guidelines](/labs/end-to-end-it-lifecycle-management/resources/CONTRIBUTING.md) first. :tada:
 
 ## License
 This sample code is made available under a modified MIT license. See the LICENSE file.
