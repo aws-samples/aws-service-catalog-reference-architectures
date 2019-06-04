@@ -54,7 +54,7 @@ _Note - Ensure that you have AdministratorAccess policy attached with your login
 As a part of this lab, you will be connecting your `AWS account` with a `ServiceNow` instance. If you haven't been provided a `ServiceNow` instance, you can follow the [AWS Service Catalog-ServiceNow Connector Setup](README-PREREQ-SNOW.md) to set up a `ServiceNow` instance with the `AWS Service Catalog connector for ServiceNow` and a scoped app for setting up `SNS notifications`.
 
 >todo- lab folks will still need to configure SNOW with their AWS configuration
----
+
 ## **B. Lab Overview**
 #### What are we doing in this lab?
 AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. AWS Service Catalog allows you to centrally manage commonly deployed IT services in AWS, and helps you achieve consistent governance and meet your compliance requirements while enabling users to quickly deploy only the approved IT services they need.
@@ -72,7 +72,7 @@ _ServiceNow related_
 #### How does the architecture look?
 ![AWS-SC-SNOW-Architecture-Diagram](/labs/end-to-end-it-lifecycle-management/resources/architecture.png)
 
----
+
 
 ## **C. Lab Execution**
 
