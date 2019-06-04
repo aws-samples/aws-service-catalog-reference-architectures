@@ -111,15 +111,22 @@ In this lab, we have set up pre-provisioned roles for you in the *Lab Setup* sec
 
 In the next task, we will see how this user can launch an EC2 instance in a secure, and governed manner using AWS Service Catalog.
 
-### Task 1.1- Provisioning EC2 from the EC2 console 
+### Task 1.2- Provisioning EC2 from AWS Service Catalog
+>todo - add from pdf
+
+### Task 2.1- Configure ServiceNow with access for your AWS account
+>todo - add from pdf
+
+### Task 2.2- Provisioning an AWS Service Catalog for EC2 from ServiceNow
+>todo - add from pdf
+
+### Task 3.1- Configure AWS to create incidents in ServiceNow
+>todo - add from pdf
+
+### Task 3.2- Create an incident in ServiceNow by provisioning a disallowed EC2 instance size
+>todo - add from pdf
 
 
-
-
-### Objective: Show the value prop of SNOW integration
-
-1. Launch an EC2 instance from the ServiceNow dashboard 
-2. Create an incident in ServiceNow if instance launched is t2.medium
 
 
 
