@@ -3,7 +3,7 @@
 ## **A. Lab Overview**
 
 ### What is AWS Service Catalog?
-
+AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. These IT services can include everything from virtual machine images, servers, software, and databases to complete multi-tier application architectures. AWS Service Catalog allows you to centrally manage commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need.
 
 **Service Catalog Concepts**
 - A **product** is an IT service that you want to make available for deployment on AWS. You create a product by importing a CloudFormation template.
@@ -17,9 +17,9 @@
     * _Template Constraints_ <br>To limit the options that are available to end users when they launch a product, you apply template constraints.
 
 ### What are we doing in this lab?
-AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. AWS Service Catalog allows you to centrally manage commonly deployed IT services in AWS, and helps you achieve consistent governance and meet your compliance requirements while enabling users to quickly deploy only the approved IT services they need.
-In this lab, you will learn the following things:
+This lab is designed to help you understand how AWS Service Catalog can help you meet your governance, security, and self-service objectives while running AWS workloads. Additionally, this lab will show you how AWS Service Catalog integrates with an asset management system like ServiceNow.
 
+In this lab, you will learn the following things:
 _AWS Related_
 1. Configure an approved catalog of IT services created and managed on AWS. These IT services can include everything from virtual machine images, servers, software, and databases to complete multi-tier application architectures. 
 2. The end user experience of provisioning and managing approved IT services using AWS Service Catalog.
