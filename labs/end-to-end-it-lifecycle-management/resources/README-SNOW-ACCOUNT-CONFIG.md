@@ -10,10 +10,10 @@ connector. This role is associated with EC2 product while setting up your SNOW-S
 - `SCEndUser` - Within ServiceNow, the SCEndUser is mapped to snow-stsuser-account. SCEndUser has access to assume SnowEndUser role.
 
 In this task:
-- You will create two ServiceNow accounts, and map them to SCEndUser and SCSyncUser using their credentials.
-- Next, you will run `Syncallaccountsscheduledjob` which will pull AWS Service Catalog resources into ServiceNow. 
+- You will configure the AWS Service Catalog Connector scoped application
+- You will create two ServiceNow accounts, and map them to `SCEndUser` and `SCSyncUser` using their credentials.
+- Next, you will run `Sync all accounts scheduled job` which will pull AWS Service Catalog resources into ServiceNow. 
 - Next, you will associate SnowEndUser(fromAWS) with the snow-stsuser-account and order_aws_sc_products roles in ServiceNow.
-- You will launch an EC2 instance from ServiceNow (browniepointstask)
 
 ## Configuring AWS Service Catalog Connector Scoped Application
 >todo: Is this going to be preconfigured???
@@ -30,6 +30,7 @@ To configure the AWS Service Catalog scoped application and applicable roles
 In the AWS Service Catalog scoped app Accounts menu, you will create two accounts, one for sync and one for provisioning. 
 
 The following table shows the correlations between AWS and ServiceNow identities:
+
 | ServiceNow Account   | AWS User   |
 |----------------------|------------|
 | snow-sync-account    | SCSyncUser |
