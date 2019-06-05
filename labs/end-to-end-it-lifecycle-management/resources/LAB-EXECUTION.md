@@ -1,5 +1,10 @@
 # Lab Execution
-In this lab, we have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
+In this lab, you will go through the Service Catalog administrator and end-user experiences in Section 1. In Section 2, you will go through the ServiceNow experience when integrated with AWS. 
+
+
+## Section 1: AWS related activities
+ ![sc-icon](/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png)
+We have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
 * User roles
     - `service_catalog_administrator`
     <br> This role has AWSServiceCatalogAdminFullAccess policy associated with it. You can use this user for configuring and managing your AWS Service Catalog.
@@ -65,7 +70,8 @@ In this task, you will login as an end user and provision resources from the sam
 12. On the Review page, review the configuration information, and click `LAUNCH`. This will create a CloudFormation stack. The initial status of the product is shown as `Under change`. Wait a minute, then refresh the screen till the status changes to `AVAILABLE`.
     -  This means you have successfully launched an EC2 instance from AWS Service Catalog. Optionally, you can review the EC2 instance you created. You have been given AmazonEC2ReadOnlyAccess so that you can view the EC2 Management Console.
 
-
+## Section 2- ServiceNow related activities
+ ![snow-icon](/labs/end-to-end-it-lifecycle-management/resources/snow-icon.png)
 ### Task 2.1- Configure ServiceNow with access for your AWS account
 In this task, you will add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps. 
 [Configure your AWS accounts in ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md) 

@@ -6,8 +6,6 @@ _(We will provide you AWS credits before you start at the day of this event for 
 
 You will need to setup your AWS account with the required infrastructure to run this lab. We have provided an AWS CloudFormation template to make this a one step process for you. Follow these steps to set up your AWS account for this lab:
 
-
->todo: Add Stack Template URL- upload lab.json to an S3 bucket  
 1.	Login to your AWS account as an administrator and select one the following 4 regions from the top right corner on the AWS Management Console:
     - North Virginia (us-east-1)
     - Ireland (eu-west-1)
@@ -50,6 +48,4 @@ You will need to setup your AWS account with the required infrastructure to run 
 ### ServiceNow instance setup and configuration.
 **Please skip this step if you are doing this as a part of AWS re:inforce 2019. We will provide you with a pre-configured ServiceNow instance for this event.** <br />
 As a part of this lab, you will be connecting your `AWS account` with a `ServiceNow` instance. If you haven't been provided a `ServiceNow` instance, you can follow the [AWS Service Catalog-ServiceNow Connector Setup](README-PREREQ-SNOW.md) to set up a `ServiceNow` instance with the `AWS Service Catalog connector for ServiceNow` and a scoped app for setting up `SNS notifications`.
-
->todo- lab folks will still need to configure SNOW with their AWS configuration
 
