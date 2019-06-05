@@ -19,7 +19,7 @@ ServiceNow is an enterprise service management platform that places a service or
 ### What are we doing in this lab?
 This lab is designed to help you understand how AWS Service Catalog can help you meet your governance, security, and self-service objectives while running AWS workloads. Additionally, this lab will show you how AWS Service Catalog integrates with an asset management system like ServiceNow.
 
-In this lab, you will learn the following things:
+In this lab, you will learn the following things:<br />
 _AWS Related_
 1. Configure an approved catalog of IT services created and managed on AWS. These IT services can include everything from virtual machine images, servers, software, and databases to complete multi-tier application architectures. 
 2. The end user experience of provisioning and managing approved IT services using AWS Service Catalog.
