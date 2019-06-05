@@ -4,6 +4,13 @@ In this workshop, cloud architects, Cloud Center of Excellence (CCOE) team membe
 
 This hands-on session requires you to **bring your own laptop and an AWS account** to the workshop. 
 
+## Table of Contents
+[A. Lab Overview](#a.-lab-overview)
+[B. Lab Setup](#b.-lab-setup)
+[C. Lab Execution](#c.-lab-execution)
+[Clean up](#clean-up)
+[Contributing](#contributing)
+[License](#license)
 ## **A. Lab Overview** 
 
 ### What is AWS Service Catalog?
@@ -189,11 +196,12 @@ In this task, you will use ServiceNow to launch an AWS Service Catalog product w
 ```sh
 add steps for clean up
 ```
-
+[(Back to top)](#building-an-end-to-end-IT-lifecycle-flow-with-AWS-Service-Catalog-and-ServiceNow)
 ## Contributing
 Your contributions are always welcome! Please have a look at the [contribution guidelines](/labs/end-to-end-it-lifecycle-management/resources/CONTRIBUTING.md) first. :tada:
 
+[(Back to top)](#building-an-end-to-end-IT-lifecycle-flow-with-AWS-Service-Catalog-and-ServiceNow)
 ## License
 This sample code is made available under a modified MIT license. See the LICENSE file.
 
-[Back to top](#building-an-end-to-end-IT-lifecycle-flow-with-AWS-Service-Catalog-and-ServiceNow)
+[(Back to top)](#building-an-end-to-end-IT-lifecycle-flow-with-AWS-Service-Catalog-and-ServiceNow)
