@@ -5,13 +5,14 @@ In this workshop, cloud architects, Cloud Center of Excellence (CCOE) team membe
 This hands-on session requires you to **bring your own laptop and an AWS account** to the workshop. 
 
 ## Table of Contents
-[A. Lab Overview](#a.-lab-overview)
-[B. Lab Setup](#b.-lab-setup)
-[C. Lab Execution](#c.-lab-execution)
-[Clean up](#clean-up)
-[Contributing](#contributing)
-[License](#license)
-## **A. Lab Overview** 
+[A. Lab Overview](#a.-lab-overview) <br />
+[B. Lab Setup](#b.-lab-setup)<br />
+[C. Lab Execution](#c.-lab-execution)<br />
+[Clean up](#clean-up)<br />
+[Contributing](#contributing)<br />
+[License](#license)<br />
+
+## A. Lab Overview 
 
 ### What is AWS Service Catalog?
 AWS Service Catalog allows organizations to create and manage catalogs of IT services that are approved for use on AWS. These IT services can include everything from virtual machine images, servers, software, and databases to complete multi-tier application architectures. AWS Service Catalog allows you to centrally manage commonly deployed IT services, and helps you achieve consistent governance and meet your compliance requirements, while enabling users to quickly deploy only the approved IT services they need.
@@ -46,7 +47,7 @@ _ServiceNow related_
 ### How does the architecture look?
 ![AWS-SC-SNOW-Architecture-Diagram](/labs/end-to-end-it-lifecycle-management/resources/architecture.png)
 
-## **B. Lab Setup**
+## B. Lab Setup
 ### Infrastructure setup in your AWS account
 You need an AWS account with Administrator access for successfully completing this lab.  If you do not have one, you can create an AWS account. For instructions on how to create an account, see following page- https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/ 
 _(We will provide you AWS credits before you start at the day of this event for your AWS usage)_
@@ -102,7 +103,7 @@ As a part of this lab, you will be connecting your `AWS account` with a `Service
 
 
 
-## **C. Lab Execution**
+## C. Lab Execution
 In this lab, we have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
 * User roles
     - `service_catalog_administrator`
