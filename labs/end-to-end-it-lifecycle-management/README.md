@@ -132,10 +132,10 @@ For your convenience, a sample catalog has been already set up for you. In this 
 3. Ensure you are in the same region as before in AWS Management Console.
 4. On the Services menu, search and then choose `Service Catalog`.
     - The screen will be divided into two panels. Please see the sample screen below. Note: if you do not see a left panel as shown in the following screen, use chrome browser and reduce the resolution.
-    - ![sc-admin-view](/labs/end-to-end-it-lifecycle-management/resources/sc-admin-view.png)
+![sc-admin-view](/labs/end-to-end-it-lifecycle-management/resources/sc-admin-view.png)
 5. Below the `Admin` section, click `Portfolios list`. The right panel will display all the portfolios available.
 6. Click the `SNOW-SC Test Portfolio`. This will open the portfolio that was created for you.
-    - ![sc-portfolio-view](/labs/end-to-end-it-lifecycle-management/resources/sc-portfolio-view.png)
+![sc-portfolio-view](/labs/end-to-end-it-lifecycle-management/resources/sc-portfolio-view.png)
 7. On the portfolio management screen of `SNOW-SC Test Portfolio`, notice that there is a product named `EC2 instance`. This was created for you during the _Lab Setup_ step. 
     - You may optionally click on the product to open it and subsequently on the version – V1.0 to see the CloudFormation template.
     - Whenever your end users request an EC2 instance using EC2 instance product, the AWS Service Catalog will run the CloudFormation template you configured and create a CloudFormation Stack.
