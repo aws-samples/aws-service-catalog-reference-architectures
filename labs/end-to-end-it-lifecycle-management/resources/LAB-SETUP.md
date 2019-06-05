@@ -1,4 +1,4 @@
-#Lab Setup
+# Lab Setup
 
 ### Infrastructure setup in your AWS account
 You need an AWS account with Administrator access for successfully completing this lab.  If you do not have one, you can create an AWS account. For instructions on how to create an account, see following page- https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/ 
