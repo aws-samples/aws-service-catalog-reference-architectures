@@ -1,7 +1,7 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md)
 
-# ServiceNow provisioning workflow
+# Provisioning AWS Services using ServiceNow 
 In this task, you will provision an AWS Service Catalog product for launching an EC2 instance from ServiceNow. 
 You are now ready to order an EC2 instance from your ServiceNow service catalog.
 
