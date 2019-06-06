@@ -4,21 +4,18 @@
 
 In this workshop, cloud architects, Cloud Center of Excellence (CCOE) team members, and IT managers learn how to launch and operate governed cloud workloads on AWS by leveraging AWS management tools. They extend a sample catalog containing Amazon EC2 and enable catalog users to only manage the resources they create. They then perform the IT service management process integration using ServiceNow as an example solution.
 
-This hands-on session requires you to **bring your own laptop and an AWS account** to the workshop. 
+This hands-on session requires you to **bring your own laptop and an AWS account with administrator access** to the workshop. 
 
-Go through the sections below in the order provided to complete this lab.
-## A. Lab Overview 
+Go through the sections below **in the order** provided to complete this lab.
+## Steps
 
-[Click here for Lab Overview](/labs/end-to-end-it-lifecycle-management/resources/LAB-OVERVIEW.md)
+1. [Lab Overview](/labs/end-to-end-it-lifecycle-management/resources/LAB-OVERVIEW.md)
 
-## B. Lab Setup
+2. [Lab Setup](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
 
-[Click here for Lab Setup](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
-
-## C. Lab Execution
-
-[Click here for Lab Execution](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION.md)
-
+3. **Lab Execution**
+    1. [AWS Service Catalog Related Activities](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
+    2. [ServiceNow Related Activities](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
 
 ## Clean Up
 >todo
