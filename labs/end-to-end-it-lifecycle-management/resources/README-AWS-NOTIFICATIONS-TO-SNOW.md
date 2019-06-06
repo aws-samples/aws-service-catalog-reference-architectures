@@ -58,7 +58,7 @@ Stay on this page for the next step.
 Now let’s do something meaningful whenever `AWS SNS` sends a notification to ServiceNow. ServiceNow provides a script `Handler` that is invoked when SNS sends an alarm message. To configure a handler to create an incident, follow the instructions below:
 - At the bottom of the Subscription form,find the Handlers section.
 ![snow-incident-6](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-6.png)
-- Choose New and type a name for the handler, such as “Create SNS Non-micro launch Incident.” 
+- Choose `New` and type a name for the handler, such as `Create SNS Non-micro launch Incident`. 
 - Replace the entire function with below text:
 ```sh
 // SNS Message payload is available as the 'message' object
@@ -69,8 +69,8 @@ Now let’s do something meaningful whenever `AWS SNS` sends a notification to S
 		incident.initialize();
 		incident.caller_id = gs.getUserID();
 		incident.short_description = "SNS Alarm: "+message.detail.configRuleName;
-		incident.description = "AWS Account ID: " + message.account + "\nRegion: " + message.detail.awsRegion +
-		"\nCompliance status: " + message.detail.newEvaluationResult.complianceType; incident.insert();
+		incident.description = "AWS Account ID: " + message.account + "\nRegion: " + message.detail.awsRegion + "\nCompliance status: " + message.detail.newEvaluationResult.complianceType; 
+        incident.insert();
 		}
 }(message));
 ```
