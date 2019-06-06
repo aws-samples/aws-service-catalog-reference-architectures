@@ -1,5 +1,5 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
-[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-OVERVIEW.md)
+<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-OVERVIEW.md)
 
 # 2. Lab Setup
 

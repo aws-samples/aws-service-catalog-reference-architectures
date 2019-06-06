@@ -1,5 +1,5 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
-[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
+<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
 
 # Trigger incident creation in ServiceNow 
 

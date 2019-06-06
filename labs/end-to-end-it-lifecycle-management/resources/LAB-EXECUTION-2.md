@@ -1,5 +1,5 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
-[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
+<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
 # ServiceNow related activities
 In this lab, you will go through the ServiceNow experience when integrated with AWS. 
 

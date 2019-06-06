@@ -1,5 +1,5 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
-[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
+<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
 # 3. Lab Execution
 ## AWS related activities
 In this lab, you will go through the Service Catalog administrator and end-user experiences.
