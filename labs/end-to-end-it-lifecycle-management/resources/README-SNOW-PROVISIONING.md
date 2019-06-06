@@ -23,8 +23,8 @@ You are now ready to validate the AWS Service Catalog Connector for ServiceNow i
 6. Choose `Order Now` from Top Right of the screen. This will start the creation of an EC2 instance in your AWS account.
 ![snow-prov-4](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-4.png)
 7. Next, open `My Assets` from navigation panel in left.
-8. Scroll down, and at the end of the page, under `My Asset Requests`, choose the request number that you provisioned, under configuration item column.
+8. Scroll down, and at the end of the page, under `My Asset Requests`, you can see the request number that you provisioned, under configuration item column.
 ![snow-prov-5](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-5.png)
-8. On AWS Service Catalog provisioned product screen, once product status becomes provisioned(you can refresh the screen in few seconds if you dont see this yet), you will see that `Request Termination` & `Request update` options have become available. This means that your EC2 instance has been launched.
+8. Click on `Provisioned Products` under the AWS Service Catalog navigation menu. Once product status becomes provisioned(you can refresh the screen in few seconds if you dont see this yet), you will see that `Request Termination` & `Request update` options have become available. This means that your EC2 instance has been launched.
 ![snow-prov-6](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-6.png)
 
