@@ -16,6 +16,10 @@ Go through the sections below **in the order** provided to complete this lab.
 3. **Lab Execution**
     1. [AWS Service Catalog Related Activities](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
     2. [ServiceNow Related Activities](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
+        1. [Configure your AWS accounts in ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md) 
+        2. [Provisioning AWS Services using ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
+        3. [Set up AWS notifications to ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
+        4. [Trigger incident creation in ServiceNow from AWS](README-SNOW-INCIDENT-CREATION.md)
 
 ## Clean Up
 >todo
