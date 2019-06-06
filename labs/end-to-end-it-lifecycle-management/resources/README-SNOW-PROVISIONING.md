@@ -10,7 +10,7 @@ You are now ready to validate the AWS Service Catalog Connector for ServiceNow i
 3.	The user interface view displays the AWS Service Catalog category. 
 
 
-### To order a product
+## To order a product
 1. Choose EC2 instance, then specify Product name as `My-Snow-EC2-Instance`.
 ![snow-prov-3](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-3.png)
 
