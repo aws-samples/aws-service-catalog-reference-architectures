@@ -1,9 +1,8 @@
 # ServiceNow provisioning workflow
 
-You are now ready to validate the AWS Service Catalog Connector for ServiceNow installation procedures.
-
+You are now ready to order an EC2 instance from your ServiceNow service catalog.
 ## To validate the configuration of the Connector
-1. Go back to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `Abel Tuter` as the impersonation.
+1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `Abel Tuter` as the impersonation.
 ![snow-prov-1](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-1.png)
 2. Open Service Catalog under Self Service from the left navigation panel. This will display Service Catalog Home Screen. Choose AWS Service Catalog.
 ![snow-prov-2](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-2.png)
