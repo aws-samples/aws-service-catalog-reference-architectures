@@ -2,7 +2,7 @@
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
 
 # Trigger incident creation in ServiceNow 
-
+In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size `t2.micro`. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. 
 In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 
 So, in this task, we will verify that an incident is created in ServiceNow by launching an EC2 instance of type `t2.medium`.
 
