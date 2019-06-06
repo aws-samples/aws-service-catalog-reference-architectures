@@ -34,4 +34,4 @@ _ServiceNow related_
 ![AWS-SC-SNOW-Architecture-Diagram](/labs/end-to-end-it-lifecycle-management/resources/architecture.png)
 
 
-[Next: Lab Setup >>](/labs/end-to-end-it-lifecycle-management/LAB-SETUP.md)
+[Next: Lab Setup >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
