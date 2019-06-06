@@ -1,3 +1,4 @@
+[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
 # Trigger incident creation in ServiceNow 
 
 In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 

@@ -1,3 +1,5 @@
+[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
+
 # Set up automatic incident creation in ServiceNow 
 
 In this task, you will configure your AWS account to send a notification and create an incident in the ServiceNow instance. As a part of the _Lab Setup_, we have pre-provisioned a custom AWS Config rule in your AWS account that flags any EC2 instance that does not have `t2.micro` as an instance type, as a non-compliant resource. 
