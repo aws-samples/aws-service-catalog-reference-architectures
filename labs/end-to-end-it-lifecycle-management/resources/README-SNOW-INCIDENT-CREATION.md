@@ -31,6 +31,6 @@ _Note_:
 
 1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `System Administrator` as the impersonation.
 2. In the left panel, type incidents and then choose `Incidents` available under `Service Desk` menu
-![snow-incident-7](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-7.png)
+![snow-incident-8](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-8.png)
 You will see an incident here, which means you have successfully integrated AWS SNS and ServiceNow.
 
