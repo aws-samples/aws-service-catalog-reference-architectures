@@ -17,7 +17,7 @@ You are now ready to validate the AWS Service Catalog Connector for ServiceNow i
 2. On the `Parameters` page, configure:
     - `KeyName`: Choose the key you created in task _Task 1.1_
     - `SubnetID`: **choose the value of 'PublicSubnetId' from the CloudFormation outputs noted in Lab Setup**
-    - `InstanceType`: t2.micro
+    - `InstanceType`: t2.medium
     - `Security Group`: **choose the value of 'SecurityGroup' from the CloudFormation outputs noted in Lab Setup**
     - `AMI`: **choose the value of 'AMI' from the CloudFormation outputs noted in Lab Setup**
 6. Choose `Order Now` from Top Right of the screen. This will start the creation of an EC2 instance in your AWS account.
