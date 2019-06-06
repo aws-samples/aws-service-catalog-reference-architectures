@@ -3,8 +3,8 @@
 
 # Trigger incident creation in ServiceNow 
 In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size `t2.micro`. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. 
-In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 
-So, in this task, we will verify that an incident is created in ServiceNow by launching an EC2 instance of type `t2.medium`.
+<br/>In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 
+<br/>So, in this task, we will verify that an incident is created in ServiceNow by launching an EC2 instance of type `t2.medium`.
 
 ## Launch EC2 instance of size t2.medium from ServiceNow
 1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `Abel Tuter` as the impersonation.
