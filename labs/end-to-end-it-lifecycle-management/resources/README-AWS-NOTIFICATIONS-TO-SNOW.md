@@ -1,4 +1,5 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
 
 # Set up automatic incident creation in ServiceNow 
 
@@ -78,3 +79,7 @@ Now let’s do something meaningful whenever `AWS SNS` sends a notification to S
 ```
 - Choose `Submit` to save the handler. Here is how your code will look.
 ![snow-incident-7](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-7.png)
+
+
+[Next: Trigger incident creation in ServiceNow from AWS >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-CREATION.md)
+

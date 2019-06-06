@@ -1,5 +1,7 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
-# AWS related activities
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
+# 3. Lab Execution
+## AWS related activities
 In this lab, you will go through the Service Catalog administrator and end-user experiences.
  ![sc-icon](/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png)
 We have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
@@ -70,4 +72,4 @@ In this task, you will login as an end user and provision resources from the sam
     -  This means you have successfully launched an EC2 instance from AWS Service Catalog. Optionally, you can review the EC2 instance you created. You have been given AmazonEC2ReadOnlyAccess so that you can view the EC2 Management Console.
 
 
-[Next: ServiceNow Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
+[Next: Lab Execution- ServiceNow Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)

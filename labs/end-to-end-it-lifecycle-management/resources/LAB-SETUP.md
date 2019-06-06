@@ -1,8 +1,11 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
-# Lab Setup
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-OVERVIEW.md)
+
+# 2. Lab Setup
 
 ### Infrastructure setup in your AWS account
-You need an AWS account with Administrator access for successfully completing this lab.  If you do not have one, you can create an AWS account. For instructions on how to create an account, see following page- https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/ 
+You need an AWS account with Administrator access for successfully completing this lab.  If you do not have one, you can create an AWS account. For instructions on how to create an account, see following page- 
+https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/
 _(We will provide you AWS credits before you start at the day of this event for your AWS usage)_
 
 You will need to setup your AWS account with the required infrastructure to run this lab. We have provided an AWS CloudFormation template to make this a one step process for you. Follow these steps to set up your AWS account for this lab:
@@ -50,4 +53,4 @@ You will need to setup your AWS account with the required infrastructure to run 
 **Please skip this step if you are doing this as a part of AWS re:inforce 2019. We will provide you with a pre-configured ServiceNow instance for this event.** <br />
 As a part of this lab, you will be connecting your `AWS account` with a `ServiceNow` instance. If you haven't been provided a `ServiceNow` instance, you can follow the [AWS Service Catalog-ServiceNow Connector Setup](README-PREREQ-SNOW.md) to set up a `ServiceNow` instance with the `AWS Service Catalog connector for ServiceNow` and a scoped app for setting up `SNS notifications`.
 
-[Next: AWS Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
+[Next: Lab Execution- AWS Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)

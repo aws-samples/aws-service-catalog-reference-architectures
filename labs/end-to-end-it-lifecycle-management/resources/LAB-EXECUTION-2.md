@@ -1,8 +1,10 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)
 # ServiceNow related activities
 In this lab, you will go through the ServiceNow experience when integrated with AWS. 
 
  ![snow-icon](/labs/end-to-end-it-lifecycle-management/resources/snow-icon2.png)
+
 ### Task 2.1- Configure ServiceNow with access for your AWS account
 In this task, you will add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps. 
 [Configure your AWS accounts in ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md) 
@@ -22,3 +24,4 @@ Refer to the following page to go through the steps to enable notifications base
 In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size t2.micro. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. Refer to the following page to go through the steps to trigger incident creation in ServiceNow: 
 [Trigger incident creation in ServiceNow from AWS](README-SNOW-INCIDENT-CREATION.md)
 
+[Next: Configure your AWS accounts in ServiceNow >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md)

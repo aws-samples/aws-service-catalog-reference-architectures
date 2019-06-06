@@ -1,7 +1,9 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
-# ServiceNow provisioning workflow
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md)
 
+# ServiceNow provisioning workflow
 You are now ready to order an EC2 instance from your ServiceNow service catalog.
+
 ## To validate the configuration of the Connector
 1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `Abel Tuter` as the impersonation.
 ![snow-prov-1](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-1.png)
@@ -28,3 +30,4 @@ You are now ready to order an EC2 instance from your ServiceNow service catalog.
 8. Click on `Provisioned Products` under the AWS Service Catalog navigation menu. Once product status becomes provisioned(you can refresh the screen in few seconds if you dont see this yet), you will see that `Request Termination` & `Request update` options have become available. This means that your EC2 instance has been launched.
 ![snow-prov-6](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-6.png)
 
+[Next: Set up AWS notifications to ServiceNow >>](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)

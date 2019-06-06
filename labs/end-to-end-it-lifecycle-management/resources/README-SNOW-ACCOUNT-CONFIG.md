@@ -1,6 +1,7 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
-# ServiceNow configuration with AWS accounts
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
 
+# ServiceNow configuration with AWS accounts
 
 In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. Also, following ServiceNow connection specific roles have been created for you:
 - `SCEC2ConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog
@@ -86,5 +87,4 @@ Data will be visible in the AWS Service Catalog scoped app menus after the adapt
 3.	An unsuccessful test returns the message `Error using account…`
 4.	Given the preceding setup, `Abel Tuter` can now order products from AWS Service Catalog in ServiceNow.
 
-
-
+[Next: Provisioning AWS Services using ServiceNow >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)

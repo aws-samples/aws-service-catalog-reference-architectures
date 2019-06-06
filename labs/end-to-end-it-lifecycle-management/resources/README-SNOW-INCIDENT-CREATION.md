@@ -1,4 +1,6 @@
-[< Back](/labs/end-to-end-it-lifecycle-management/README.md)
+[⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
+[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
+
 # Trigger incident creation in ServiceNow 
 
 In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 
@@ -35,3 +37,4 @@ _Note_:
 ![snow-incident-8](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-8.png)
 You will see an incident here, which means you have successfully integrated AWS SNS and ServiceNow.
 
+[End- Go back home](/labs/end-to-end-it-lifecycle-management/README.md)
