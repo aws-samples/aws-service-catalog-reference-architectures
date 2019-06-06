@@ -32,3 +32,6 @@ _ServiceNow related_
 
 ### How does the architecture look?
 ![AWS-SC-SNOW-Architecture-Diagram](/labs/end-to-end-it-lifecycle-management/resources/architecture.png)
+
+
+[Next: Lab Setup >>](/labs/end-to-end-it-lifecycle-management/LAB-SETUP.md)

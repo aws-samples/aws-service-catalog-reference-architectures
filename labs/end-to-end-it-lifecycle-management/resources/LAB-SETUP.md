@@ -46,7 +46,8 @@ You will need to setup your AWS account with the required infrastructure to run 
 ![Stack Complete](/labs/end-to-end-it-lifecycle-management/resources/stack-complete.png)
 
 
-### ServiceNow instance setup and configuration.
+### (SKIP FOR REINFORCE 2019) ServiceNow instance setup and configuration.
 **Please skip this step if you are doing this as a part of AWS re:inforce 2019. We will provide you with a pre-configured ServiceNow instance for this event.** <br />
 As a part of this lab, you will be connecting your `AWS account` with a `ServiceNow` instance. If you haven't been provided a `ServiceNow` instance, you can follow the [AWS Service Catalog-ServiceNow Connector Setup](README-PREREQ-SNOW.md) to set up a `ServiceNow` instance with the `AWS Service Catalog connector for ServiceNow` and a scoped app for setting up `SNS notifications`.
 
+[Next: AWS Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-1.md)

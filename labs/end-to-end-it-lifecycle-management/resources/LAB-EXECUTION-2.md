@@ -21,3 +21,4 @@ Refer to the following page to go through the steps to enable notifications base
 ### Task 2.4- Create an incident in ServiceNow by provisioning a disallowed EC2 instance size
 In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size t2.micro. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. Refer to the following page to go through the steps to trigger incident creation in ServiceNow: 
 [Trigger incident creation in ServiceNow from AWS](README-SNOW-INCIDENT-CREATION.md)
+

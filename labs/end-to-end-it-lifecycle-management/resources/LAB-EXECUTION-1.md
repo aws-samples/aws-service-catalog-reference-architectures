@@ -68,3 +68,6 @@ In this task, you will login as an end user and provision resources from the sam
 11. On the Notifications page, click `NEXT`.
 12. On the Review page, review the configuration information, and click `LAUNCH`. This will create a CloudFormation stack. The initial status of the product is shown as `Under change`. Wait a minute, then refresh the screen till the status changes to `AVAILABLE`.
     -  This means you have successfully launched an EC2 instance from AWS Service Catalog. Optionally, you can review the EC2 instance you created. You have been given AmazonEC2ReadOnlyAccess so that you can view the EC2 Management Console.
+
+
+[Next: ServiceNow Related Activities >>](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
