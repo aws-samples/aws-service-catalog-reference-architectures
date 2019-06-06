@@ -36,15 +36,15 @@ Next, you need to view the `CloudWatch Events rule` which publishes compliance c
 3. Under `Subscriptions`, choose `Create Subscription` to create a subscription for ServiceNow.
 4. Choose `Https` as the protocol
 5. Specify your ServiceNow instance URL as the endpoint:
- a. `https://admin:<ServiceNow admin password>@<your developer instance>.service-now.com/api/x_snc_aws_sns/aws_sns`
- b. Note: If `https://rel-oct12shm-005.lab.service-now.com/` is your ServiceNow URL, then `rel-oct12shm-005.lab` is the value of your developer instance)
- c. Here is an example of a value: `https://admin:mypassword@rel-oct12shm-005.lab.service-now.com/api/x_snc_aws_sns/aws_sns`
+ 1. `https://admin:<ServiceNow admin password>@<your developer instance>.service-now.com/api/x_snc_aws_sns/aws_sns`
+ 2. Note: If `https://rel-oct12shm-005.lab.service-now.com/` is your ServiceNow URL, then `rel-oct12shm-005.lab` is the value of your developer instance)
+ 3. Here is an example of a value: `https://admin:mypassword@rel-oct12shm-005.lab.service-now.com/api/x_snc_aws_sns/aws_sns`
 ![snow-incident-3](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-3.png)
 6. Before you click on `Create subscription`, specify password and developer instance name in the endpoint.
 7. Next, Choose `Create Subscription`.
 
 ### AWS SNS Subscription confirmation in ServiceNow
-Now you will log in to your ServiceNow instance and accept the pending subscription.Before `AWS SNS` is allowed to send messages to ServiceNow, you must confirm the subscription on ServiceNow. 
+Now you will log in to your ServiceNow instance and accept the pending subscription. Before `AWS SNS` is allowed to send messages to ServiceNow, you must confirm the subscription on ServiceNow. 
 At this point, AWS has already sent a handshake request, and it’s awaiting confirmation inside your ServiceNow instance.
 Next, choose `Subscriptions` under `AWS SNS` by using the filter in the left panel of your ServiceNow screen, and notice that a new record has been created by AWS.
 ![snow-incident-4](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-4.png)
