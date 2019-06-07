@@ -17,10 +17,9 @@ You will need to setup your AWS account with the required infrastructure to run 
     - Canada (ca-central-1)
 <br />_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
 2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account.
-<br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://marketplace-sa-resources.s3.amazonaws.com/lab.json)
+<br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://reinforce-us-east-1.s3.amazonaws.com/lab_v2.json)
 3. On the `Create Stack` page, verify that you have selected one of the regions from _Step 1_ and Click `Next`.
-6.	On the `Specify Details` page, enter `SC-SNOW-<your-name>` in the `Stack Name` text box, and then click `Next`. Do not change the parameter value for `PWD`. 
->todo- need to change the param name PWD or add explanation 
+6.	On the `Specify Details` page, enter `SC-SNOW-<your-name>` in the `Stack Name` text box, and then click `Next`. 
 7.	On the `Options` page, click `Next`.
 8.	On the `Review` page, select `"I acknowledge that AWS CloudFormation might create IAM resources with custom names."` checkbox and then click `Create`.
 9.	Once status of the stack changes to `CREATE COMPLETE`, click on the stack and open the `Outputs` tab to see the output values.
@@ -29,25 +28,37 @@ You will need to setup your AWS account with the required infrastructure to run 
     - AMI         
     - ConfigBucket        
     - ConfigServiceRole
-    - MySimpleAD
     - PublicSubnetId  
     - Region      
-    - SCEC2ConnectLaunchRole  
-    - SCEndUserAccessKey
-    - SCEndUserSAK        
-    - ScheduledRule   
-    - SCSyncUserAccessKey         
-    - SCSyncUserSAK       
+    - SCEC2ConnectLaunchRole       
+    - ScheduledRule      
     - SecurityGroup   
     - SnowEndUser     
     - SwitchRoleAwsStudent
     - SwitchRoleSCAdmin   
     - SwitchRoleSCEndUser 
-    - T2MicroConfigRuleTopic    
     - T2MicroConfigRuleTopic 
     ```
 ![Stack Complete](/labs/end-to-end-it-lifecycle-management/resources/stack-complete.png)
 
+11. Now, you will go to AWS SSM parameter store, where we have **securely** stored the values of the IAM user access keys and secret access keys. Please copy these 4 values along with the values noted above, you will use them to set up your ServiceNow integration.
+    1. Go to the `AWS Management Console`, and search for `Systems Manager`, and click on it. **Make sure you are in the same region from _Step 1_**.
+    2. On the left navigation menu, click on `Parameter Store`.
+    3. You will find the following four values stored in the parameter store:
+        ```
+        - SCEndUser-PublicAccessKey
+        - SCEndUser-SecretAccessKey
+        - SCSyncUser-PublicAccessKey
+        - SCSyncUser-SecretAccessKey
+        ```
+
+![setup-ssm-1](/labs/end-to-end-it-lifecycle-management/resources/setup-ssm-1.png)
+
+12. To access the value of these parameters, click on each of them, and check the `Value` field as shown below. For secret access keys, you will see the `Value` field masked since we have encrypted it for you. Just click on the `Show` button to display these keys. (Since you are logged in as the administrator, you can decrypt this value)
+![setup-ssm-1.5](/labs/end-to-end-it-lifecycle-management/resources/setup-ssm-1.5.png)
+![setup-ssm-2](/labs/end-to-end-it-lifecycle-management/resources/setup-ssm-2.png)
+
+Please store all of the values in the previous step in a text file locally, since you will be needing them as we move through the labs.
 
 ### (SKIP FOR REINFORCE 2019) ServiceNow instance setup and configuration.
 **Please skip this step if you are doing this as a part of AWS re:inforce 2019. We will provide you with a pre-configured ServiceNow instance for this event.** <br />
