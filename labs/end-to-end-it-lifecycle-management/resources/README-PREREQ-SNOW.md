@@ -286,7 +286,7 @@ arn:aws:iam::`123456789123`:role/AWSCloudFormationStackSetAdministrationRole
 
 Note: replace number string in highlighted text with your account information.
 ![snow-stackset-constraint](/labs/end-to-end-it-lifecycle-management/resources/snow-stackset-constraint.png)
-Note: Service Catalog products can only have either a StackSet or Launch constraint, but not both.
+Note: AWS Service Catalog products can only have either a StackSet or Launch constraint, but not both.
 11.	Add the SnowEndUser IAM role to the AWS Service Catalog portfolio. For additional user access instructions, see [Granting Access to Users](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/catalogs_portfolios_users.html).
 ## Configure ServiceNow
 After completing the IAM and AWS Service Catalog configurations, the next configuration area to set up is ServiceNow. Installation tasks within ServiceNow include:

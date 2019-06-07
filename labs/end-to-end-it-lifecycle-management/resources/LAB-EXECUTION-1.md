@@ -3,7 +3,7 @@
 # 3. Lab Execution
 ## AWS related activities
 In this lab, you will go through the Service Catalog administrator and end-user experiences.
- ![sc-icon](/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png)
+ <img src="/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png" width="400"><br/>
 We have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
 * User roles
     - `service_catalog_administrator`
@@ -12,9 +12,9 @@ We have set up pre-provisioned roles for you in the *Lab Setup* section. You wil
     <br> This role has AWSServiceCatalogEndUserFullAccess policy associated with it. You will use this user for launching products from available catalog.
 ### Task 1.1- Provisioning EC2 from the EC2 console 
 
-1. Log in using the Service Catalog end user in your AWS account. To do this, use the link provided in the CloudFormation `Outputs` from the *Lab Setup* section for the key `SwitchRoleSCEndUser`.
-2. From the AWS Management Console, click on `Services`, and select `EC2`
-3. Click on the `Launch Instance` button, and then click on `Select` for any of the listed Amazon Machine Images (AMI).
+1. Log in using the `Service Catalog end user` in your AWS account. To do this, use the link provided in the CloudFormation `Outputs` from the *Lab Setup* section for the key `SwitchRoleSCEndUser`.
+2. We will now try to launch 
+3. Click on the `Launch Instance` button, and then click on `Select` for **any of the listed Amazon Machine Images (AMI)**.
 4. Select the instance size of `t2.micro` and click `Review and Launch`.
 5. On the `Review Instance Launch` page, click `Launch`.
 6. For key pair, select `Proceed without a key pair` , and click `Launch Instances`.

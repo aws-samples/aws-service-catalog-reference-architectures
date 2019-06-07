@@ -10,6 +10,13 @@ _(We will provide you AWS credits before you start at the day of this event for 
 
 You will need to setup your AWS account with the required infrastructure to run this lab. We have provided an AWS CloudFormation template to make this a one step process for you. Follow these steps to set up your AWS account for this lab:
 
+**Pre-requisites**:
+- DO NOT use your ROOT user for this exercise.
+- Create a user called *labadmin*, give it an an Administrator policy (optional if    you have a user with an admin policy)
+- Login to your AWS Account using the *labadmin* user (or an admin user)
+
+
+
 1.	Login to your AWS account as an administrator and select one the following 4 regions from the top right corner on the AWS Management Console:
     - North Virginia (us-east-1)
     - Ireland (eu-west-1)

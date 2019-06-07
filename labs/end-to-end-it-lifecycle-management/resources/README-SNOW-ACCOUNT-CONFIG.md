@@ -10,7 +10,7 @@ Also, following ServiceNow connection specific roles have been created for you i
 - `SCEC2ConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog
 connector. This role is associated with EC2 product while setting up your SNOW-SC test portfolio.
 - `SnowEndUser` - This role is mapped to the ServiceNow side role to which access to launch the products from a portfolio is given. This role has AWSServiceCatalogEndUserFullAccess managed policy associated with it and will have access to SNOW-SC test portfolio from your catalog.
-- `SCSyncUser` - This user has ServiceCatalogAdminReadOnlyAccess policy associated it with. This user is used by Service catalog- Service now connector for synchronizing portfolios, products, etc.
+- `SCSyncUser` - This user has ServiceCatalogAdminReadOnlyAccess policy associated it with. This user is used by ServiceNow-Service Catalog connector for synchronizing portfolios, products, etc.
 - `SCEndUser` - Within ServiceNow, the SCEndUser is mapped to snow-stsuser-account. SCEndUser has access to assume SnowEndUser role.
 
 In this **ServiceNow** task:

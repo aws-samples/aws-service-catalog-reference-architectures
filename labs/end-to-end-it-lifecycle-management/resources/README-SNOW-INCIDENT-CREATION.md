@@ -8,7 +8,7 @@ In this task, you will use ServiceNow to launch an AWS Service Catalog product w
 
 ## Launch EC2 instance of size t2.medium from ServiceNow
 1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `SCEndUser01` as the impersonation.
-2. Go to the Service Catalog screen in ServiceNow, choose EC2 instance, then specify Product name as `My-Snow-EC2-Instance-2`.
+2. Go to the ServiceNow Service Catalog screen and choose AWS Service Catalog, choose EC2 instance, then specify Product name as `My-Snow-EC2-Instance-2`.
 ![snow-prov-3](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-3.png)
 
 3. On the `Parameters` page, configure:
