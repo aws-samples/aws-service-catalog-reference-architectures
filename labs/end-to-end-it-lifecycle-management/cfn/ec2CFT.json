@@ -33,10 +33,6 @@
       "Type" : "AWS::EC2::SecurityGroup::Id",
       "Description" : "Id of an existing security group (for the primary network) in your Virtual Private Cloud (VPC)",
       "ConstraintDescription" : "Must be an existing security group in the selected Virtual Private Cloud."
-    },
-      "KeyName" : {
-      "Type" : "AWS::EC2::KeyPair::KeyName",
-      "Description" : "Keypair"
     }
   },
  
@@ -54,7 +50,6 @@
             },
             "HVM64"
           ]},
-        "KeyName":{"Ref":"KeyName"},
         "NetworkInterfaces" : [ {
           "DeviceIndex" : "0",
           "GroupSet" : [ {
