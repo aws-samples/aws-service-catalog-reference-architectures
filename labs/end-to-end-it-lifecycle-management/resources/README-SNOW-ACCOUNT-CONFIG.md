@@ -4,20 +4,23 @@
 # ServiceNow configuration with AWS accounts
 In this task, you will add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps.
 
-In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. Also, following ServiceNow connection specific roles have been created for you:
+In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. 
+**Recap**
+Also, following ServiceNow connection specific roles have been created for you in the _Lab Setup_ section of AWS:
 - `SCEC2ConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog
 connector. This role is associated with EC2 product while setting up your SNOW-SC test portfolio.
 - `SnowEndUser` - This role is mapped to the ServiceNow side role to which access to launch the products from a portfolio is given. This role has AWSServiceCatalogEndUserFullAccess managed policy associated with it and will have access to SNOW-SC test portfolio from your catalog.
 - `SCSyncUser` - This user has ServiceCatalogAdminReadOnlyAccess policy associated it with. This user is used by Service catalog- Service now connector for synchronizing portfolios, products, etc.
 - `SCEndUser` - Within ServiceNow, the SCEndUser is mapped to snow-stsuser-account. SCEndUser has access to assume SnowEndUser role.
 
-In this task:
-- You will configure the AWS Service Catalog Connector scoped application
+In this **ServiceNow** task:
 - You will create two ServiceNow accounts, and map them to `SCEndUser` and `SCSyncUser` using their credentials.
 - Next, you will run `Sync all accounts scheduled job` which will pull AWS Service Catalog resources into ServiceNow. 
-- Next, you will associate SnowEndUser(fromAWS) with the snow-stsuser-account and order_aws_sc_products roles in ServiceNow.
+- Next, you will associate SnowEndUser(from AWS) with the `snow-stsuser-account` and `order_aws_sc_products` roles in ServiceNow.
 
 ## List of users preconfigured in ServiceNow
+**(you will be given a link, and credentials for ServiceNow instance)**
+
 We have preconfigured 4 users for you within ServiceNow with different permissions based on persona as follows:
 
 **ServiceNow Users Preconfigured** 			
@@ -42,7 +45,7 @@ The following table shows the correlations between AWS and ServiceNow identities
 The `snow-stsuser-account` account will have no Regions configured. The `snow-sync-account` account has one region configured, matching the Region where the AWS Service Catalog is defined.
 
 To configure `snow-sync-account`:
-1. Log in to ServiceNow as the System Administrator using credentials provided to you (you will be given a link, and credentials for ServiceNow instance).
+1. Log in to ServiceNow as the System Administrator using credentials provided to you **(you will be given a link, and credentials for ServiceNow instance)**.
 2. In the navigation panel on the left, choose `Accounts` (type `Accounts` in filter navigator search box) under AWS Service Catalog.
 3. Choose `New` to create a new account.
 ![snow-acc-config-0](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-0.png)

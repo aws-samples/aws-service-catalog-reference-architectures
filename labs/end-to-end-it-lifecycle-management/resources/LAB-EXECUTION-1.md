@@ -17,7 +17,7 @@ We have set up pre-provisioned roles for you in the *Lab Setup* section. You wil
 3. Click on the `Launch Instance` button, and then click on `Select` for any of the listed Amazon Machine Images (AMI).
 4. Select the instance size of `t2.micro` and click `Review and Launch`.
 5. On the `Review Instance Launch` page, click `Launch`.
-6. Select an existing key pair, or create a new key pair for your instance, and click `Launch Instances`.
+6. For key pair, select `Proceed without a key pair` , and click `Launch Instances`.
 7. At this time, you will get the `Launch Failed` error. This is by design, and proves that your Service Catalog end user does not have the permissions to launch EC2 instances from the EC2 console.
 ![ec2-launch-fail](/labs/end-to-end-it-lifecycle-management/resources/ec2-fail.png)
 
