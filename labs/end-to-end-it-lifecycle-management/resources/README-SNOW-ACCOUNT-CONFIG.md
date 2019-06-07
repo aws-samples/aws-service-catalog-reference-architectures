@@ -7,7 +7,6 @@ In this task, you will add your AWS account specific information such as IAM use
 In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. Also, following ServiceNow connection specific roles have been created for you:
 - `SCEC2ConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog
 connector. This role is associated with EC2 product while setting up your SNOW-SC test portfolio.
-- `SCWorkspacesConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog connector. This role is associtaed with Workspaces product while setting up your SNOW-SC test portfolio.
 - `SnowEndUser` - This role is mapped to the ServiceNow side role to which access to launch the products from a portfolio is given. This role has AWSServiceCatalogEndUserFullAccess managed policy associated with it and will have access to SNOW-SC test portfolio from your catalog.
 - `SCSyncUser` - This user has ServiceCatalogAdminReadOnlyAccess policy associated it with. This user is used by Service catalog- Service now connector for synchronizing portfolios, products, etc.
 - `SCEndUser` - Within ServiceNow, the SCEndUser is mapped to snow-stsuser-account. SCEndUser has access to assume SnowEndUser role.
@@ -18,16 +17,16 @@ In this task:
 - Next, you will run `Sync all accounts scheduled job` which will pull AWS Service Catalog resources into ServiceNow. 
 - Next, you will associate SnowEndUser(fromAWS) with the snow-stsuser-account and order_aws_sc_products roles in ServiceNow.
 
-## Configuring AWS Service Catalog Connector Scoped Application
->todo: Is this going to be preconfigured???
+## List of users preconfigured in ServiceNow
+We have preconfigured 4 users for you within ServiceNow with different permissions based on persona as follows:
 
-First, you must configure the AWS Service Catalog scoped application and applicable roles.
-To configure the AWS Service Catalog scoped application and applicable roles
-1.	Got to `User Administration` on the `ServiceNow`>`Roles`>`New`, create a role called `order_aws_sc_products`. This role is granted to any users with permission to order AWS Service Catalog products. For instructions, see Create a role. 
-2.	Grant roles to the following users: 
-    - `System Administrator (admin)`: For simplicity in this example, user admin is designated as the administrator of the AWS Service Catalog scoped application. Grant this user both of the administrative permissions from the adapter, `x_126749_aws_sc_portfolio_manager` and `x_126749_aws_sc_account_admin`. In a real scenario, these roles would likely be granted to two different users.
-    - `Abel Tuter`: The user `abel.tuter` is chosen as an illustrative end user. Grant Abel the new role `order_aws_sc_products`. This allows him to order products from AWS.
-
+**ServiceNow Users Preconfigured** 			
+|UserID	   |Password | 	Group	   |     SC_Connector Group Permissions             |
+|----------|---------|--------------|-----------------------------------------------|
+SCEndUser01|MTSC@1	 | SC_Connector	|  itil                                         |
+SCEndUser02|MTSC@1	 | SC_Connector	|  x_126749_aws_sc_portfolio_manager            |
+SCEndUser03|MTSC@1	 | SC_Connector	|  x_126749_aws_sc_account_admin                |
+SCEndUser04|MTSC@1	 | SC_Connector	|  "x_snc_aws_sns.admin & order_aws_sc_products"|
 
 ## Configure accounts
 In the AWS Service Catalog scoped app Accounts menu, you will create two accounts, one for sync and one for provisioning. 
@@ -86,6 +85,6 @@ Data will be visible in the AWS Service Catalog scoped app menus after the adapt
 2.	If the test is successful, the message `Successfully performed SearchProducts action as arn:aws:iam::AWS Account:role/SnowEndUser` is returned. 
 ![snow-acc-config-8](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-8.png)
 3.	An unsuccessful test returns the message `Error using account…`
-4.	Given the preceding setup, `Abel Tuter` can now order products from AWS Service Catalog in ServiceNow.
+4.	Given the preceding setup, `SCEndUser01` can now order products from AWS Service Catalog in ServiceNow.
 
 [Next: Provisioning AWS Services using ServiceNow >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
