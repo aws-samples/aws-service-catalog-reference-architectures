@@ -46,15 +46,16 @@ The `snow-stsuser-account` account will have no Regions configured. The `snow-sy
 
 To configure `snow-sync-account`:
 1. Log in to ServiceNow as the System Administrator using credentials provided to you **(you will be given a link, and credentials for ServiceNow instance)**.
-2. In the navigation panel on the left, choose `Accounts` (type `Accounts` in filter navigator search box) under AWS Service Catalog.
+2. In the navigation panel on the left, search for `AWS`, and choose `Accounts` (type `Accounts` in filter navigator search box) under AWS Service Catalog.
+![snow-acc-config](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config.jpg)
 3. Choose `New` to create a new account.
 ![snow-acc-config-0](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-0.png)
 4. Specify `snow-sync-account` as the Name.
-5. Under Access Key, specify the value of `SCSyncUserAccessKey` provided to you in the outputs section of Cloudformation.
-6. Under Secret Access Key, specify the value of `SCSyncUserSAK` provided to you, in the outputs section of Cloudformation. Next, click on `Submit`, and open the `snow-sync-account`.
+5. Under Access Key, specify the value of `SCSyncUser-PublicAccessKey` provided to you in the _Lab Setup_ SSM parameter outputs.
+6. Under Secret Access Key, specify the value of `SCSyncUser-SecretAccessKey` provided to you, in the _Lab Setup_ SSM parameter outputs. Next, click on `Submit`, and open the `snow-sync-account`.
 ![snow-acc-config-1](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-1.png)
 
-7. Under Account Synchronizations, choose region specified in the output section by clicking the tick icon (you can double click on “insert a new row” in the Region column to see regions list) of Cloudformation and then click
+7. Under Account Synchronizations, choose region specified in the output section by clicking the tick icon **(you can double click on “insert a new row” in the Region column to see regions list)** of Cloudformation and then click
 on update.
 8. Next, open the snow-sync-account entry. Choose Validate Regions, in a few seconds, it should show following message. 
 ![snow-acc-config-3](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-3.png)
@@ -63,8 +64,9 @@ This means your ServiceNow is able to communicate with AWS.
 To configure `snow-stsuser-account`:
 1. Go back to Accounts screen, Choose New to create a new account.
 2. Specify `snow-stsuser-account` as the Name.
-3. Under Access Key, specify the value of `SCSyncUserAccessKey` provided to you in the outputs section of Cloudformation.
-4. Under Secret Access Key, specify the value of `SCSyncUserSAK` provided to you, in the outputs section of Cloudformation. Next, click on `Submit`, and open the `snow-sync-account`.
+3. Under Access Key, specify the value of `SCEndUser-PublicAccessKey` provided to you in the outputs section of Cloudformation.
+4. Under Secret Access Key, specify the value of `SCEndUser-SecretAccessKey` provided to you, in the outputs section of Cloudformation. **Don't add any regions here**
+5. Next, click on `Submit`, and open the `snow-stsuser-account`.
 ![snow-acc-config-4](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-4.png)
 
 ## Schedule Manual Sync
