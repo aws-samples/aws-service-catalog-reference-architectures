@@ -1,6 +1,22 @@
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
   "Description" : "AWS CloudFormation base Template for launching an EC2 instance.",
+  "Mappings": {
+    "AMI": {
+      "us-east-1": {
+        "HVM64": "ami-0922553b7b0369273"
+      },
+      "eu-west-1": {
+        "HVM64": "ami-0c21ae4a3bd190229"
+      },
+      "ap-southeast-1": {
+        "HVM64": "ami-0fca02518e0faeb84"
+      },
+      "ca-central-1": {
+        "HVM64": "ami-0bf6ee3cf1ee25853"
+      }
+    }
+  },
   "Parameters" : {
     "InstanceType" : {
       "Description" : "WebServer EC2 instance type",
@@ -18,10 +34,6 @@
       "Description" : "Id of an existing security group (for the primary network) in your Virtual Private Cloud (VPC)",
       "ConstraintDescription" : "Must be an existing security group in the selected Virtual Private Cloud."
     },
-      "AMI" : {
-      "Type" : "String",
-      "Description" : "AMI ID"
-    },
       "KeyName" : {
       "Type" : "AWS::EC2::KeyPair::KeyName",
       "Description" : "Keypair"
@@ -35,7 +47,13 @@
         "InstanceType" : {
           "Ref" : "InstanceType"
         },
-        "ImageId" : {"Ref":"AMI"},
+        "ImageId" : {"Fn::FindInMap": [
+            "AMI",
+            {
+              "Ref": "AWS::Region"
+            },
+            "HVM64"
+          ]},
         "KeyName":{"Ref":"KeyName"},
         "NetworkInterfaces" : [ {
           "DeviceIndex" : "0",
