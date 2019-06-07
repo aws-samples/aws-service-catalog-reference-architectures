@@ -1,6 +1,7 @@
 # Building an end-to-end IT lifecycle flow with AWS Service Catalog and ServiceNow
- ![sc-icon](/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png=250x250)
- ![snow-icon](/labs/end-to-end-it-lifecycle-management/resources/snow-icon2.png=250x250)
+ ![sc-icon](/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png)
+ ![snow-icon](/labs/end-to-end-it-lifecycle-management/resources/snow-icon2.png)
+ <img src="/labs/end-to-end-it-lifecycle-management/resources/snow-icon2.png" width="100">
 
 In this workshop, cloud architects, Cloud Center of Excellence (CCOE) team members, and IT managers learn how to launch and operate governed cloud workloads on AWS by leveraging AWS management tools. They extend a sample catalog containing Amazon EC2 and enable catalog users to only manage the resources they create. They then perform the IT service management process integration using ServiceNow as an example solution.
 
