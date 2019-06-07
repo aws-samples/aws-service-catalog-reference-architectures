@@ -23,7 +23,7 @@ You will need to setup your AWS account with the required infrastructure to run 
     - Singapore (ap-southeast-1)
     - Canada (ca-central-1)
 <br />_Note - Ensure that you have AdministratorAccess policy attached with your login as you would be creating AWS resources including IAM roles and users._
-2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account.
+2. Click on the `Launch Stack` button below to launch a Cloudformation template that will setup the required infrastructure in your AWS account. (**CTRL + CLICK for opening this a new tab**)
 <br />[![Launch Stack](/labs/end-to-end-it-lifecycle-management/resources/launch-stack.svg)](https://console.aws.amazon.com/cloudformation/home#/stacks/new?stackName=SC-SNOW-&templateURL=https://reinforce-us-east-1.s3.amazonaws.com/lab_v2.json)
 3. On the `Create Stack` page, verify that you have selected one of the regions from _Step 1_ and Click `Next`.
 6.	On the `Specify Details` page, enter `SC-SNOW-<your-name>` in the `Stack Name` text box, and then click `Next`. 

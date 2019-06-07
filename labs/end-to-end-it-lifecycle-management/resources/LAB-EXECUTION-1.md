@@ -13,7 +13,7 @@ We have set up pre-provisioned roles for you in the *Lab Setup* section. You wil
 ### Task 1.1- Provisioning EC2 from the EC2 console 
 
 1. Log in using the `Service Catalog end user` in your AWS account. To do this, use the link provided in the CloudFormation `Outputs` from the *Lab Setup* section for the key `SwitchRoleSCEndUser`.
-2. We will now try to launch 
+2. We will now try to launch an EC2 instance from the [Amazon EC2 console](https://console.aws.amazon.com/ec2/v2/home).
 3. Click on the `Launch Instance` button, and then click on `Select` for **any of the listed Amazon Machine Images (AMI)**.
 4. Select the instance size of `t2.micro` and click `Review and Launch`.
 5. On the `Review Instance Launch` page, click `Launch`.
@@ -32,7 +32,8 @@ For your convenience, a sample catalog has been already set up for you. In this 
     - Clicking `Switch Role` button
 3. Ensure you are in the same region as before in AWS Management Console.
 4. On the Services menu, search and then choose `Service Catalog`.
-    - The screen will be divided into two panels. Please see the sample screen below. Note: if you do not see a left panel as shown in the following screen, use chrome browser and reduce the resolution.
+    - Choose the menu for AWS Service Catalog on the left top corner, this will show you the left panel with options available for an administrator. 
+    - Please see the sample screen below. Note: if you do not see a left panel as shown in the following screen, use chrome browser and reduce the resolution.
 ![sc-admin-view](/labs/end-to-end-it-lifecycle-management/resources/sc-admin-view.png)
 5. Below the `Admin` section, click `Portfolios list`. The right panel will display all the portfolios available.
 6. Click the `SNOW-SC Test Portfolio`. This will open the portfolio that was created for you.
@@ -41,9 +42,11 @@ For your convenience, a sample catalog has been already set up for you. In this 
     - You may optionally click on the product to open it and subsequently on the version – V1.0 to see the CloudFormation template.
     - Whenever your end users request an EC2 instance using EC2 instance product, the AWS Service Catalog will run the CloudFormation template you configured and create a CloudFormation Stack.
 8. On the portfolio management screen of `SNOW-SC Test Portfolio`, expand TagOptions. You will see that `cost-center=1001` tag-option has been associated with your portfolio. This means that any taggable product provisioned via users of this portfolio will have the `cost-center=1001` tag associated with it. You can click the `TagOption Library` option link to see your library of all tag-options configured across all portfolios.
-9. On the portfolio management screen of `SNOW-SC Test Portfolio,` expand Constraints. Your end user - `service_catalog_end_user` does not have IAM permissions to create an EC2 instance as noted in _Task 1.1_. This is because you don’t want your end users to launch any EC2 instance. You only want them to launch EC2 instances that you have approved. 
-    - To enable your end user to launch approved instances, we have pre-configured a role that has permissions to create an EC2 instance with the product(s) within the portfolio. 
-    - Instead of having to give access to your end user, you can give an elevated role that AWS Service Catalog will assume on behalf of the user for that product. This will allow it to run the CloudFormation templates that you configured.
+9. On the portfolio management screen of `SNOW-SC Test Portfolio,` expand Constraints. 
+    - Your end user - `service_catalog_end_user` does not have IAM permissions to create an EC2 instance as noted in _Task 1.1_. This user, however, has permissions to launch AWS Service Catalog products. 
+    - When your end user launches an AWS Service Catalog product, a launch role with elevated permissions will be used by AWS Service Catalog to provision products. This is called a `Launch Constraint`.  
+    - To enable your end user to launch approved instances, we have pre-configured a `Launch Constraint` that has permissions to create an EC2 instance with the product within the portfolio. 
+    - Instead of having to provide direct EC2 IAM permissions to your end user, you are providing an elevated role that AWS Service Catalog will assume on behalf of the user for launching a preconfigured EC2 product. This will allow you to provide self-service to your end-users in a governed manner.
 
 ### Task 1.3- Provisioning EC2 from AWS Service Catalog
 In this task, you will login as an end user and provision resources from the sample catalog we looked at in the previous step.
