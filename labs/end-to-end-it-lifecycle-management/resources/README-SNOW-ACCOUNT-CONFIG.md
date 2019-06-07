@@ -82,7 +82,7 @@ Data will be visible in the AWS Service Catalog scoped app menus after the adapt
 2. Open the identity with `SnowEndUser` ARN. E.g. `arn:aws:iam::0123456789012:role/SnowEndUser`
 3. Under Account, choose `snow-stsuser-account` (you can also find this by clicking on search/look-up button):, next, choose `Update` to update the record.
 ![snow-acc-config-7](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-7.png)
-4. Next, In ServiceNow, In the navigation panel on the left, choose `Role Grants` under AWS Service Catalog.
+4. Next, in ServiceNow, In the navigation panel on the left, search for `AWS`, choose `Role Grants` under AWS Service Catalog.
 5. Choose `New `to create a new Role Grant. Under role, specify `order_aws_sc_products`.
 6. Under `Identity`, specify SnowEndUser's ARN(you can also find this by clicking on search button) specified in the outputs section of Cloudformation, choose Submit.
 
