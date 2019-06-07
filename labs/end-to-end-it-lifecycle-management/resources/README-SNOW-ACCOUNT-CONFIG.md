@@ -78,7 +78,7 @@ During the initial setup, manually execute the sync(synchronize) job instead of 
 
 ## Grant Access to Portfolios
 Data will be visible in the AWS Service Catalog scoped app menus after the adapter’s scheduled synchronization job has run.
-1. In ServiceNow, as an administrator user, in the navigation panel on the left, choose `Identities` under AWS Service Catalog.
+1. In ServiceNow, as an administrator user, in the navigation panel on the left, search for `AWS`, and choose `Identities` under AWS Service Catalog.
 2. Open the identity with `SnowEndUser` ARN. E.g. `arn:aws:iam::0123456789012:role/SnowEndUser`
 3. Under Account, choose `snow-stsuser-account` (you can also find this by clicking on search/look-up button):, next, choose `Update` to update the record.
 ![snow-acc-config-7](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-7.png)
