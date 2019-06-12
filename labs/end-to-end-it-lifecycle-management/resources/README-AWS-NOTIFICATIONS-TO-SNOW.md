@@ -1,7 +1,7 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
 
-# Set up automatic incident creation in ServiceNow 
+# Set up your AWS account to send notifications to ServiceNow
 In this task, you will configure your **AWS account** to send a notification and create an incident in the ServiceNow instance. As a part of the _Lab Setup_, we have pre-provisioned a custom AWS Config rule in your AWS account that flags any EC2 instance that does not have `t2.micro` as an instance type, as a non-compliant resource.
 
 You will enable this rule and set up an AWS CloudWatch events rule to trigger SNS notifications to ServiceNow from your account. 

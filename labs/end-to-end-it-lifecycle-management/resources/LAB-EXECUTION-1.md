@@ -63,7 +63,6 @@ In this task, you will login as an end user and provision resources from the sam
     b. Select `v1.0`
 7. Click `NEXT`
 8. On the `Parameters` page, configure:
-    - `KeyName`: Choose the key you created in task _Task 1.1_
     - `SubnetID`: **choose the value of 'PublicSubnetId' from the CloudFormation outputs noted in Lab Setup**
     - `InstanceType`: t2.micro
     - `Security Group`: **choose the value of 'SecurityGroup' from the CloudFormation outputs noted in Lab Setup**
