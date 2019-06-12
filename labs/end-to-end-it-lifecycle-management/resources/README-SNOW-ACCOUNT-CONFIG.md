@@ -5,7 +5,7 @@
 In this task, you will **login to ServiceNow using the admin account** add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps.
 
 In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. 
-**Recap**
+<br/>**Recap**<br/>
 Also, following ServiceNow connection specific roles have been created for you in the _Lab Setup_ section of AWS:
 - `SCEC2ConnectLaunchRole` - This role is an internal role created for your ServiceNow-Service Catalog
 connector. This role is associated with EC2 product while setting up your SNOW-SC test portfolio.
