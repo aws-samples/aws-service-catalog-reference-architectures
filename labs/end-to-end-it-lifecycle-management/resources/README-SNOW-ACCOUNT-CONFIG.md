@@ -2,7 +2,7 @@
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-EXECUTION-2.md)
 
 # ServiceNow configuration with AWS accounts
-In this task, you will add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps.
+In this task, you will **login to ServiceNow using the admin account** add your AWS account specific information such as IAM user access keys, and secret access keys in ServiceNow. Please refer to the following page to go through these steps.
 
 In this workshop, for your convenience, the setup process has been simplified and some pre-configuration has been done for you. 
 **Recap**
