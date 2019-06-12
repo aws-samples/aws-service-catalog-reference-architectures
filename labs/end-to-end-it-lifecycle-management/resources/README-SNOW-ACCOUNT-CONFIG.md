@@ -25,12 +25,12 @@ We have preconfigured 4 users for you within ServiceNow with different permissio
 
 **ServiceNow Users Preconfigured** 			
 
-|UserID	    |Password | 	Group	    |     SC_Connector Group Permissions            |
-|-----------|---------|-----------------|-----------------------------------------------|
-|SCEndUser01|MTSC@1	  | SC_Connector	|  itil                                         |
-|SCEndUser02|MTSC@1	  | SC_Connector	|  x_126749_aws_sc_portfolio_manager            |
-|SCEndUser03|MTSC@1	  | SC_Connector	|  x_126749_aws_sc_account_admin                |
-|SCEndUser04|MTSC@1	  | SC_Connector	|  "x_snc_aws_sns.admin & order_aws_sc_products"|
+|UserID	    | 	Group	    |     SC_Connector Group Permissions            |
+|-----------|---------------|-----------------------------------------------|
+|SCEndUser01| SC_Connector	|  itil                                         |
+|SCEndUser02| SC_Connector	|  x_126749_aws_sc_portfolio_manager            |
+|SCEndUser03| SC_Connector	|  x_126749_aws_sc_account_admin                |
+|SCEndUser04| SC_Connector	|  "x_snc_aws_sns.admin & order_aws_sc_products"|
 
 ## Configure accounts
 In the AWS Service Catalog scoped app Accounts menu, you will create two accounts, one for sync and one for provisioning. 
