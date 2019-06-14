@@ -84,13 +84,11 @@ Data will be visible in the AWS Service Catalog scoped app menus after the adapt
 ![snow-acc-config-7](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-7.png)
 4. Next, in ServiceNow, In the navigation panel on the left, search for `AWS`, choose `Role Grants` under AWS Service Catalog.
 5. Choose `New `to create a new Role Grant. Under role, specify `order_aws_sc_products`.
-6. Under `Identity`, specify SnowEndUser's ARN(you can also find this by clicking on search button) specified in the outputs section of Cloudformation, choose Submit.
-
-### To test access to portfolios
-1.	Choose the `Test Authorization` button shown in the AWS identity module.
-2.	If the test is successful, the message `Successfully performed SearchProducts action as arn:aws:iam::AWS Account:role/SnowEndUser` is returned. 
+6. Under `Identity`, specify SnowEndUser's ARN(you can also find this by clicking on search button) specified in the outputs section of Cloudformation, choose `Submit`.
+7.	In the navigation panel on the left, search for `AWS`, choose `Identities` under AWS Service Catalog. Choose the ARN listed for `SnowEndUser`, and click on the `Test Authorization` button shown on this screen.
+8.	If the test is successful, the message `Successfully performed SearchProducts action as arn:aws:iam::AWS Account:role/SnowEndUser` is returned. 
 ![snow-acc-config-8](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-8.png)
-3.	An unsuccessful test returns the message `Error using account…`
-4.	Given the preceding setup, `SCEndUser01` can now order products from AWS Service Catalog in ServiceNow.
+9.	An unsuccessful test returns the message `Error using account…`
+10.	Given the preceding setup, `SCEndUser01` can now order products from AWS Service Catalog in ServiceNow.
 
 [Next: Provisioning AWS Services using ServiceNow >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
