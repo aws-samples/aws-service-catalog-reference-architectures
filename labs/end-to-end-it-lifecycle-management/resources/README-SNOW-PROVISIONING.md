@@ -18,7 +18,6 @@ You are now ready to order an EC2 instance from your ServiceNow service catalog.
 ![snow-prov-3](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-3.png)
 
 2. On the `Parameters` page, configure:
-    - `KeyName`: Choose the key you created in task _Task 1.1_
     - `SubnetID`: **choose the value of 'PublicSubnetId' from the CloudFormation outputs noted in Lab Setup**
     - `InstanceType`: t2.medium
     - `Security Group`: **choose the value of 'SecurityGroup' from the CloudFormation outputs noted in Lab Setup**
