@@ -71,7 +71,7 @@ To configure `snow-stsuser-account`:
 
 ## Schedule Manual Sync
 During the initial setup, manually execute the sync(synchronize) job instead of waiting for the Scheduled Jobs to occur. To synchronize the accounts manually, do the following:
-1. As System Administrator, in ServiceNow console, find Scheduled Jobs under `System Definition` in the filter navigator panel on the left.
+1. As System Administrator, in ServiceNow console, find `Scheduled Jobs` under `System Definition` in the filter navigator panel on the left.
 ![snow-acc-config-5](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-5.png)
 2. Next, Search by name for job called `Sync all Accounts`, open it by clicking it, and then choose `Execute Now`.
 ![snow-acc-config-6](/labs/end-to-end-it-lifecycle-management/resources/snow-acc-config-6.png)
