@@ -1,7 +1,7 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/LAB-SETUP.md)
 # 3. Lab Execution
-## AWS related activities
+## Deploy using AWS Service Catalog
 In this lab, you will go through the Service Catalog administrator and end-user experiences.
  <img src="/labs/end-to-end-it-lifecycle-management/resources/sc-icon.png" width="400"><br/>
 We have set up pre-provisioned roles for you in the *Lab Setup* section. You will use these roles to perform tasks in the upcoming labs. The following roles have been created:
