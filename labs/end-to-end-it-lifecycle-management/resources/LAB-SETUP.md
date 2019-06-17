@@ -32,7 +32,6 @@ You will need to setup your AWS account with the required infrastructure to run 
 9.	Once status of the stack changes to `CREATE COMPLETE`, click on the stack and open the `Outputs` tab to see the output values.
 10.	Copy the key and value column contents of the `Outputs` section and save it in a text file. You would be referring to these output values throughout the lab. Here are the keys that you will find in the output:
     ```
-    - AMI         
     - ConfigBucket        
     - ConfigServiceRole
     - PublicSubnetId  
