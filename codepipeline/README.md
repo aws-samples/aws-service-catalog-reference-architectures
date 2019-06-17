@@ -5,6 +5,7 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
  across multiple accounts and regions in ServiceCatalog.  The pipeline includes sample template validation and cfn_nag stages.
  Updating a ServiceCatalog becomes as easy as ```git push```
 
+![sc-cicd-ra-architecture.png](sc-cicd-ra-architecture.png)
 
 ## Setup for Single Account
 1. Create the Automated pipeline  
@@ -75,6 +76,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
   f. Deploy to any regions in which you want to use ServiceCatalog - this guide assumes us-east-1,us-east-2,us-west-1  
 
 ## Using The Automated CodePipeline  
+
+![ServiceCatalog-CICD-templates.png](ServiceCatalog-CICD-templates.png)
   
 1. Copy this Repo into your new CodeCommit Repo.  
   You will need a codecommit user. You can use an existing user or create a new one with the supplied template. Pick either HTTPS or SSH for connecting.
@@ -96,7 +99,6 @@ The hub account id is needed to create the trust relationship in each spoke acco
 3. Commit the changes to your CodeCommit Repo and push!  
   You can follow the automated process in CodePipeline and Cloudformation.
 
-### CodePipeline automatically updates ServiceCatalog when templates are checked into CodeCommit  
-![sc-cicd-ra-architecture.png](sc-cicd-ra-architecture.png)
+
 
 
