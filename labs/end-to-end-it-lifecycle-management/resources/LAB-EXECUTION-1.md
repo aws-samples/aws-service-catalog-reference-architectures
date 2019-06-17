@@ -66,7 +66,6 @@ In this task, you will login as an end user and provision resources from the sam
     - `SubnetID`: **choose the value of 'PublicSubnetId' from the CloudFormation outputs noted in Lab Setup**
     - `InstanceType`: t2.micro
     - `Security Group`: **choose the value of 'SecurityGroup' from the CloudFormation outputs noted in Lab Setup**
-    - `AMI`: **choose the value of 'AMI' from the CloudFormation outputs noted in Lab Setup**
 9. Click `NEXT`.
 10. On the `TagOptions` page notice that cost-center has auto-populated. Click `NEXT`.
 11. On the Notifications page, click `NEXT`.

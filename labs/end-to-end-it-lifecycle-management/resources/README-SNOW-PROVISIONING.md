@@ -21,7 +21,6 @@ You are now ready to order an EC2 instance from your ServiceNow service catalog.
     - `SubnetID`: **choose the value of 'PublicSubnetId' from the CloudFormation outputs noted in Lab Setup**
     - `InstanceType`: t2.medium
     - `Security Group`: **choose the value of 'SecurityGroup' from the CloudFormation outputs noted in Lab Setup**
-    - `AMI`: **choose the value of 'AMI' from the CloudFormation outputs noted in Lab Setup**
 6. Choose `Order Now` from Top Right of the screen. This will start the creation of an EC2 instance in your AWS account.
 ![snow-prov-4](/labs/end-to-end-it-lifecycle-management/resources/snow-prov-4.png)
 7. Next, open `My Assets` from navigation panel in left.
