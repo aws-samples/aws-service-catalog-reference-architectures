@@ -2,20 +2,6 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": " This cloudformation template creates resources for the re:inforce workshop.(fdp-1o32smpoh)",
   "Mappings": {
-    "AMI": {
-      "us-east-1": {
-        "HVM64": "ami-0922553b7b0369273"
-      },
-      "eu-west-1": {
-        "HVM64": "ami-0c21ae4a3bd190229"
-      },
-      "ap-southeast-1": {
-        "HVM64": "ami-0fca02518e0faeb84"
-      },
-      "ca-central-1": {
-        "HVM64": "ami-0bf6ee3cf1ee25853"
-      }
-    },
     "SubnetAZ1": {
       "us-east-1": {
         "HVM64": "us-east-1b"
@@ -678,24 +664,6 @@
         ]
       }
     },
-    "EC2Instance": {
-      "Type": "AWS::EC2::Instance",
-      "Properties": {
-        "InstanceType": "t2.micro",
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AMI",
-            {
-              "Ref": "AWS::Region"
-            },
-            "HVM64"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "subnetPrivate"
-        }
-      }
-    },
     "subnetPublic1": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
@@ -1195,17 +1163,6 @@
             "Ref": "AWS::Region"
           },
           "name"
-        ]
-      }
-    },
-    "AMI": {
-      "Value": {
-        "Fn::FindInMap": [
-          "AMI",
-          {
-            "Ref": "AWS::Region"
-          },
-          "HVM64"
         ]
       }
     }
