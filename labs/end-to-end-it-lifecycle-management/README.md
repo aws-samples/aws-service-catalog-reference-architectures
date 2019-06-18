@@ -20,7 +20,7 @@ Go through the sections below **in the order** provided to complete this lab.
         1. [Configure your AWS accounts in ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-ACCOUNT-CONFIG.md) 
         2. [Provisioning AWS Services using ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-PROVISIONING.md)
         3. [Set up your AWS account to send notifications to ServiceNow](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
-        4. [Trigger incident creation in ServiceNow from AWS](README-SNOW-INCIDENT-CREATION.md)
+        4. [Trigger incident creation in ServiceNow from AWS](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-CREATION.md)
 
 ## Clean Up
 
