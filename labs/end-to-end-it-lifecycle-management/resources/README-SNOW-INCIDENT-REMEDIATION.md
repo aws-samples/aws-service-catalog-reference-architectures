@@ -1,10 +1,14 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
-<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-AWS-NOTIFICATIONS-TO-SNOW.md)
+<br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-CREATION.md)
 
-# Trigger incident creation in ServiceNow 
-In this task, you will use ServiceNow to launch an AWS Service Catalog product with an EC2 instance other than size `t2.micro`. This will trigger the AWS Config rule that we set up in the previous step, and generate a notification to create an incident in ServiceNow. 
-<br/>In the previous tasks, we set up an AWS Config Rule, AWS CloudWatch Event rule, and an AWS SNS notification to notify ServiceNow whenever an EC2 instance **OTHER** than `t2.micro` is launched. 
-<br/>So, in this task, we will verify that an incident is created in ServiceNow by launching an EC2 instance of type `t2.medium`.
+# Post Provisioned Operational Action Triggers Change Record in ServiceNow
+In this section you will remediate the ServiceNow incident created in section d by updating the AWS Service Catalog provisioned product in ServiceNow’s My Assets (view of the CMDB) to the allowable web-server instance type. 
+
+Update EC2 instance of size t2.medium to t2.micro from ServiceNow
+1.	Go to the ServiceNow browser tab, on the top right of the screen, open the system administrator menu, and then Choose Impersonate User, choose SCEndUser01 as the impersonation.
+2.	In the navigation panel on the left, search for My Assets, and choose My Assets (type My Assets in filter navigator search box) 
+3.	Choose the Configuration Item (Product Name) that you requested in the previous task
+![snow-remd-1](/labs/end-to-end-it-lifecycle-management/resources/snow-remd-1.png)
 
 ## Launch EC2 instance of size t2.medium from ServiceNow
 1. Go to the ServiceNow browser tab, open the system administrator menu (Top right of the screen) and then Choose `Impersonate User`, choose `SCEndUser01` as the impersonation.
