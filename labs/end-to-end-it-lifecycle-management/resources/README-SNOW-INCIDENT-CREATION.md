@@ -36,4 +36,4 @@ _Note_:
 ![snow-incident-8](/labs/end-to-end-it-lifecycle-management/resources/snow-incident-8.png)
 You will see an incident here, which means you have successfully integrated AWS SNS and ServiceNow.
 
-[Next: Incident Remediation in ServiceNow from AWS >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-REMEDIATIATION.md)
+[Next: Incident Remediation in ServiceNow from AWS >>](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-REMEDIATION.md)
