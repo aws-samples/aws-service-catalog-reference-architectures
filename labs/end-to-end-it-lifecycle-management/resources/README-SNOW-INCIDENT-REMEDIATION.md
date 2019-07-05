@@ -1,10 +1,10 @@
 [⌂ Home](/labs/end-to-end-it-lifecycle-management/README.md)
 <br />[< Back](/labs/end-to-end-it-lifecycle-management/resources/README-SNOW-INCIDENT-CREATION.md)
 
-## Post Provisioned Operational Action Triggers Change Record in ServiceNow
+# Post Provisioned Operational Action Triggers Change Record in ServiceNow
 In this section you will remediate the ServiceNow incident created in section d by updating the AWS Service Catalog provisioned product in ServiceNow’s My Assets (view of the CMDB) to the allowable web-server instance type. 
 
-# Update EC2 instance of size t2.medium to t2.micro from ServiceNow
+## Update EC2 instance of size t2.medium to t2.micro from ServiceNow
 1.	Go to the ServiceNow browser tab, on the top right of the screen, open the system administrator menu, and then Choose Impersonate User, choose SCEndUser01 as the impersonation.
 2.	In the navigation panel on the left, search for My Assets, and choose My Assets (type My Assets in filter navigator search box) 
 3.	Choose the Configuration Item (Product Name) that you requested in the previous task
