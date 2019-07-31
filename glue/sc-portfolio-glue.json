@@ -1,0 +1,175 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Glue Portfolio for Service Catalog. (fdp-1p4dlgglue)",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Portfolio Information"
+                    },
+                    "Parameters": [
+                        "PorfolioName",
+                        "PortfolioProvider",
+                        "PorfolioDescription"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "IAM Settings"
+                    },
+                    "Parameters": [
+                        "LaunchRoleName",
+                        "LinkedRole1",
+                        "LinkedRole2",
+                        "CreateEndUsers"
+                    ]
+                } ,
+                {
+                    "Label": {
+                        "default": "Product Settings"
+                    },
+                    "Parameters": [
+                        "RepoRootURL"
+                    ]
+                } 
+  
+            ]
+        }
+    },
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name",
+            "Default":"IT Services"
+        },
+       "PorfolioName": {
+            "Type":"String",
+            "Description":"Portfolio Name",
+            "Default":"Service Catalog - AWS Glue Reference Architecture"
+        },
+        "PorfolioDescription": {
+            "Type":"String",
+            "Description":"Portfolio Description",
+            "Default":"Service Catalog Portfolio that contains reference architecture products for AWS Glue (Glue)."
+        },
+        "LaunchRoleName": {
+            "Type":"String",
+            "Description":"Name of the launch constraint role for Glue products. leave this blank to create the role."            
+        },
+       "LinkedRole1": {
+            "Type":"String",
+            "Description":"(Optional) The name of a role which can execute products in this portfolio."
+        },       
+        "LinkedRole2": {
+            "Type":"String",
+            "Description":"(Optional) The name of a second role which can execute products in this portfolio."
+        },       
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates.",
+            "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
+        },
+        "CreateEndUsers":{
+            "Type":"String",
+            "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
+             "AllowedValues": ["Yes","No"],
+             "Default":"Yes" 
+        }
+      },
+      "Conditions":{
+        "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
+        "CondCreateEndUsers" : {"Fn::Equals" : [{"Ref" : "CreateEndUsers"}, "Yes"]},
+        "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
+        "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
+    },
+    "Resources": {
+        "SCGLUEportfolio": {
+          "Type" : "AWS::ServiceCatalog::Portfolio",
+          "Properties" : {
+            "ProviderName": {"Ref":"PortfolioProvider"},
+            "Description" : {"Ref":"PorfolioDescription"},
+            "DisplayName" : {"Ref":"PorfolioName"}
+          }
+        },
+        "addrole1":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole1",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
+            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "addrole2":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Condition":"CondLinkRole2",
+          "Properties" : {
+            "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
+            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },        
+        "stackServiceCatalogEndusers": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CondCreateEndUsers",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },        
+        "LinkEndusersRole":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
+                ]},
+            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LinkEndusersGroup":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
+                ]},
+            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CreateLaunchConstraint",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-glue-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },        
+        "glueproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCGLUEportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}glue/sc-product-glue.json"},
+            "TimeoutInMinutes" : 5
+          }
+        }
+
+    }  
+}

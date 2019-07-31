@@ -1,0 +1,56 @@
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'This Cloudformation template creates a glue crawler.(fdp-2o24sdsdpoh). Please review the cloudformation template and ensure that configuration of resources (such as SchemaChangePolicy and others) created meet your security standards and expectations. '
+Parameters:
+    CrawlerName:
+        Description: Enter a name of crawler.
+        Type: String
+        Default: ""
+    DatabaseName:
+        Description: Enter a name of crawler.
+        Type: String
+        Default: ""
+    S3Path:
+        Description: Full S3 path for crawling data from(e.g. s3://<bucketname>/data)
+        Type: String
+        Default: ""
+    IAMRoleARN:
+        Description: IAMRoleARN to be used for crawling.
+        Type: String
+        Default: ""
+Resources:
+    MyCrawler2:
+        Type: AWS::Glue::Crawler
+        Properties:
+          Name: !Ref CrawlerName
+          Role: !Ref IAMRoleARN
+          DatabaseName: !Ref MyDatabase
+          Targets:
+            S3Targets:
+              - Path: !Ref S3Path
+          SchemaChangePolicy:
+            UpdateBehavior: "UPDATE_IN_DATABASE"
+            DeleteBehavior: "LOG"
+
+    MyDatabase:
+        Type: AWS::Glue::Database
+        Properties:
+            CatalogId: !Ref AWS::AccountId
+            DatabaseInput: 
+                Name: !Ref DatabaseName
+Outputs:
+    Crawler:
+        Value: !Join 
+          - ''
+          - - 'https://console.aws.amazon.com/glue/home?#crawler:name='
+            - !Ref MyCrawler2
+            - /
+        Description: Database populated by the crawler
+    Database:
+        Value: !Join 
+          - ''
+          - - 'https://console.aws.amazon.com/glue/home?#database:name='
+            - !Ref MyDatabase
+            - /
+        Description: Database populated by the crawler

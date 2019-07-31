@@ -1,0 +1,65 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Glue Service Catalog product. (fdp-1p4dlgcoglue)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Owner and Distributor Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for Glue products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The ServiceCatalog portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+        
+      },
+    "Resources": {
+        "scglueproduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "AWS Glue crawler",
+                "Description": "This product creates a glue crawler.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "baseline version",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}glue/sc-glue-ra.yml"}
+                        },
+                        "Name": "v1.1"
+                    }
+                ]
+            }
+        },
+        "Associateglue":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scglueproduct"}
+          }
+        },
+        "constraintglue":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associateglue",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scglueproduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    }
+}    
