@@ -5,10 +5,10 @@
     "ProductDescription": "DMS Replication Instance",
     "ProductVersion": "1.0",
     "ProductVersionDescription": "Initial Version",
-    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/dmsinstance/sc-dmsinstance.yml",
+    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/labs/preventive-control/products/dmsinstance/sc-dmsinstance.yml",
     "ProductRoleName": "sc-dms-instance-product-role",
     "ProductPolicyName": "var.policy",
-    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/dmsinstance/sc-dmsinstance-products-role.yml",
+    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/labs/preventive-control/products/dmsinstance/sc-dmsinstance-products-role.yml",
     "TemplateRuleConstraint": {
       "ReplicationInstanceClass": {
         "Assertions": [

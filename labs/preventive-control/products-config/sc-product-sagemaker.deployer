@@ -5,10 +5,10 @@
     "ProductDescription": "Amazon SageMaker Notebook Instance",
     "ProductVersion": "1.0",
     "ProductVersionDescription": "Initial Version",
-    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/sagemaker/sc-sagemaker.yml",
+    "ProductTemplateUrl": "aws-service-catalog-reference-architectures/labs/preventive-control/products/sagemaker/sc-sagemaker.yml",
     "ProductRoleName": "sc-sagemaker-product-role",
     "ProductPolicyName": "var.policy",
-    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/preventive-control/products/sagemaker/sc-sagemaker-products-role.yml",
+    "ProductRoleTemplateUrl": "aws-service-catalog-reference-architectures/labs/preventive-control/products/sagemaker/sc-sagemaker-products-role.yml",
     "TemplateRuleConstraint": {
       "InstanceType": {
         "Assertions": [
