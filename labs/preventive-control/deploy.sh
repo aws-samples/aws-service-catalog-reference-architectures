@@ -68,7 +68,7 @@ cd products-config/
 for f in ${products_to_deploy[*]}
 do
   printf "Downloading Configuration for Product: $f\n"
-  wget -q https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/products-config/sc-product-$f.deployer -O sc-product-$f.deployer
+  wget -q https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/products-config/sc-product-$f.deployer -O sc-product-$f.deployer
 done
 cd ..
 
