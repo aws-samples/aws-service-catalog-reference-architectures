@@ -5,14 +5,14 @@ Resources:
     Properties:
       GroupName: ServiceCatalogEndusers
       ManagedPolicyArns: 
-        - arn:aws:iam::aws:policy/ServiceCatalogEndUserAccess
+        - arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess
       Path: /
   SCEnduserRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: ServiceCatalogEndusers
       ManagedPolicyArns: 
-        - arn:aws:iam::aws:policy/ServiceCatalogEndUserAccess
+        - arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess
       Path: /      
       AssumeRolePolicyDocument:
         Version: 2012-10-17
