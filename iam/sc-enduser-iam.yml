@@ -22,27 +22,6 @@ Resources:
               AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
             Action:
               - 'sts:AssumeRole'
-  SCEnduserPolicy:
-    Type: AWS::IAM::Policy
-    Properties: 
-      PolicyDocument: 
-        Version: "2012-10-17"
-        Statement: 
-          - Effect: "Allow"
-            Action: 
-              - "servicecatalog:ProvisionProduct"
-              - "servicecatalog:UpdateProvisionedProduct"
-              - "servicecatalog:TerminateProvisionedProduct"
-              - "servicecatalog:ListServiceActionsForProvisioningArtifact"
-              - "servicecatalog:ExecuteProvisionedProductPlan"
-              - "servicecatalog:ExecuteProvisionedProductServiceAction"
-              - "cloudformation:ListStackResources"
-            Resource: "*"
-      PolicyName:  ServiceCatalogEndusers-AdditionalPermissions
-      Roles:
-        - !Ref SCEnduserRole
-      Groups:
-        - !Ref SCEnduserGroup
 Outputs:
     EndUserGroupArn:
         Value: !GetAtt SCEnduserGroup.Arn

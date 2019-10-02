@@ -27,12 +27,12 @@
           "VpcId" : {"Ref" : "VPC"},
           "GroupDescription" : "Enable HTTP and HTTPS access",
           "SecurityGroupIngress" : [ 
-              { "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
-              { "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+              {"Description":"allow incoming HTTP", "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
+              {"Description":"allow incoming HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
           ],
           "SecurityGroupEgress" : [
-              { "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
-              { "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+              {"Description":"allow outgoing HTTP",  "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
+              {"Description":"allow outgoing HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
           ]
         }
       }, 

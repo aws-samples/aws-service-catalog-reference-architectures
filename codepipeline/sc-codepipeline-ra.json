@@ -70,7 +70,7 @@
         "CodeBuildRole" :{
             "Type":"AWS::IAM::Role",
             "Properties":{
-                "RoleName": "CodeBuilderRole",
+                "Description":"CodePipelie role for building and deploying artifacts. This role will need expansive powers to test templates.",                
                 "AssumeRolePolicyDocument": {
                     "Version":"2012-10-17",
                     "Statement":{
@@ -85,7 +85,7 @@
                     "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess",
                     "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
                     "arn:aws:iam::aws:policy/AmazonSSMFullAccess",
-                    "arn:aws:iam::aws:policy/AWSCodeCommitPowerUser"
+                    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
                 ],
                 "Policies": [ { 
                     "PolicyName":"CodeBuildManageS3Artifacts",
@@ -146,13 +146,15 @@
                                     "cloudformation:CreateStack",
                                     "cloudformation:DeleteStack",
                                     "cloudformation:DescribeStackEvents",
-                                    "cloudformation:DescribeStacks",
-                                    "cloudformation:GetTemplateSummary",
                                     "cloudformation:SetStackPolicy",
-                                    "cloudformation:ValidateTemplate",
-                                    "s3:GetObject"
+                                    "cloudformation:ValidateTemplate"
                                 ],
-                                "Resource": "*"
+                                "Resource": [
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/tcat-tag-*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/SC-RA-IACPipeline/*"},                                    
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-IAMroles:*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-portfolio:*"}
+                                ]
                             }
                         ]
                     }
@@ -170,7 +172,6 @@
                                     "iam:CreateRole",
                                     "iam:DeleteRole",
                                     "iam:GetRole",
-                                    "iam:PassRole",
                                     "iam:ListRoles",
                                     "iam:CreateInstanceProfile",
                                     "iam:DeleteInstanceProfile",
@@ -182,9 +183,14 @@
                                     "iam:PutGroupPolicy",
                                     "iam:DeleteGroupPolicy",
                                     "iam:DetachGroupPolicy",
-                                    "iam:AttachGroupPolicy"
+                                    "iam:AttachGroupPolicy",
+                                    "iam:PassRole"
                                 ],
-                                "Resource": "*"
+                                "Resource": [
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/SC-RA-IACPipeline-*"},
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/tcat-tag-*"},
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:instance-profile/tcat-tag-*"}
+                                ]
                             }
                         ]
                     }
@@ -200,7 +206,7 @@
                                 "codebuild:ListProjects",
                                 "codebuild:ListBuildsForProject",
                                 "codebuild:UpdateProject",
-                                "codebuild:CreateProject"
+                                "codebuild:CreateProject"                                
                               ],
                               "Resource":[
                                  {"Fn::Sub":"arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*"}
@@ -215,7 +221,7 @@
         "CodePipelineServiceCatalogRole":{
             "Type":"AWS::IAM::Role",
             "Properties":{
-                "RoleName": "CodePipelieManageProductsRole",
+                "Description":"CodePipelie role for moving objects through the build and deploy stages.",
                 "AssumeRolePolicyDocument": {
                     "Version":"2012-10-17",
                     "Statement":{
