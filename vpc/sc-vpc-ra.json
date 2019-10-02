@@ -604,7 +604,7 @@
         },
         "BastionSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
-            "Condition": "CreateBastionResources",
+            "Condition": "CreateBastionResources",            
             "Properties": {
                 "GroupDescription": "Enables SSH Access to Bastion Hosts",
                 "VpcId": {
@@ -612,6 +612,7 @@
                 },
                 "SecurityGroupIngress": [
                     {
+                        "Description":"allow SSH",
                         "IpProtocol": "tcp",
                         "FromPort": "22",
                         "ToPort": "22",
@@ -620,6 +621,7 @@
                         }
                     },
                     {
+                        "Description":"allow icmp",
                         "IpProtocol": "icmp",
                         "FromPort": "-1",
                         "ToPort": "-1",
@@ -630,6 +632,7 @@
                 ],
                 "SecurityGroupEgress":[
                     {
+                        "Description":"allow all outgoing",
                         "IpProtocol" : "-1",
                         "CidrIp" : "0.0.0.0/0"
                     }

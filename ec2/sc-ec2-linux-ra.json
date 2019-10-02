@@ -147,6 +147,7 @@
                 },
                 "SecurityGroupIngress": [
                     {
+                        "Description":"allow SSH",
                         "IpProtocol": "tcp",
                         "FromPort": {
                             "Ref": "LinuxSSHPort"
@@ -159,6 +160,7 @@
                         }
                     },
                     {
+                        "Description":"allow icmp",
                         "IpProtocol": "icmp",
                         "FromPort": "-1",
                         "ToPort": "-1",
@@ -169,6 +171,7 @@
                 ],
                 "SecurityGroupEgress":[
                     {
+                        "Description":"allow all outgoing",
                         "IpProtocol" : "-1",
                         "CidrIp" : "0.0.0.0/0"
                     }
