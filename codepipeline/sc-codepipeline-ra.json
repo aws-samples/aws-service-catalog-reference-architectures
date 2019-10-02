@@ -150,10 +150,10 @@
                                     "cloudformation:ValidateTemplate"
                                 ],
                                 "Resource": [
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/tcat-tag-*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/tcat-tag-*"},
                                     {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/SC-RA-IACPipeline/*"},                                    
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-IAMroles:*"},
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-portfolio:*"}
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stackset/SC-IAC-automated-IAMroles:*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stackset/SC-IAC-automated-portfolio:*"}
                                 ]
                             }
                         ]
