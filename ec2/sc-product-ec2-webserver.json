@@ -46,6 +46,7 @@
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache-simple.json"}
                         },
                         "Name": "Apache v1.0"
+                    }
                 ]
             }
         },
