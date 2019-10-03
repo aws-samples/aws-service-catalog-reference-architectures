@@ -1,0 +1,417 @@
+{
+    "Description": "Container CI/CD Automation Pipeline (fdp-1p5s1037g)",
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "pipelineartifactsBucketName": {
+            "Type":"String",
+            "Description":"Bucket name for the codepipeline artifacts container",
+            "Default":"codepipeline-pipelineartifacts"
+        },"CodeCommitRepoName": {
+            "Type":"String",
+            "Description":"The project name, also the CodeCommit Repository name",
+            "Default":"ETLTasks"
+        },"ECRRepoName": {
+            "Type": "String",
+            "Description" : "Name of the ECR repository. must be lowercase.",
+            "Default":"etltest"
+        }
+    },
+    "Resources": {
+        "PipelineArtifacts": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketName" : {"Fn::Sub":"${pipelineartifactsBucketName}-${AWS::AccountId}"}
+            }
+        },
+        "ECRRepo" : {
+            "Type": "AWS::ECR::Repository",
+            "Properties": {
+                "RepositoryName": {"Ref":"ECRRepoName"}
+            }
+        },
+        "ETLTasksRepo": {
+          "Type" : "AWS::CodeCommit::Repository",
+          "Properties" : {
+            "RepositoryDescription" : "Repository for Service Catalog Portfolios and products",
+            "RepositoryName" : {"Ref":"CodeCommitRepoName"},
+            "Triggers" : [ ]
+          }
+        },
+        "CodeBuildRole" :{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "Description":"CodePipelie role for building and deploying artifacts. This role will need expansive powers to test templates.",                
+                "AssumeRolePolicyDocument": {
+                    "Version":"2012-10-17",
+                    "Statement":{
+                        "Effect":"Allow",
+                        "Principal":{
+                            "Service":"codebuild.amazonaws.com"
+                        },
+                        "Action":"sts:AssumeRole"
+                    }
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+                    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+                ],
+                "Policies": [ { 
+                    "PolicyName":"CodeBuildManageS3Artifacts",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:CreateBucket",
+                                    "s3:DeleteBucket",
+                                    "s3:DeleteBucketPolicy",
+                                    "s3:GetBucketPolicy",
+                                    "s3:GetBucketPolicyStatus",
+                                    "s3:PutBucketPolicy",
+                                    "s3:GetBucketLocation",
+                                    "s3:DeleteObject",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:ListBucket"
+                                ],
+                                "Resource": [
+                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
+                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"}
+                                ]
+                            },{
+                              "Effect": "Allow",
+                              "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogStreams"
+                                ],
+                                  "Resource": [
+                                    {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}                                    
+                                ]
+                            } 
+                        ]
+                    }
+                },{ 
+                    "PolicyName":"CodeBuildManageECR",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [                            
+                            {
+                              "Action": [
+                                "ecr:BatchCheckLayerAvailability",
+                                "ecr:CompleteLayerUpload",
+                                "ecr:InitiateLayerUpload",
+                                "ecr:PutImage",
+                                "ecr:UploadLayerPart"
+                              ],
+                              "Resource": [
+                                {"Fn::GetAtt": ["ECRRepo","Arn"]}
+                             ],
+                              "Effect": "Allow"
+                            },
+                            {
+                              "Action": [
+                                "ecr:GetAuthorizationToken"
+                              ],
+                              "Resource": "*",
+                              "Effect": "Allow"
+                            }
+                        ]
+                    }
+                    }
+                ]
+            }
+        },
+        "CodePipelineArtifactsRole":{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "Description":"CodePipelie role for moving objects through the build and deploy stages.",
+                "AssumeRolePolicyDocument": {
+                    "Version":"2012-10-17",
+                    "Statement":{
+                        "Effect":"Allow",
+                        "Principal":{
+                            "Service":"codepipeline.amazonaws.com"
+                        },
+                        "Action":"sts:AssumeRole"
+                    }
+                },
+                "Policies": [ { 
+                    "PolicyName":"CodePipelineManageS3Artifacts",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:GetObject",
+                                    "s3:GetObjectVersion",
+                                    "s3:GetBucketVersioning",
+                                    "s3:PutObject"
+                                ],
+                                "Resource": [
+                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
+                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"}
+                                ]
+                            }
+                        ]
+                    }
+                    },{ 
+                    "PolicyName":"codepipeline-codecommit",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {"Effect": "Allow",
+                            "Action": [
+                                "codecommit:GetBranch",
+                                "codecommit:GetCommit",
+                                "codecommit:UploadArchive",
+                                "codecommit:GetUploadArchiveStatus",
+                                "codecommit:CancelUploadArchive"
+                            ],
+                            "Resource": {"Fn::Sub":"arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"}
+                            },{
+                              "Effect":"Allow",
+                              "Action":[
+                                "codebuild:StartBuild",
+                                "codebuild:StartBuild",
+                                "codebuild:StopBuild",
+                                "codebuild:BatchGetProjects",
+                                "codebuild:BatchGetBuilds",
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects",
+                                "codebuild:ListBuildsForProject",
+                                "codebuild:ListCuratedEnvironmentImages",
+                                "codebuild:ListSourceCredentials"
+                              ],
+                              "Resource":[
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjBuildContainer"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjValidateContainer"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjDeployContainer"}} ]}
+                             ]                              
+                            }
+                        ]
+                    }
+                    }
+                
+                ]
+            }            
+        },        
+        "ProjDeployContainer" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "DeployToECR",
+              "Description": "push the container to ECR.",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/standard:2.0",
+                "EnvironmentVariables":[
+                      {
+                        "Name": "AWS_DEFAULT_REGION",
+                        "Value": {"Fn::Sub":"${AWS::Region}" },
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "AWS_ACCOUNT_ID",
+                        "Value": {"Fn::Sub":"${AWS::AccountId}"},
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "IMAGE_REPO_NAME",
+                        "Value": {"Ref":"ECRRepoName"},
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "IMAGE_TAG_LATEST",
+                        "Value": "latest",
+                        "Type": "PLAINTEXT"
+                      }
+                ],
+                "PrivilegedMode": true
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-deploy.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },
+        "ProjBuildContainer" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "Build_Container",
+              "Description": "build the container",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/standard:2.0",
+                "EnvironmentVariables":[
+                      {
+                        "Name": "AWS_DEFAULT_REGION",
+                        "Value": {"Fn::Sub":"${AWS::Region}" },
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "AWS_ACCOUNT_ID",
+                        "Value": {"Fn::Sub":"${AWS::AccountId}"},
+                        "Type": "PLAINTEXT"
+                      }
+                ]
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-build.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },
+        "ProjValidateContainer" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "Validate_Container",
+              "Description": "run validations on the container",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/python:3.6.5",
+                "EnvironmentVariables":[
+                    {
+                      "Name":  "PROJECTNAME",
+                      "Value": {"Ref":"CodeCommitRepoName"},
+                      "Type": "PLAINTEXT"
+                    },{
+                      "Name": "ARTIFACT_BUCKET",
+                      "Value": {"Ref":"PipelineArtifacts"},
+                      "Type": "PLAINTEXT"
+                    }
+                ]
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-validate.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },      
+        "ProductPipeline" :{
+          "Type" : "AWS::CodePipeline::Pipeline",          
+          "Properties" : {
+            "ArtifactStore" :{
+                "Type": "S3",
+                "Location":{"Ref":"PipelineArtifacts"}
+            },
+            "Name" : "ETL-Container-ProductPipeline",
+            "RoleArn" : {"Fn::GetAtt":["CodePipelineArtifactsRole","Arn"]},
+            "Stages" : [ 
+                {
+                    "Name": "SourceStageCodeCommit",
+                    "Actions": [
+                        {
+                          "InputArtifacts":[],
+                          "Name":"Source",
+                          "ActionTypeId": {
+                              "Category": "Source",
+                              "Owner": "AWS",
+                              "Version": "1",
+                              "Provider": "CodeCommit"
+                          },
+                          "Configuration": {
+                              "RepositoryName":{"Fn::GetAtt":["ETLTasksRepo","Name"]},
+                              "BranchName":"master"
+                          },
+                          "OutputArtifacts":[
+                              {
+                                "Name":"SourceArtifacts"
+                              }
+                          ]
+                        }
+                    ]
+                },{
+                    "Name": "BuildAndValidate",
+                    "Actions": [
+                        {
+                            "InputArtifacts": [
+                                { "Name": "SourceArtifacts" }
+                            ],
+                            "Name": "ContainerBuild",
+                            "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Version": "1",
+                                "Provider": "CodeBuild"
+                            },
+                            "OutputArtifacts": [
+                                { "Name": "BuildArtifacts" }
+                            ],
+                            "Configuration": {
+                                "ProjectName":{"Ref":"ProjBuildContainer"}
+                            },
+                            "RunOrder": 1
+                        },{
+                            "InputArtifacts": [
+                                { "Name": "BuildArtifacts" }
+                            ],
+                            "Name": "CodeValidation",
+                            "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Version": "1",
+                                "Provider": "CodeBuild"
+                            },
+                            "OutputArtifacts": [],
+                            "Configuration": {
+                                "ProjectName":{"Ref":"ProjValidateContainer"}
+                            },
+                            "RunOrder": 2
+                        }
+                     ]
+                },{
+                    "Name": "Deploy",
+                    "Actions": [{
+                      "InputArtifacts":[{"Name":"BuildArtifacts"}],
+                      "Name":"TagContainer-latest",
+                      "ActionTypeId": {
+                          "Category": "Build",
+                          "Owner": "AWS",
+                          "Version": "1",
+                          "Provider": "CodeBuild"
+                      },
+                      "Configuration": {
+                          "ProjectName":{"Ref":"ProjDeployContainer"}
+                      },
+                      "OutputArtifacts":[
+                          {
+                            "Name":"DeployOutput"
+                          }
+                      ]
+                    }]
+                }
+            ]
+          }
+        }
+        
+        
+    },
+    "Outputs": {
+        "CloneUrlSsh": {
+          "Value": { "Fn::GetAtt": ["ETLTasksRepo","CloneUrlSsh"] },
+          "Description": "URL for ssh cloning the Product Repo"
+        }
+    }
+}

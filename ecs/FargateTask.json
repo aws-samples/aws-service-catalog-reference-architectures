@@ -1,0 +1,67 @@
+{
+    "Description": "Container Fargate Task (fdp-1p5s1037g)",
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "ECRRepoName": {
+            "Type": "String",
+            "Description" : "Name of the ECR repository. must be lowercase.",
+            "Default":"etltest"
+        },
+        "TaskImageTag": {
+            "Type": "String",
+            "Description" : "Container image tag.",
+            "Default":"latest"
+        },
+        "ContainerName": {
+            "Type": "String",
+            "Description" : "Container name in Fargate.",
+            "Default":"etl-container-task"
+        },
+        "LogGroup": {
+            "Type": "String",
+            "Description" : "Cloudwatch log group for the container.",
+            "Default":"etltest"
+        }
+        ,
+        "ExecutionRoleArn": {
+            "Type": "String",
+            "Description" : "Execution role for the container."
+        }
+	},
+	"Resources": {
+        "taskdefinition": {
+            "Type": "AWS::ECS::TaskDefinition",
+            "Properties" : {
+                "ExecutionRoleArn":{"Ref":"ExecutionRoleArn"},
+                "RequiresCompatibilities": [
+                  "FARGATE"
+                ],
+                "Memory": "2048",
+                "Family": {"Ref":"LogGroup"},
+                "NetworkMode": "awsvpc",
+                "Cpu": "512",          
+                "ContainerDefinitions" : [
+                    {
+                      "LogConfiguration": {
+                        "LogDriver": "awslogs",
+                        "Options": {
+                          "awslogs-group": {"Fn::Sub":"/ecs/${LogGroup}"},
+                          "awslogs-region": {"Ref":"AWS::Region"},
+                          "awslogs-stream-prefix": "ecs"
+                        }
+                      },
+                      "Environment": [
+                            {
+                                "Name": "AWS_REGION",
+                                "Value": {"Ref":"AWS::Region"}
+                            }
+                      ],
+                      "Image": {"Fn::Sub":"${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepoName}:${TaskImageTag}"},
+                      "Name": {"Ref":"ContainerName"}
+                    }                                
+                ]
+            }
+        }
+    
+	}	
+}
