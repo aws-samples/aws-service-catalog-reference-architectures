@@ -1,10 +1,14 @@
 # AWS Service Catalog ECS Reference architecture
 
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog Containers Reference Architecture"  
-The Portfolio provides 3 products which create a full pipeline from codecommit to container deployment in Fargate.  
-First the whole portfolio, then create the cluster and codepipeline products.  Use the provisioned codepipeline product to checkin your code and supply a docker file.
-adjust the skeleton builspecs in the codepipeline subfolder to fit your project tests and builds.  Check-in the code to the new codecommit repo. CodePipeline will validate, build, and push the checked in code to ECR.
- Once the container is in ECR you can use the supplied Fargate Task product to create an ECS task definition which can then be launched in the previously provisioned Fargate Cluster.
+The Portfolio provides 3 products which will create a full DevOps pipeline from code to container deployment in Fargate.  
+
+1. First create the portfolio, then provision the cluster and codepipeline products from Service Catalog.  
+2. The provisioned codepipeline product will create a new CodeCommit repo towhich you will use to check-in your code with a docker file and tests.
+    a. Adjust the skeleton builspecs in the codepipeline subfolder to fit your project tests and build commands.  
+    b. Check-in the code to the new codecommit repo. CodePipeline will validate, build, and push the container to ECR.
+3. Once the container is in ECR you can provision the supplied Fargate Task product in Service Catalog.  
+  This will create an ECS task definition which can then be launched in the previously provisioned Fargate Cluster.
 
 ### Install  
 Launch the Container portfolio stack:  

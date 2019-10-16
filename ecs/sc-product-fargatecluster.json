@@ -36,7 +36,7 @@
                     {
                         "Description": "Fargate Cluster",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/Fargate-private-vpc.yml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/fargate-private-vpc.yml"}
                         },
                         "Name": "v1.0"
                     }
