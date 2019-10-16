@@ -1,0 +1,19 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+  pre_build:
+    commands:
+      - ls      
+  build:
+    commands:
+      - echo Build started on `date`
+# add your build commands here      
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+  # move all files to the output
+    - '**/*'
