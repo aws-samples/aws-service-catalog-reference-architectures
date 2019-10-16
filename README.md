@@ -4,7 +4,7 @@
 
 This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).
  Read the [documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
- for mor information on ServiceCatalog and CloudFormation.  
+ for more information on ServiceCatalog and CloudFormation.  
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
  a launch constraint and linked roles for provisioning.  

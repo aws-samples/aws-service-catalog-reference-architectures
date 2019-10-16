@@ -1,7 +1,7 @@
 # AWS Service Catalog CodePipeline Automation Reference architecture
 
 This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and CodeBuild.
- This pipeline will allow infrastructrue engineers to use Infrastructure as Code (IaC) to mange the Portfolios and Products
+ This pipeline will allow infrastructure engineers to use Infrastructure as Code (IaC) to manage the Portfolios and Products
  across multiple accounts and regions in ServiceCatalog.  The pipeline includes sample template validation and cfn_nag stages.
  Updating a ServiceCatalog becomes as easy as ```git push```
 

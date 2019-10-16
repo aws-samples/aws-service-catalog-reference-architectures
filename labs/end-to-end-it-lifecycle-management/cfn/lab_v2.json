@@ -260,7 +260,7 @@
           }
         ],
         "ManagedPolicyArns": [
-          "arn:aws:iam::aws:policy/ServiceCatalogAdminReadOnlyAccess"
+          "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
         ]
       }
     },
