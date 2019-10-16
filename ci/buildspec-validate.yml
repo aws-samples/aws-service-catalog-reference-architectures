@@ -22,13 +22,20 @@ phases:
   post_build:
     commands:
       - echo uploading report to $ARTIFACT_BUCKET S3 bucket
-      - aws s3 sync taskcat_outputs s3://$ARTIFACT_BUCKET/taskcat_reports/$CODEBUILD_BUILD_ID
+      - |
+        if [ -d "taskcat_outputs" ]
+        then
+          aws s3 sync taskcat_outputs s3://$ARTIFACT_BUCKET/taskcat_reports/$CODEBUILD_BUILD_ID
+        else
+          echo Validation FAILED!
+          exit 1
+        fi
       - |
         if $(grep -Fq "CREATE_FAILED" taskcat_outputs/index.html)
         then
-          echo Quickstart FAILED!
+          echo Validation FAILED!
           exit 1
         else
-          echo Quickstart Passed!
+          echo Validation Passed!
           exit 0
         fi

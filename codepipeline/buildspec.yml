@@ -9,11 +9,11 @@ phases:
             - echo "S3 Upload Beginning"
             - python -V
             - export ACCID=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
-            - aws s3 sync . s3://servicecatalog-deployedtemplates-$ACCID/ --delete --exclude "*" --include "*.json" --include "*.yml"
+            - aws s3 sync . s3://$DEPLOY_BUCKET/ --delete --exclude "*" --include "*.json" --include "*.yml"
             - echo "S3 Upload Complete, updating cloudformation now..."
             - /bin/bash codepipeline/run-pipelineupdate.sh
-            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-IAMroles  --parameters "[{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"https://servicecatalog-deployedtemplates-$ACCID.s3.amazonaws.com/\"}]" --template-url "https://servicecatalog-deployedtemplates-$ACCID.s3.amazonaws.com/iam/sc-demosetup-iam.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
-            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"LinkedRole2\",\"UsePreviousValue\":true},{\"ParameterKey\":\"LinkedRole1\",\"UsePreviousValue\":true},{\"ParameterKey\":\"LaunchRoleName\",\"UsePreviousValue\":true},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"https://servicecatalog-deployedtemplates-$ACCID.s3.amazonaws.com/\"}]" --template-url "https://servicecatalog-deployedtemplates-$ACCID.s3.amazonaws.com/ec2/sc-portfolio-ec2VPC.json"
+            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-IAMroles  --parameters "[{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"https://$DEPLOY_BUCKET.s3.amazonaws.com/\"}]" --template-url "https://$DEPLOY_BUCKET.s3.amazonaws.com/iam/sc-demosetup-iam.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+            - aws cloudformation update-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"LinkedRole2\",\"UsePreviousValue\":true},{\"ParameterKey\":\"LinkedRole1\",\"UsePreviousValue\":true},{\"ParameterKey\":\"LaunchRoleName\",\"UsePreviousValue\":true},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"https://$DEPLOY_BUCKET.s3.amazonaws.com/\"}]" --template-url "https://$DEPLOY_BUCKET.s3.amazonaws.com/ec2/sc-portfolio-ec2demo.json"
     post_build:
         commands:
             - echo "Deploy complete"
