@@ -36,7 +36,7 @@
                     {
                         "Description": "Fargate Task",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/FargateTask.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/fargate-task.json"}
                         },
                         "Name": "v1.0"
                     }
