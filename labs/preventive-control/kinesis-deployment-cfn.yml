@@ -27,30 +27,31 @@ Parameters:
     Type: String
 
 Resources:
-  Kinesis:
-    Type: AWS::KinesisFirehose::DeliveryStream
+  ProductSelectorFirehose:
+    Type: "Custom::ProdutcSelector"
+    Version: "1.0"
     Properties:
-      DeliveryStreamName: sc-lab-kinesis-fh-stream
-      DeliveryStreamType: DirectPut
-      S3DestinationConfiguration:
-        BucketARN:
-          Fn::ImportValue:
-            !Sub "${S3StackName}-S3BucketArn"          
-        RoleARN: !Ref KinesisRole
-        EncryptionConfiguration:
-          KMSEncryptionConfig:
-            AWSKMSKeyARN: !Ref KMSEncryptionKeyArn
-        BufferingHints:
-          IntervalInSeconds: 60
-          SizeInMBs: 2
-        CompressionFormat: GZIP
+      ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
+      ProductName: firehose
+
+  Kinesis:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    Properties:
+      ProvisionedProductName: 'sc-lab-kinesis-fh-stream'
+      ProvisioningParameters:
+        - Key: Name
+          Value: sc-lab-kinesis-fh-stream
+        - Key: BucketArn
+          Value:
+            Fn::ImportValue:
+              !Sub "${S3StackName}-S3BucketArn"
+        - Key: RoleArn
+          Value: !Ref KinesisRole
+        - Key: KMSArn
+          Value: !Ref KMSEncryptionKeyArn
+      ProductId: !GetAtt ProductSelectorFirehose.ProductId
+      ProvisioningArtifactId: !GetAtt ProductSelectorFirehose.ArtifactId
 
 Outputs:
-  KinesisArn:
-    Value: !GetAtt Kinesis.Arn
-    Export:
-      Name: !Sub ${AWS::StackName}-KinesisArn
-  KinesisId:
-    Value: !Ref Kinesis
-    Export:
-      Name: !Sub ${AWS::StackName}-KinesisId
+  KinesisCFN:
+    Value: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt Kinesis.CloudformationStackArn ]]]]

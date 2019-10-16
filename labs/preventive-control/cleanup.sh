@@ -18,18 +18,26 @@
 # */
 
 # list of product to delete from Service Catalog
-products_to_deploy=(sns elasticsearch ebs autoscaling alb albtarget alblistener s3)
+products_to_deploy=(sns elasticsearch ebs autoscaling alb albtarget alblistener s3 firehose)
 # Domain Name to remove from ACM
 domainName='www.example.com'
 
+# optional AWS CLI profile. If not provided default profile will be used.
+aws_cli_profile="default"
+
+if [[ $1 != '' ]]
+then
+  aws_cli_profile=$1
+fi
+
 printf "Delete SSL Certificate from ACM\n"
-certArn=$(aws acm list-certificates --query 'CertificateSummaryList[?DomainName==`'$domainName'`].CertificateArn' --output text)
-aws acm delete-certificate --certificate-arn $certArn
+certArn=$(aws acm list-certificates --query 'CertificateSummaryList[?DomainName==`'$domainName'`].CertificateArn' --region us-east-1 --profile $aws_cli_profile --output text)
+aws acm delete-certificate --certificate-arn $certArn --region us-east-1 --profile $aws_cli_profile
 
 # Delete Service Catalog Products
 for i in ${products_to_deploy[*]}
 do
   printf "Deleting Product: $i\n"
-  aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name "sc-$i-product-cfn"
-  aws cloudformation delete-stack --stack-name "sc-$i-product-cfn"
+  aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name "sc-$i-product-cfn" --region us-east-1 --profile $aws_cli_profile
+  aws cloudformation delete-stack --stack-name "sc-$i-product-cfn" --region us-east-1 --profile $aws_cli_profile
 done

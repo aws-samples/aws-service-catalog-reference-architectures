@@ -1,0 +1,17 @@
+{
+  "Parameters" : {
+    "PorfolioStack" : "var.portfolioCfn",
+    "ProductName" : "firehose",
+    "ProductDescription" : "Kinesis Firehose",
+    "ProductVersion" : "1.0",
+    "ProductVersionDescription" : "Initial Version",
+    "ProductTemplateUrl" : "aws-service-catalog-reference-architectures/labs/preventive-control/products/firehose/sc-firehose.yml",
+    "ProductRoleName" : "sc-firehose-product-role",
+    "ProductPolicyName" : "var.policy",
+    "ProductRoleTemplateUrl" : "aws-service-catalog-reference-architectures/labs/preventive-control/products/firehose/sc-firehose-products-role.yml",
+    "TemplateRuleConstraint" : "",
+    "DeploymentBucket" : "var.deploymentBucket",
+    "DeployUpdatePipeline":"true",
+    "UpdateConfigFileName": "sc-firehose-update"
+  }
+}

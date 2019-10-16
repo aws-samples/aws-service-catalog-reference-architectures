@@ -28,9 +28,6 @@ Parameters:
   PortfolioName:
     Description: Service Catalog Portfolio Name
     Type: String
-  AccessRoleName:
-    Description: Name of IAM Role that will have access to products in portfolio
-    Type: String
   DeploymentLambdaRoleName:
     Description: Deploymnet Lambda Function Role Name
     Type: String
@@ -46,6 +43,21 @@ Parameters:
   PipelineRoleName:
     Description: Pipeline Role Name
     Type: String
+  PortfolioAccessRole:
+    Description: Name of IAM role you want to grant access to portfolio
+    Type: String
+    Default: ''
+  PortfolioAccessUser:
+    Description:  Name of IAM user you want to grant access to portfolio
+    Type: String
+    Default: ''
+  UserName:
+    Description: IAM User Name
+    Type: String
+
+Conditions:
+  HasAccessRole: !Not [!Equals [!Ref PortfolioAccessRole, '']]
+  HasAccessUser: !Not [!Equals [!Ref PortfolioAccessUser, '']]
 
 Resources:
   PipelineRole:
@@ -239,7 +251,7 @@ Resources:
                   - sqs:TagQueue
                   - kms:DescribeKey
                   - lambda:AddPermission
-                  - s3:PutBucketNotification                  
+                  - s3:PutBucketNotification
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
@@ -326,11 +338,27 @@ Resources:
       Description: !Ref PortfolioDescription
       DisplayName: !Ref PortfolioName
 
-  PortfolioAccessRole:
-    Type: "AWS::ServiceCatalog::PortfolioPrincipalAssociation"
+  PorfolioDeveloperPermission:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Properties:
-      PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${AccessRoleName}'
       PortfolioId: !Ref Portfolio
+      PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:user/${UserName}'
+      PrincipalType: IAM
+
+  PorfolioRolePermission:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: HasAccessRole
+    Properties:
+      PortfolioId: !Ref Portfolio
+      PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${PortfolioAccessRole}'
+      PrincipalType: IAM
+
+  PorfolioUserPermission:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: HasAccessUser
+    Properties:
+      PortfolioId: !Ref Portfolio
+      PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:user/${PortfolioAccessUser}'
       PrincipalType: IAM
 
 Outputs:

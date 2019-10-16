@@ -81,6 +81,10 @@ Parameters:
   BucketName:
     Description: S3 Bucket Name
     Type: String
+  KMSAlias:
+    Description: Alias for KMS Key
+    Type: String
+    Default: 'sc-lab-key'
 
 Resources:
   WebResourceSelector:
@@ -177,92 +181,12 @@ Resources:
       ServiceToken: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector'
       ProductName: 's3'
 
-  KinesisRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName: 'sc-lab-kinesis-role'
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Principal:
-              Service:
-                - "firehose.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Path: "/"
-      Policies:
-        -
-          PolicyName: "FH"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              -
-                Effect: "Allow"
-                Action:
-                  - logs:PutLogEvents
-                Resource: "*"
-              -
-                Effect: "Allow"
-                Action:
-                  - s3:*
-                Resource:
-                  - !Sub 'arn:aws:s3:::${BucketName}'
-                  - !Sub 'arn:aws:s3:::${BucketName}/*'
-
-  EC2Role:
-    Type: "AWS::IAM::Role"
-    DependsOn: KinesisRole
-    Properties:
-      RoleName: 'sc-lab-ec2-role'
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          -
-            Effect: "Allow"
-            Principal:
-              Service:
-                - "ec2.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Path: "/"
-      Policies:
-        -
-          PolicyName: "Stream"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              -
-                Effect: "Allow"
-                Action: "s3:*"
-                Resource: "*"
-              -
-                Effect: "Allow"
-                Action:
-                  - firehose:DeleteDeliveryStream
-                  - firehose:PutRecord
-                  - firehose:PutRecordBatch
-                  - firehose:UpdateDestination
-                Resource: "*"
-
-  EC2InstanceProfile:
-    Type: "AWS::IAM::InstanceProfile"
-    DependsOn: EC2Role
-    Properties:
-      Path: "/"
-      InstanceProfileName: sc-lab-ec2-role
-      Roles:
-        -
-          Ref: "EC2Role"
-
   LabKMSKey:
     Type: AWS::KMS::Key
-    DependsOn: EC2InstanceProfile
     Properties:
       Description: SC Lab KMS key
       Enabled: 'true'
-      EnableKeyRotation: 'true'
+      EnableKeyRotation: 'false'
       KeyPolicy:
         Version: 2012-10-17
         Id: key-default-1
@@ -276,7 +200,7 @@ Resources:
                 - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-sns-product-role'
                 - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-autoscaling-product-role'
                 - !Sub 'arn:aws:iam::${AWS::AccountId}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling'
-                - !GetAtt KinesisRole.Arn
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-lab-kinesis-role'
             Action: 'kms:*'
             Resource: '*'
       Tags:
@@ -287,12 +211,12 @@ Resources:
     Type: AWS::KMS::Alias
     DependsOn: LabKMSKey
     Properties:
-      AliasName: alias/sc-lab-key
+      AliasName: !Sub 'alias/${KMSAlias}'
       TargetKeyId: !Ref LabKMSKey
 
   S3Bucket:
     Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
-    DependsOn: LabKMSKey
+    DependsOn: LabKMSKeyAlias
     Properties:
       ProvisionedProductName: 'sc-lab-s3'
       ProvisioningParameters:
@@ -308,7 +232,7 @@ Resources:
     DependsOn: S3Bucket
     Properties:
       Parameters:
-        KinesisRole: !GetAtt  KinesisRole.Arn
+        KinesisRole:  !Sub 'arn:aws:iam::${AWS::AccountId}:role/sc-lab-kinesis-role'
         KMSEncryptionKeyArn: !GetAtt LabKMSKey.Arn
         S3StackName: !Select [1, !Split ['/', !Select [5, !Split [':', !GetAtt S3Bucket.CloudformationStackArn ]]]]
       Tags:
@@ -318,7 +242,7 @@ Resources:
         -
           Key: "LAB:Env"
           Value: "sc-lab"
-      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/kinesis-deployment-cfn.yml
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/kinesis-deployment-cfn.yml
 
   SNS:
     Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
@@ -409,7 +333,7 @@ Resources:
         - Key: AppInstanceType
           Value: !Ref AppInstanceType
         - Key: AppEC2IAMRole
-          Value: !Ref EC2Role
+          Value: 'sc-lab-ec2-role'
         - Key: AppHealthCheckGracePeriod
           Value: !Ref AppHealthCheckGracePeriod
         - Key: HealthCheckType
@@ -436,17 +360,15 @@ Resources:
           Value: !GetAtt WebResourceSelector.sg
         - Key: SubnetIds
           Value: !GetAtt WebResourceSelector.subnet
-        - Key: KeyName
-          Value: RemekDev
         - Key: UserData
           Value:
             Fn::Base64:
               !Sub |
                 #!/bin/bash
                 yum update -y;
-                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/httpd.conf -O /tmp/httpd.conf;
-                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/ssl.conf -O /tmp/ssl.conf;
-                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/fh-agent.json -O /tmp/fh-agent.json;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/httpd.conf -O /tmp/httpd.conf;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/ssl.conf -O /tmp/ssl.conf;
+                wget  https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/fh-agent.json -O /tmp/fh-agent.json;
                 yum install https://s3.amazonaws.com/streaming-data-agent/aws-kinesis-agent-latest.amzn1.noarch.rpm -y;
                 yum install httpd mod_ssl -y;
                 echo "<html>Success</html>" >> /var/www/html/healthcheck.html;

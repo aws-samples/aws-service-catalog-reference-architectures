@@ -1,0 +1,151 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Lab - IAM User Stack
+Parameters:
+    UserName:
+      Description: IAM User Name
+      Type: String
+    UserPassword:
+      Description: IAM User Password
+      Type: String
+      NoEcho: true
+
+Resources:
+  IAMUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: !Ref UserName
+      LoginProfile:
+        Password: !Ref UserPassword
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess'
+      Policies:
+        -
+          PolicyName: "ServiceCatalog"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - lambda:InvokeFunction
+                Resource:
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-resource-selector"
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:sc-product-selector"
+              -
+                Effect: "Allow"
+                Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:ListStacks
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStackInstance
+                  - cloudformation:DescribeStackResources
+                  - cloudformation:GetTemplateSummary
+                  - cloudformation:ListStackResources
+                  - cloudformation:DescribeStacks
+                  - servicecatalog:DescribeProvisionedProduct
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - kms:TagResource
+                  - kms:PutKeyPolicy
+                  - kms:CreateAlias
+                  - kms:CreateKey
+                  - kms:ScheduleKeyDeletion
+                  - kms:DescribeKey
+                  - kms:ListAliases
+                Resource: "*"
+
+  KinesisRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 'sc-lab-kinesis-role'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "firehose.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "FH"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - logs:PutLogEvents
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - s3:*
+                Resource: "*"
+
+
+
+  EC2Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: 'sc-lab-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "Stream"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action: "s3:*"
+                Resource: "*"
+              -
+                Effect: "Allow"
+                Action:
+                  - firehose:DeleteDeliveryStream
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                  - firehose:UpdateDestination
+                Resource: "*"
+
+  EC2InstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    DependsOn: EC2Role
+    Properties:
+      Path: "/"
+      InstanceProfileName: sc-lab-ec2-role
+      Roles:
+        -
+          Ref: "EC2Role"

@@ -1,0 +1,79 @@
+# * Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# *
+# * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# * software and associated documentation files (the "Software"), to deal in the Software
+# * without restriction, including without limitation the rights to use, copy, modify,
+# * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# * permit persons to whom the Software is furnished to do so.
+# *
+# * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: Service Catalog Firehose Product
+Parameters:
+  Name:
+    Description: Firehose Delivery Stream Name
+    Type: String
+  IntervalInSeconds:
+    Description: The length of time, in seconds, for buffers incoming data before delivering it to the destination
+    Type: Number
+    MinValue: 60
+    MaxValue: 900
+    Default: 60
+  SizeInMBs:
+    Description: The size of the buffer, in MBs, for incoming data before delivering it to the destination
+    Type: Number
+    MinValue: 1
+    MaxValue: 128
+    Default: 2
+  CompressionFormat:
+    Description: The type of compression to compress the data that it delivers to the Amazon S3 bucket
+    Type: String
+    Default: GZIP
+    AllowedValues:
+      - GZIP
+      - Snappy
+      - UNCOMPRESSED
+      - ZIP
+  BucketArn:
+    Description: Destination S3 Bucket Arn
+    Type: String
+  RoleArn:
+    Description: Firehose Role Arn
+    Type: String
+  KMSArn:
+    Description: KMS Encryption Key Arn
+    Type: String
+
+Resources:
+
+  Firehose:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamName: !Ref Name
+      DeliveryStreamType: DirectPut
+      S3DestinationConfiguration:
+        BucketARN: !Ref BucketArn
+        RoleARN: !Ref RoleArn
+        EncryptionConfiguration:
+          KMSEncryptionConfig:
+            AWSKMSKeyARN: !Ref KMSArn
+        BufferingHints:
+          IntervalInSeconds: !Ref IntervalInSeconds
+          SizeInMBs: !Ref SizeInMBs
+        CompressionFormat: !Ref CompressionFormat
+
+Outputs:
+  FirehoseArn:
+    Value: !GetAtt Firehose.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-FirehoseArn
+  FirehoseId:
+    Value: !Ref Firehose
+    Export:
+      Name: !Sub ${AWS::StackName}-FirehoseId

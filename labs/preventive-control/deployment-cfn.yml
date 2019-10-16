@@ -21,7 +21,7 @@ Parameters:
     Type: String
     Default: 'service-catalog-product-policy'
   DeploymentBucketName:
-    Description: Name of S3 Deploymenbt Bucket
+    Description: Name of S3 Deployment Bucket
     Type: String
   PortfolioDescription:
     Description: Service Catalog Portfolio Description
@@ -31,10 +31,6 @@ Parameters:
     Description: Service Catalog Portfolio Name
     Type: String
     Default: 'security-products'
-  AccessRoleName:
-    Description: Name of IAM Role that will have access to products in portfolio
-    Type: String
-    Default: 'Admin'
   DeploymentLambdaRoleName:
     Description: Deploymnet Lambda Function Role Name
     Type: String
@@ -63,22 +59,56 @@ Parameters:
     Description: Deployment Configuration file suffix e.g. deployer
     Type: String
     Default: 'deployer'
+  PortfolioAccessRole:
+    Description: Name of IAM role you want to grant access to portfolio
+    Type: String
+    Default: ''
+  PortfolioAccessUser:
+    Description:  Name of IAM user you want to grant access to portfolio
+    Type: String
+    Default: ''
+  UserName:
+    Description: IAM User Name
+    Type: String
+    Default: 'sc-lab-user'
+  UserPassword:
+    Description: IAM User Password
+    Type: String
+    NoEcho: true
 
 Resources:
+  IAMResources:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        UserName: !Ref UserName
+        UserPassword: !Ref UserPassword
+      Tags:
+        -
+          Key: "LAB:Object"
+          Value: "sc-lab-iam-cfn"
+        -
+          Key: "LAB:Env"
+          Value: "sc-lab"
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/iam-user-cfn.yml
+
   SCResources:
     Type: AWS::CloudFormation::Stack
+    DependsOn: IAMResources
     Properties:
       Parameters:
         PolicyName: !Ref PolicyName
         DeploymentBucketName: !Ref DeploymentBucketName
         PortfolioDescription: !Ref PortfolioDescription
         PortfolioName: !Ref PortfolioName
-        AccessRoleName: !Ref AccessRoleName
         DeploymentLambdaRoleName: !Ref DeploymentLambdaRoleName
         ProductSelectorLambdaRoleName: !Ref ProductSelectorLambdaRoleName
         ResourceSelectorLambdaRoleName: !Ref ResourceSelectorLambdaRoleName
         ResourceComplianceLambdaRoleName: !Ref ResourceComplianceLambdaRoleName
         PipelineRoleName: !Ref PipelineRoleName
+        PortfolioAccessRole: !Ref PortfolioAccessRole
+        PortfolioAccessUser: !Ref PortfolioAccessUser
+        UserName: !Ref UserName
       Tags:
         -
           Key: "LAB:Object"
@@ -86,7 +116,7 @@ Resources:
         -
           Key: "LAB:Env"
           Value: "sc-lab"
-      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-product-resources-cfn.yml
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/service-catalog-product-resources-cfn.yml
 
   SCLambdas:
     Type: AWS::CloudFormation::Stack
@@ -107,7 +137,7 @@ Resources:
         -
           Key: "LAB:Env"
           Value: "sc-lab"
-      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-lambdas-cfn.yml
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/service-catalog-lambdas-cfn.yml
 
   SCNetworks:
     Type: AWS::CloudFormation::Stack
@@ -120,7 +150,7 @@ Resources:
         -
           Key: "LAB:Env"
           Value: "sc-lab"
-      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/preventive-control/service-catalog-networks-cfn.yml
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/labs/preventive-control/service-catalog-networks-cfn.yml
 
   S3Notification:
     Type: "Custom::ResourceCompliance"

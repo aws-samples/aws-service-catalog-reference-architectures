@@ -17,24 +17,42 @@
 # * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 # */
 
-#Initial Deployment Configuration Section
-#deployment_s3_bucket_name=""
-#sc_product_policy_name="service-catalog-product-policy"
-#resources_cfn_stack_name=""
-
 # Domain Name of SSL Cert import to ACM
 domain_name="www.example.com"
 # list of product to deploy to Service Catalog
-products_to_deploy=(sns elasticsearch ebs autoscaling alb albtarget alblistener s3)
+products_to_deploy=(sns elasticsearch ebs autoscaling alb albtarget alblistener s3 firehose)
 
 # Variable and function to validate if products were deploy to AWS Service Catalog
 deploymentStarted=false
 deploymentFinished=true
+
+no_cert=true
+
+# optional AWS CLI profile. If not provided default profile will be used.
+aws_cli_profile="default"
+
+
+while [ "$1" != "" ]; do
+    case $1 in
+        nocert )
+        no_cert=false
+        shift
+        ;;
+
+        * )
+        aws_cli_profile=$1
+        shift
+        ;;
+    esac
+done
+
+printf "Deploying under AWS CLI Profile: $aws_cli_profile\n"
+
 validate_products_deployment()
 {
   for i in ${products_to_deploy[*]}
   do
-    cfStat=$(aws cloudformation describe-stacks --stack-name "sc-$i-product-cfn" --query 'Stacks[].StackStatus' --output text 2> /dev/null)
+    cfStat=$(aws cloudformation describe-stacks --stack-name "sc-$i-product-cfn" --query 'Stacks[].StackStatus' --region us-east-1 --profile $aws_cli_profile --output text 2> /dev/null)
     if [[ $cfStat != "" ]]
     then
       deploymentStarted=true
@@ -48,18 +66,22 @@ validate_products_deployment()
 
 printf "Read Deployment Variables\n"
 # Get Resources Deployment CFN STack Name
-resources_cfn_stack_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-resource-cfn`][]].StackName' --output text)
+resources_cfn_stack_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-resource-cfn`][]].StackName' --region us-east-1 --profile $aws_cli_profile --output text)
 # Get Deployment S3 Bucket name
-deployment_s3_bucket_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-lambdas-cfn`][]].Outputs[]' | jq --raw-output '.[] | select(.OutputKey == "BucketName").OutputValue')
+deployment_s3_bucket_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-lambdas-cfn`][]].Outputs[]' --region us-east-1 --profile $aws_cli_profile --output json | jq --raw-output '.[] | select(.OutputKey == "BucketName").OutputValue')
 # Get Service Catalog IAM policy name
-sc_product_policy_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-resource-cfn`][]].Parameters[]' | jq --raw-output '.[] | select(.ParameterKey == "PolicyName").ParameterValue')
+sc_product_policy_name=$(aws cloudformation describe-stacks --query 'Stacks[?Tags[?Key==`LAB:Object` && Value==`sc-lab-resource-cfn`][]].Parameters[]' --region us-east-1 --profile $aws_cli_profile --output json | jq --raw-output '.[] | select(.ParameterKey == "PolicyName").ParameterValue')
 
-if [[ -z $1 ]]
+printf "Creating Service Linked Role"
+aws iam create-service-linked-role --aws-service-name autoscaling.amazonaws.com --profile $aws_cli_profile
+aws iam create-service-linked-role --aws-service-name elasticloadbalancing.amazonaws.com --profile $aws_cli_profile
+
+if [ $no_cert = true ]
 then
   printf "Generate and Import Self-Sign SSL Certificate to ACM\n"
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout certificate.key -out certificate.crt -subj "/C=US/ST=MA/L=Boston/O=Company/OU=IT/CN=$domain_name"
-  certArn=$(aws acm import-certificate --certificate file://./certificate.crt --private-key file://./certificate.key --query 'CertificateArn' --output text)
-  aws acm add-tags-to-certificate --certificate-arn $certArn --tags Key=Name,Value=sc-lab Key=Env,Value=lab
+  certArn=$(aws acm import-certificate --certificate file://./certificate.crt --private-key file://./certificate.key --query 'CertificateArn' --region us-east-1 --profile $aws_cli_profile --output text)
+  aws acm add-tags-to-certificate --certificate-arn $certArn --tags Key=Name,Value=sc-lab Key=Env,Value=lab --region us-east-1 --profile $aws_cli_profile
 fi
 
 printf "Download Deployment Configuration Files\n"
@@ -89,7 +111,7 @@ do
     sed -i 's/var.portfolioCfn/'$resources_cfn_stack_name'/g' products-config/sc-product-$i.deployer
     sed -i 's/var.policy/'$sc_product_policy_name'/g' products-config/sc-product-$i.deployer
   fi
-  aws s3 cp products-config/sc-product-$i.deployer s3://$deployment_s3_bucket_name/deployment-cfg/sc-product-$i.deployer
+  aws s3 cp products-config/sc-product-$i.deployer s3://$deployment_s3_bucket_name/deployment-cfg/sc-product-$i.deployer --profile $aws_cli_profile
 done
 
 printf "Waiting for Products to be deploy ...\n"
