@@ -2,11 +2,7 @@
     "Description": "ServiceCatalog Portfolio CI/CD Automation Pipeline (fdp-1p4dlgcoo)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "pipelineartifactsBucketName": {
-            "Type":"String",
-            "Description":"Bucket name for the codepipeline artifacts container",
-            "Default":"servicecatalog-pipelineartifacts"
-        },"DeployedTemplatesBucketName": {
+        "DeployedTemplatesBucketName": {
             "Type":"String",
             "Description":"Bucket name for the Deployed Templates container",
             "Default":"servicecatalog-deployedtemplates"
@@ -26,8 +22,7 @@
         "PipelineArtifacts": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "AccessControl": "Private",
-                "BucketName" : {"Fn::Sub":"${pipelineartifactsBucketName}-${AWS::AccountId}"}
+                "AccessControl": "Private"
             }
         },
         "DeployedTemplates": {
@@ -54,8 +49,8 @@
                         }]}
                     ]}
                 },
-                "Action": "s3:GetObject",
-                "Resource": { "Fn::Sub" : "arn:aws:s3:::${DeployedTemplates}/*" }
+                "Action": "s3:GetObject", 
+                "Resource": { "Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["DeployedTemplates", "Arn"]}}] }
               }]}
            }
         },
@@ -63,14 +58,13 @@
           "Type" : "AWS::CodeCommit::Repository",
           "Properties" : {
             "RepositoryDescription" : "Repository for Service Catalog Portfolios and products",
-            "RepositoryName" : {"Ref":"CodeCommitRepoName"},
-            "Triggers" : [ ]
+            "RepositoryName" : {"Ref":"CodeCommitRepoName"}
           }
         },
         "CodeBuildRole" :{
             "Type":"AWS::IAM::Role",
             "Properties":{
-                "Description":"CodePipelie role for building and deploying artifacts. This role will need expansive powers to test templates.",                
+                "Description":"CodePipelie role for validating and deploying artifacts. This role will need expansive powers to test templates.",
                 "AssumeRolePolicyDocument": {
                     "Version":"2012-10-17",
                     "Statement":{
@@ -108,16 +102,15 @@
                                     "s3:ListBucket"
                                 ],
                                 "Resource": [
-                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
-                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"},
-                                    {"Fn::Sub":"arn:aws:s3:::${DeployedTemplates}"},
-                                    {"Fn::Sub":"arn:aws:s3:::${DeployedTemplates}/*"},
+                                    {"Fn::GetAtt":["PipelineArtifacts", "Arn"]},
+                                    {"Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["PipelineArtifacts", "Arn"]}}] },
+                                    {"Fn::GetAtt":["DeployedTemplates", "Arn"]},
+                                    {"Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["DeployedTemplates", "Arn"]}}] },
                                     {"Fn::Sub":"arn:aws:s3:::taskcat-*"}
                                 ]
                             },{
                               "Effect": "Allow",
                               "Action": [
-                                "logs:CreateLogGroup",
                                 "logs:CreateLogStream",
                                 "logs:PutLogEvents",
                                 "logs:DescribeLogStreams"
@@ -125,7 +118,13 @@
                                   "Resource": [
                                     {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}                                    
                                 ]
-                            } 
+                            },{
+                              "Effect": "Allow",
+                              "Action": [
+                                "logs:CreateLogGroup"
+                                ],
+                                  "Resource": "*"
+                            }  
                         ]
                     }
                 },{ 
@@ -140,21 +139,32 @@
                                     "cloudformation:DescribeStackResources",
                                     "cloudformation:GetTemplate",
                                     "cloudformation:ListStackSets",
-                                    "cloudformation:ListStacks",
                                     "cloudformation:DescribeStackEvents",
                                     "cloudformation:DescribeStacks",
+                                    "cloudformation:DescribeStackSet",
                                     "cloudformation:CreateStack",
                                     "cloudformation:DeleteStack",
+                                    "cloudformation:UpdateStack",
+                                    "cloudformation:UpdateStackSet",
+                                    "cloudformation:CreateStackInstances",
+                                    "cloudformation:UpdateStackInstances",
                                     "cloudformation:DescribeStackEvents",
-                                    "cloudformation:SetStackPolicy",
-                                    "cloudformation:ValidateTemplate"
+                                    "cloudformation:SetStackPolicy"
                                 ],
                                 "Resource": [
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/tcat-tag-*"},
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/SC-RA-IACPipeline/*"},                                    
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-IAMroles:*"},
-                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stackset/SC-IAC-automated-portfolio:*"}
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stack/tcat-tag-*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${AWS::StackName}/*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/SC-IAC-automated-portfolio/*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stackset/SC-IAC-automated-IAMroles:*"},
+                                    {"Fn::Sub": "arn:aws:cloudformation:*:${AWS::AccountId}:stackset/SC-IAC-automated-portfolio:*"}
                                 ]
+                            },{
+                                "Effect": "Allow",
+                                "Action": [
+                                    "cloudformation:ListStacks",
+                                    "cloudformation:ValidateTemplate"
+                                ],
+                                "Resource": "*"
                             }
                         ]
                     }
@@ -166,13 +176,18 @@
                             {
                                 "Effect": "Allow",
                                 "Action": [
+                                    "iam:ListPolicies",
+                                    "iam:ListRoles",
+                                ],
+                                "Resource": "*"
+                            },{
+                                "Effect": "Allow",
+                                "Action": [
                                     "iam:AddRoleToInstanceProfile",
                                     "iam:ListRolePolicies",
-                                    "iam:ListPolicies",
                                     "iam:CreateRole",
                                     "iam:DeleteRole",
                                     "iam:GetRole",
-                                    "iam:ListRoles",
                                     "iam:CreateInstanceProfile",
                                     "iam:DeleteInstanceProfile",
                                     "iam:RemoveRoleFromInstanceProfile",
@@ -187,9 +202,12 @@
                                     "iam:PassRole"
                                 ],
                                 "Resource": [
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodeBuildRole-*"},
                                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/SC-RA-IACPipeline-*"},
                                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/tcat-tag-*"},
-                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:instance-profile/tcat-tag-*"}
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:instance-profile/tcat-tag-*"},
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers"},
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers"}
                                 ]
                             }
                         ]
@@ -202,8 +220,6 @@
                             {
                               "Effect":"Allow",
                               "Action":[
-                                "codebuild:ListBuilds",
-                                "codebuild:ListProjects",
                                 "codebuild:ListBuildsForProject",
                                 "codebuild:UpdateProject",
                                 "codebuild:CreateProject"                                
@@ -211,6 +227,13 @@
                               "Resource":[
                                  {"Fn::Sub":"arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*"}
                              ]
+                            },{
+                              "Effect":"Allow",
+                              "Action":[
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects"
+                              ],
+                              "Resource":"*"
                             }
                         ]
                     }
@@ -218,7 +241,7 @@
                 ]
             }
         },
-        "CodePipelineServiceCatalogRole":{
+        "CodePipelineManageStepsRole":{
             "Type":"AWS::IAM::Role",
             "Properties":{
                 "Description":"CodePipelie role for moving objects through the build and deploy stages.",
@@ -246,8 +269,8 @@
                                     "s3:PutObject"
                                 ],
                                 "Resource": [
-                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}"},
-                                    {"Fn::Sub":"arn:aws:s3:::${PipelineArtifacts}/*"}
+                                    {"Fn::GetAtt":["PipelineArtifacts", "Arn"]},
+                                    {"Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["PipelineArtifacts", "Arn"]}}] }
                                 ]
                             }
                         ]
@@ -265,7 +288,7 @@
                                 "codecommit:GetUploadArchiveStatus",
                                 "codecommit:CancelUploadArchive"
                             ],
-                            "Resource": {"Fn::Sub":"arn:aws:codecommit:${AWS::Region}:${AWS::AccountId}:${CodeCommitRepoName}"}
+                            "Resource": { "Fn::GetAtt" : [SCPortfoliosRepo, Arn ] }
                             },{
                               "Effect":"Allow",
                               "Action":[
@@ -274,17 +297,22 @@
                                 "codebuild:StopBuild",
                                 "codebuild:BatchGetProjects",
                                 "codebuild:BatchGetBuilds",
-                                "codebuild:ListBuilds",
-                                "codebuild:ListProjects",
-                                "codebuild:ListBuildsForProject",
-                                "codebuild:ListCuratedEnvironmentImages",
-                                "codebuild:ListSourceCredentials"
+                                "codebuild:ListBuildsForProject"
                               ],
                               "Resource":[
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]},
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildCFNNAG"}} ]},
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildValidateTemplate"}} ]}
                              ]                              
+                            },{
+                              "Effect":"Allow",
+                              "Action":[
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects",
+                                "codebuild:ListCuratedEnvironmentImages",
+                                "codebuild:ListSourceCredentials"
+                              ],
+                              "Resource":"*"
                             }
                         ]
                     }
@@ -305,7 +333,18 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/ubuntu-base:14.04"
+                "Image": "aws/codebuild/ubuntu-base:14.04",
+                "EnvironmentVariables":[
+                    {
+                      "Name": "DEPLOY_BUCKET",
+                      "Value": {"Ref":"DeployedTemplates"},
+                      "Type": "PLAINTEXT"
+                    },{
+                      "Name": "PIPELINE_NAME",
+                      "Value": {"Ref":"AWS::StackName"},
+                      "Type": "PLAINTEXT"
+                    }  
+                ]
               },
               "Source": {
                 "Type": "CODEPIPELINE",
@@ -375,7 +414,7 @@
                 "Location":{"Ref":"PipelineArtifacts"}
             },
             "Name" : "ServiceCatalog-ProductPipeline",
-            "RoleArn" : {"Fn::GetAtt":["CodePipelineServiceCatalogRole","Arn"]},
+            "RoleArn" : {"Fn::GetAtt":["CodePipelineManageStepsRole","Arn"]},
             "Stages" : [ 
                 {
                     "Name": "SourceStageCodeCommit",
@@ -414,7 +453,6 @@
                                 "Version": "1",
                                 "Provider": "CodeBuild"
                             },
-                            "OutputArtifacts": [],
                             "Configuration": {
                                 "ProjectName":{"Ref":"CodeBuildCFNNAG"}
                             },
@@ -430,7 +468,6 @@
                                 "Version": "1",
                                 "Provider": "CodeBuild"
                             },
-                            "OutputArtifacts": [],
                             "Configuration": {
                                 "ProjectName":{"Ref":"CodeBuildValidateTemplate"}
                             },
@@ -450,27 +487,14 @@
                       },
                       "Configuration": {
                           "ProjectName":{"Ref":"CodeBuildDeployS3Project"}
-                      },
-                      "OutputArtifacts":[
-                          {
-                            "Name":"DeployOutput"
-                          }
-                      ]
+                      }
                     }]
                 }
             ]
           }
         }
-        
-        
     },
     "Outputs": {
-        "PipelineArtifactsBucket": {
-          "Value": { "Fn::Join": [ "", [
-                        "https://",{"Fn::GetAtt": ["PipelineArtifacts","DomainName"] },"/"
-                    ]]},
-          "Description": "S3 bucket url for pipeline artifacts."
-        },
         "DeployedTemplatesBucket": {
           "Value": { "Fn::Join": [ "", [
                         "https://",{ "Fn::GetAtt": ["DeployedTemplates","DomainName"] },"/"

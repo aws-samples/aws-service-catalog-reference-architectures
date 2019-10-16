@@ -54,6 +54,7 @@ Resources:
         -
           Key: "LAB:Env"
           Value: "sc-lab"
+          
   DeploymentLambdaFunction:
     Type: "AWS::Lambda::Function"
     DependsOn: S3Bucket
@@ -65,10 +66,10 @@ Resources:
       Timeout: 20
       Code:
         S3Bucket: aws-service-catalog-reference-architectures
-        S3Key: preventive-control/deployment-lambda.zip
+        S3Key: labs/preventive-control/deployment-lambda.zip
       Environment:
         Variables:
-          cfnUrl: 'aws-service-catalog-reference-architectures/preventive-control/deployment-cfn/sc-product-deployment.yml'
+          cfnUrl: 'aws-service-catalog-reference-architectures/labs/preventive-control/deployment-cfn/sc-product-deployment.yml'
 
   ProductSelectorLambdaFunction:
     Type: "AWS::Lambda::Function"
@@ -81,7 +82,8 @@ Resources:
       Timeout: 300
       Code:
         S3Bucket: aws-service-catalog-reference-architectures
-        S3Key: preventive-control/product-selector-lambda.zip
+        S3Key: labs/preventive-control/product-selector-lambda.zip
+
   ResourceSelectorLambdaFunction:
     Type: "AWS::Lambda::Function"
     DependsOn: ProductSelectorLambdaFunction
@@ -93,7 +95,8 @@ Resources:
       Timeout: 120
       Code:
         S3Bucket: aws-service-catalog-reference-architectures
-        S3Key: preventive-control/resource-selector-lambda.zip
+        S3Key: labs/preventive-control/resource-selector-lambda.zip
+
   ResourceComplianceLambdaFunction:
     Type: "AWS::Lambda::Function"
     DependsOn: ResourceSelectorLambdaFunction
@@ -105,7 +108,8 @@ Resources:
       Timeout: 120
       Code:
         S3Bucket: aws-service-catalog-reference-architectures
-        S3Key: preventive-control/resource-compliance-lambda.zip
+        S3Key: labs/preventive-control/resource-compliance-lambda.zip
+
 Outputs:
   DeploymentLambdaArn:
     Value: !GetAtt DeploymentLambdaFunction.Arn

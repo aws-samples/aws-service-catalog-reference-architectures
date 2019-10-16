@@ -2,7 +2,7 @@
 shopt -s nullglob
 mkdir templates/
 cp {ec2,vpc}/*.{json,yml} templates/
-cp codepipeline/sc-codepipeline-ra.json templates/
+cp codepipeline/*.json templates/
 for f in templates/*; do
     if cfn_nag_scan --input-path "$f"; then
         echo "$f PASSED"

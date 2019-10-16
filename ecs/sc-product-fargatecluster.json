@@ -1,0 +1,67 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "ECS Fargate Cluster ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for EC2 products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The SC portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+    "Resources": {
+        "WebserverProduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "ECS Fargate Cluster",
+                "Description": "This product builds an ECS cluster for Fargate.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "Fargate Cluster",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/fargate-private-vpc.yml"}
+                        },
+                        "Name": "v1.0"
+                    }
+                ]
+            }
+        },
+        "Associatenginxcf":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"WebserverProduct"}
+          }
+        },
+        "constraintnginxcf":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associatenginxcf",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"WebserverProduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    },
+    "Outputs": {
+        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
+    }
+}

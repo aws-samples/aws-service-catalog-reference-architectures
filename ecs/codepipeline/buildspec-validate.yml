@@ -1,0 +1,10 @@
+version: 0.2
+phases:
+    install: 
+        commands:             
+            - ls
+            # add dependency packages 
+    build:
+        commands:
+            - echo Running tests...    
+            # execute any tests here. make sure success returns 0 (zero)
