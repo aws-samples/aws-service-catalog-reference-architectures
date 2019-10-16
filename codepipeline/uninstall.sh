@@ -11,10 +11,6 @@ allregions="us-east-1 us-east-2 us-west-1"
 export AWS_DEFAULT_REGION=us-east-1
 echo "Using Account:$ACC  Region:$AWS_DEFAULT_REGION Child Accounts:$childAcc All Regions:$allregions"
 
-echo "Clearing out the Automation pipeline S3 buckets"
-aws s3 rb s3://servicecatalog-pipelineartifacts-$ACC --force
-aws s3 rb s3://servicecatalog-deployedtemplates-$ACC --force
-
 # multi account multi region, CF StackSet
 echo "Deleting the ServiceCatalog Portfolio StackSet, this make take a while."
 SSOPID=$(aws cloudformation delete-stack-instances --stack-set-name SC-IAC-automated-portfolio --accounts $allACC --regions $allregions --operation-preferences FailureToleranceCount=1,MaxConcurrentCount=3 --no-retain-stacks | jq '.OperationId' | tr -d '"')
@@ -37,6 +33,11 @@ until [ "$STATUS" = "SUCCEEDED" ]; do
 done;
 
 aws cloudformation delete-stack-set --stack-set-name SC-IAC-automated-IAMroles
+
+echo "Clearing out the Automation pipeline S3 buckets"
+# edit your bucket names here
+# aws s3 rb s3://servicecatalog-pipelineartifacts-$ACC --force
+aws s3 rb s3://servicecatalog-deployedtemplates-$ACC --force
 
 echo "Deleting the automated pipeline stack."
 aws cloudformation delete-stack --stack-name SC-RA-IACPipeline
