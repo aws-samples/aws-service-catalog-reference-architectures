@@ -46,7 +46,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
 
 
 ### Manual Setup using console
-1. Create the Automated pipeline in your hub account  
+1. Create the Automated pipeline in your hub account.  
+   Supply a comma delimited list of spoke account IDs for the ChildAccountAccess parameter.
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)
 

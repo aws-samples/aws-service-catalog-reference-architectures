@@ -12,7 +12,7 @@
             "Default":"SCPortfoliosRepo"
         },"ChildAccountAccess":{
             "Type":"CommaDelimitedList",
-            "Description":"List of AccountIds to Grant GetObject Access to the Deployed Templates Bucket"
+            "Description":"Comma delimited list of AccountIds to Grant GetObject Access to the Deployed Templates Bucket"
         }
     },
     "Conditions":{
