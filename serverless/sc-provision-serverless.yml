@@ -9,21 +9,21 @@ Parameters:
     Type: String
     Description: The product's version name
     Default: v1.0
-  FunctionName:
+  LambdaName:
     Type: String
-  FunctionStage:
+  LambdaStage:
     Type: String
     Description: test, dev, prod, ...
-  BucketName:
+  S3Bucket:
     Type: String
-  BucketKey:
+  S3Key:
     Type: String
     Description: The full key of the lambda package path in S3 without the bucket
       name.
-  FunctionHandler:
+  Handler:
     Type: String
     Default: wsgi.handler
-  FunctionRuntime:
+  Runtime:
     Type: String
     Default: python2.7
     AllowedValues:
@@ -39,52 +39,45 @@ Parameters:
     - dotnetcore2.0
     - dotnetcore2.1
     - go1.x
-  FunctionMemorySize:
+  MemorySize:
     Type: Number
     Default: 1024
-  FunctionTimeout:
+  Timeout:
     Type: Number
     Default: 5
-  LambdaVersionSHA256:
-    Type: String
 Resources:
   SCprovisionServerless:
     Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
     Properties:
       ProvisioningParameters:
-      - Key: BucketName
+      - Key: S3Bucket
         Value:
-          Ref: BucketName
-      - Key: BucketKey
+          Ref: S3Bucket
+      - Key: S3Key
         Value:
-          Ref: BucketKey
-      - Key: FunctionName
+          Ref: S3Key
+      - Key: LambdaName
         Value:
-          Ref: FunctionName
-      - Key: FunctionStage
+          Ref: LambdaName
+      - Key: LambdaStage
         Value:
-          Ref: FunctionStage
-      - Key: FunctionHandler
+          Ref: LambdaStage
+      - Key: Handler
         Value:
-          Ref: FunctionHandler
-      - Key: FunctionRuntime
+          Ref: Handler
+      - Key: Runtime
         Value:
-          Ref: FunctionRuntime
-      - Key: FunctionMemorySize
+          Ref: Runtime
+      - Key: MemorySize
         Value:
-          Ref: FunctionMemorySize
-      - Key: FunctionTimeout
+          Ref: MemorySize
+      - Key: Timeout
         Value:
-          Ref: FunctionTimeout
-      - Key: LambdaVersionSHA256
-        Value:
-          Ref: LambdaVersionSHA256
-      ProvisioningArtifactName:
-        Ref: ProductArtifactName
+          Ref: Timeout
       ProductId:
         Ref: ProductId
       ProvisionedProductName:
-        Fn::Sub: provisionServerless-${FunctionName}
+        Fn::Sub: provisionServerless-${LambdaName}
 Outputs:
   CloudformationStackArn:
     Description: The Cloudformation stack that was created for the product
