@@ -8,7 +8,7 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
 ![sc-cicd-ra-architecture.png](sc-cicd-ra-architecture.png)
 
 ## Setup for Single Account
-1. Create the Automated pipeline  
+1. Create the Automated pipeline. For a single account leave ChildAccountAccess empty.  
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json
 
@@ -46,7 +46,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
 
 
 ### Manual Setup using console
-1. Create the Automated pipeline in your hub account  
+1. Create the Automated pipeline in your hub account.  
+  Supply a comma delimited list of spoke account IDs for the ChildAccountAccess parameter.  
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   [https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json](https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)
 
@@ -55,8 +56,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=IAM-StackSetAdministrator&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml)  
   https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml  
   
-3. Create the StackSet Execution roles in the hub account and any spoke account.    
-  Run once in each spoke account and the hub if you wish to use ServiceCatalog from the hub.  
+3. Create the StackSet Execution role in the spoke accounts.    
+  Run once in each spoke account. Run once in the hub account if you wish to use ServiceCatalog from the hub.  
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=IAM-StackSetExecution&templateURL=https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml)  
   https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml
 
