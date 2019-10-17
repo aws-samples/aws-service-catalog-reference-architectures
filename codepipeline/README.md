@@ -8,7 +8,7 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
 ![sc-cicd-ra-architecture.png](sc-cicd-ra-architecture.png)
 
 ## Setup for Single Account
-1. Create the Automated pipeline. For a single account leave ChildAccountAccess empty.
+1. Create the Automated pipeline. For a single account leave ChildAccountAccess empty.  
   [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-IACPipeline&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json)  
   https://s3.amazonaws.com/aws-service-catalog-reference-architectures/codepipeline/sc-codepipeline-ra.json
 
