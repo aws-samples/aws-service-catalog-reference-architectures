@@ -5,14 +5,14 @@ Resources:
     Properties:
       RoleName: SCECSLaunchRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2FullAccess      
-        - arn:aws:iam::aws:policy/AmazonECS_FullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
         - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
         - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
         - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess
         - arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
