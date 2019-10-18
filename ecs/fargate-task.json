@@ -30,6 +30,28 @@
             "Description":"Select Yes to Create the LogGroup. No if you have already created the group",
             "AllowedValues": ["Yes","No"],
             "Default":"Yes" 
+        },
+        "ContainerSize": {
+            "Type":"String",
+            "Description" : "Size of container for Fargate task.",
+            "Default":"Small",
+            "AllowedValues": ["Small","Medium","Large"]
+        }
+    },
+    "Mappings" : {
+        "MapContainerSize" : {
+            "Small" : {
+                "cpu" : "512" ,
+                "mem" : "1024"
+            },
+            "Medium" : {
+                "cpu" : "1024",
+                "mem" : "2048"
+            },
+            "Large" : {
+                "cpu" : "4096",
+                "mem" : "8192"
+            }
         }
     },
     "Conditions":{
@@ -51,10 +73,10 @@
                 "RequiresCompatibilities": [
                   "FARGATE"
                 ],
-                "Memory": "2048",
+                "Memory":  { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "mem"]},
                 "Family": {"Ref":"TaskDefinitionFamily"},
                 "NetworkMode": "awsvpc",
-                "Cpu": "512",          
+                "Cpu": { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "cpu"]},
                 "ContainerDefinitions" : [
                     {
                       "PortMappings": [
