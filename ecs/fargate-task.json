@@ -20,15 +20,16 @@
             "Description" : "Sets Cloudwatch log group for the container.",
             "Default":"ecs-task"
         },
+        "ContainerPort" {
+            "Type":"Number",
+            "Description" : "port number exposed from the container image.",
+            "Default":80
+        }
         "CreateLogGroup":{
             "Type":"String",
             "Description":"Select Yes to Create the LogGroup. No if you have already created the group",
-             "AllowedValues": ["Yes","No"],
-             "Default":"Yes" 
-        },
-        "ExecutionRoleArn": {
-            "Type": "String",
-            "Description" : "Execution role for the container."
+            "AllowedValues": ["Yes","No"],
+            "Default":"Yes" 
         }
 	},
     "Conditions":{
@@ -46,7 +47,7 @@
         "taskdefinition": {
             "Type": "AWS::ECS::TaskDefinition",
             "Properties" : {
-                "ExecutionRoleArn":{"Ref":"ExecutionRoleArn"},
+                "ExecutionRoleArn": {"Fn::ImportValue": "ECSTaskExecutionRole"}
                 "RequiresCompatibilities": [
                   "FARGATE"
                 ],
@@ -56,6 +57,9 @@
                 "Cpu": "512",          
                 "ContainerDefinitions" : [
                     {
+                      "PortMappings": {
+                        "ContainerPort": {"Ref": "ContainerPort"}
+                      }
                       "LogConfiguration": {
                         "LogDriver": "awslogs",
                         "Options": {
