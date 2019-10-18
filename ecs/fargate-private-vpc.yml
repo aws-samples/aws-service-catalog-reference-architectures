@@ -229,7 +229,7 @@ Resources:
   FargateContainerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Access to the Fargate containers
+      GroupDescription: Fargate container security group. Use this for all tasks and services.
       VpcId: !Ref 'VPC'
       Tags:
         - 
@@ -274,7 +274,7 @@ Resources:
   PublicLoadBalancerSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Access to the public facing load balancer
+      GroupDescription: Public facing load balancer Security Group
       VpcId: !Ref 'VPC'
       SecurityGroupIngress:
           # Allow access to ALB from anywhere on the internet
@@ -302,7 +302,7 @@ Resources:
   PrivateLoadBalancerSG:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Access to the internal load balancer
+      GroupDescription: Internal load balancer security group
       VpcId: !Ref 'VPC'
   PrivateLoadBalancerIngressFromECS:
     Type: AWS::EC2::SecurityGroupIngress
@@ -424,12 +424,12 @@ Outputs:
     Description: The ARN of the ECS role
     Value: !GetAtt 'ECSTaskExecutionRole.Arn'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECSTaskExecutionRole' ] ]
+      Name: 'ECSTaskExecutionRole'
   VPCId:
     Description: The ID of the VPC that this stack is deployed in
     Value: !Ref 'VPC'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'VPCId' ] ]
+      Name: 'FargateClusterVPCId'
   PublicSubnetOne:
     Description: Public subnet one
     Value: !Ref 'PublicSubnetOne'
@@ -451,7 +451,7 @@ Outputs:
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PrivateSubnetTwo' ] ]
   FargateContainerSecurityGroup:
-    Description: A security group used to allow Fargate containers to receive traffic
+    Description: A security group for Fargate containers, tasks, and services
     Value: !Ref 'FargateContainerSecurityGroup'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'FargateContainerSecurityGroup' ] ]
+      Name: 'ECSFargateContainerSecurityGroup'

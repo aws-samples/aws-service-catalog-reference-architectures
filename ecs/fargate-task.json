@@ -2,50 +2,68 @@
     "Description": "Container Fargate Task (fdp-1p5s1037g)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "ECRRepoName": {
+        "ECRImageURI": {
             "Type": "String",
-            "Description" : "Name of the ECR repository. must be lowercase.",
-            "Default":"etltest"
+            "Description" : "URI for the container from Amazon Elastic Container Registry."
         },
-        "TaskImageTag": {
+        "ContainerDefinitionName": {
             "Type": "String",
-            "Description" : "Container image tag.",
-            "Default":"latest"
+            "Description" : "This will set the Container Definition name in Fargate."
         },
-        "ContainerName": {
+        "TaskDefinitionFamily": {
             "Type": "String",
-            "Description" : "Container name in Fargate.",
-            "Default":"etl-container-task"
+            "Description" : "Sets the Task defnition family name for the container.",
+            "Default":"ecs-task"
         },
-        "LogGroup": {
+        "LogGroupName": {
             "Type": "String",
-            "Description" : "Cloudwatch log group for the container.",
-            "Default":"etltest"
+            "Description" : "Sets Cloudwatch log group for the container.",
+            "Default":"ecs-task"
+        },
+        "ContainerPort": {
+            "Type":"Number",
+            "Description" : "port number exposed from the container image.",
+            "Default":80
+        },
+        "CreateLogGroup":{
+            "Type":"String",
+            "Description":"Select Yes to Create the LogGroup. No if you have already created the group",
+            "AllowedValues": ["Yes","No"],
+            "Default":"Yes" 
         }
-        ,
-        "ExecutionRoleArn": {
-            "Type": "String",
-            "Description" : "Execution role for the container."
-        }
-	},
-	"Resources": {
+    },
+    "Conditions":{
+        "ConCreateLogGroup" : {"Fn::Equals" : [{"Ref" : "CreateLogGroup"}, "Yes"]}
+    },
+    "Resources": {
+        "TaskLogGroup": {
+          "Type" : "AWS::Logs::LogGroup",
+          "Condition":"ConCreateLogGroup",
+          "Properties" : {
+              "LogGroupName" : {"Fn::Sub":"/ecs/${LogGroupName}"},
+              "RetentionInDays" : 5
+            }
+        },    
         "taskdefinition": {
             "Type": "AWS::ECS::TaskDefinition",
             "Properties" : {
-                "ExecutionRoleArn":{"Ref":"ExecutionRoleArn"},
+                "ExecutionRoleArn": {"Fn::ImportValue": "ECSTaskExecutionRole"},
                 "RequiresCompatibilities": [
                   "FARGATE"
                 ],
                 "Memory": "2048",
-                "Family": {"Ref":"LogGroup"},
+                "Family": {"Ref":"TaskDefinitionFamily"},
                 "NetworkMode": "awsvpc",
                 "Cpu": "512",          
                 "ContainerDefinitions" : [
                     {
+                      "PortMappings": [
+                        { "ContainerPort": {"Ref": "ContainerPort"} }
+                      ],
                       "LogConfiguration": {
                         "LogDriver": "awslogs",
                         "Options": {
-                          "awslogs-group": {"Fn::Sub":"/ecs/${LogGroup}"},
+                          "awslogs-group": {"Ref":"TaskLogGroup"},
                           "awslogs-region": {"Ref":"AWS::Region"},
                           "awslogs-stream-prefix": "ecs"
                         }
@@ -56,12 +74,11 @@
                                 "Value": {"Ref":"AWS::Region"}
                             }
                       ],
-                      "Image": {"Fn::Sub":"${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepoName}:${TaskImageTag}"},
-                      "Name": {"Ref":"ContainerName"}
-                    }                                
+                      "Image": {"Ref":"ECRImageURI"},
+                      "Name": {"Ref":"ContainerDefinitionName"}
+                    }
                 ]
             }
         }
-    
-	}	
+    }
 }

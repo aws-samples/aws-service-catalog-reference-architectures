@@ -21,7 +21,7 @@
         }
       },
     "Resources": {
-        "WebserverProduct": {
+        "ECSTaskProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
                 "Name": "Amazon ECS task",
@@ -47,7 +47,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"}
+            "ProductId" :   {"Ref":"ECSTaskProduct"}
           }
         },
         "constraintnginxcf":{
@@ -55,13 +55,13 @@
           "DependsOn" : "Associatenginxcf",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"},
+            "ProductId" :   {"Ref":"ECSTaskProduct"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
     },
     "Outputs": {
-        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
+        "ProductId":{"Value": { "Ref":"ECSTaskProduct" } }
     }
 }
