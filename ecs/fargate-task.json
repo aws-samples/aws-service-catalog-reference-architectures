@@ -4,11 +4,11 @@
     "Parameters": {
         "ECRImageURI": {
             "Type": "String",
-            "Description" : "URI for the container from Amazon Elastic Container Registry."            
+            "Description" : "URI for the container from Amazon Elastic Container Registry."
         },
         "ContainerDefinitionName": {
             "Type": "String",
-            "Description" : "This will set the Container Definition name in Fargate."            
+            "Description" : "This will set the Container Definition name in Fargate."
         },
         "TaskDefinitionFamily": {
             "Type": "String",
@@ -20,22 +20,22 @@
             "Description" : "Sets Cloudwatch log group for the container.",
             "Default":"ecs-task"
         },
-        "ContainerPort" {
+        "ContainerPort": {
             "Type":"Number",
             "Description" : "port number exposed from the container image.",
             "Default":80
-        }
+        },
         "CreateLogGroup":{
             "Type":"String",
             "Description":"Select Yes to Create the LogGroup. No if you have already created the group",
             "AllowedValues": ["Yes","No"],
             "Default":"Yes" 
         }
-	},
+    },
     "Conditions":{
         "ConCreateLogGroup" : {"Fn::Equals" : [{"Ref" : "CreateLogGroup"}, "Yes"]}
     },
-	"Resources": {
+    "Resources": {
         "TaskLogGroup": {
           "Type" : "AWS::Logs::LogGroup",
           "Condition":"ConCreateLogGroup",
@@ -47,7 +47,7 @@
         "taskdefinition": {
             "Type": "AWS::ECS::TaskDefinition",
             "Properties" : {
-                "ExecutionRoleArn": {"Fn::ImportValue": "ECSTaskExecutionRole"}
+                "ExecutionRoleArn": {"Fn::ImportValue": "ECSTaskExecutionRole"},
                 "RequiresCompatibilities": [
                   "FARGATE"
                 ],
@@ -57,9 +57,9 @@
                 "Cpu": "512",          
                 "ContainerDefinitions" : [
                     {
-                      "PortMappings": {
-                        "ContainerPort": {"Ref": "ContainerPort"}
-                      }
+                      "PortMappings": [
+                        { "ContainerPort": {"Ref": "ContainerPort"} }
+                      ],
                       "LogConfiguration": {
                         "LogDriver": "awslogs",
                         "Options": {
@@ -76,10 +76,9 @@
                       ],
                       "Image": {"Ref":"ECRImageURI"},
                       "Name": {"Ref":"ContainerDefinitionName"}
-                    }                                
+                    }
                 ]
             }
         }
-    
-	}	
+    }
 }
