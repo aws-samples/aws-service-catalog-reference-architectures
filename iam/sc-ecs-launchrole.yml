@@ -13,6 +13,7 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonS3FullAccess
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess
         - arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
