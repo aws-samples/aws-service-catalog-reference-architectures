@@ -1,0 +1,20 @@
+template	name	description
+rds/sc-rds-postgresql-ra.json	Amazon RDS PostgreSQL Database	This product builds an Amazon AWS RDS PostgreSQL master database instance with options for a single instance or multi-az instances.
+rds/sc-rds-mysql-ra.json	Amazon RDS MySQL Database	This product builds an Amazon AWS RDS MySQL master database instance with options for a single instance or multi-az instances.
+rds/sc-rds-mariadb-ra.json	Amazon RDS MariaDB Database	This product builds an Amazon AWS RDS MariaDB master database instance with options for a single instance or multi-az instances.
+rds/sc-rds-mssql-ra.json	Amazon RDS Microsoft SQL Database	This product builds an Amazon AWS RDS Microsoft SQL master database instance with options for a single instance or multi-az instances.
+vpc/sc-vpc-ra.json	Amazon Virtual Private Cloud (VPC)	This product builds a multi-availability zone Amazon AWS Virtual Private Cloud (VPC) with an option to include a single instance Amazon Linux bastion instance.
+s3/sc-s3-public-ra.json	Amazon S3 Public Bucket with Read Only Access	This product builds an Amazon AWS S3 bucket with options for read only bucket with public access from any source.
+s3/sc-s3-cidr-ra.json	Amazon S3 Private Bucket with CIDR Restricted Access	This product builds an Amazon AWS S3 bucket with private access accessible from a restricted source.
+s3/sc-s3-encrypted-ra.json	Amazon S3 Private Encrypted Bucket	This product builds an Amazon AWS S3 bucket encrypted with private access accessible from any source.
+s3/sc-s3-mfa-ra.json	Amazon S3 Private Bucket with MFA Delete Restrictions	This product builds an Amazon AWS S3 bucket with multi-factor authentication restricted bucket delete option.
+s3/sc-s3-transition-ra.json	Amazon S3 Private Bucket with Transition Ruleset	This product builds an Amazon AWS S3 bucket with a transition ruleset to S3-IA and Glacier.
+ec2/sc-ec2-linux-ra.json	Amazon Elastic Compute Cloud (EC2) Linux	"This product builds one Amazon Linux EC2 instance and create a SSM patch baseline, maintenance window, and patch task to scan for and install operating system updates the EC2 instance."
+ec2/sc-ec2-windows-ra.json	Amazon Elastic Compute Cloud (EC2) Windows	"This product builds one Microsoft Windows EC2 instance and create a SSM patch baseline,  maintenance window,  and patch task to scan for and install operating system updates on the EC2 instance."
+emr/sc-emr-ra.json	Amazon Elastic MapReduce (EMR)	This product builds an Amazon Elastic MapReduce cluster with 1 master nodes and 2 core nodes.
+glue/sc-glue-ra.yaml	AWS Glue crawler	This product creates a glue crawler
+ec2/sc-ec2-linux-nginx-simple.json	Amazon Elastic Compute Cloud (EC2) Linux NGINX Webserver	This product builds one Amazon Linux EC2 webserver NGINX instance.
+emr/sc-emr-SparkHbase.json	EMR cluster for Spark or S3 backed Hbase	This product builds an Amazon Elastic MapReduce cluster for Spark or S3 backed Hbase best practices.
+ecs/fargate-task.json	Amazon ECS task	This product creates a simple ECS task for Fargate.
+ec2/sc-ec2-linux-apache-simple.json	Amazon Elastic Compute Cloud (EC2) Linux Apache Webserver	This product builds one Amazon Linux EC2 webserver Apache instance.
+ecs/fargate-private-vpc.yaml	ECS Fargate Cluster	This product builds an ECS cluster for Fargate.
