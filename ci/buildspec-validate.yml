@@ -6,7 +6,7 @@ phases:
       - apt-get update -y
       - sudo apt-get install zip gzip tar -y
       - pip3 install --upgrade pip
-      - pip install taskcat    
+      - pip install taskcat==0.8.49    
   pre_build:
     commands:
       - echo Entered the pre_build phase...

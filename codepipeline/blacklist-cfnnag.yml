@@ -1,0 +1,4 @@
+---
+RulesToSuppress:
+- id: F38
+  reason: F38 will be ignored for multi account deployment
