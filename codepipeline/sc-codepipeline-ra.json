@@ -288,7 +288,7 @@
                                 "codecommit:GetUploadArchiveStatus",
                                 "codecommit:CancelUploadArchive"
                             ],
-                            "Resource": { "Fn::GetAtt" : [SCPortfoliosRepo, Arn ] }
+                            "Resource": { "Fn::GetAtt" : ["SCPortfoliosRepo", "Arn" ] }
                             },{
                               "Effect":"Allow",
                               "Action":[
