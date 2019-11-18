@@ -177,7 +177,7 @@
                                 "Effect": "Allow",
                                 "Action": [
                                     "iam:ListPolicies",
-                                    "iam:ListRoles",
+                                    "iam:ListRoles"
                                 ],
                                 "Resource": "*"
                             },{
