@@ -36,16 +36,16 @@
                     {
                         "Description": "NGINX webserver",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx-simple.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx.json"}
                         },
-                        "Name": "NGINX v1.0"
+                        "Name": "NGINX v2.0"
                     },
                     {
                         "Description": "Apache webserver",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache-simple.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache.json"}
                         },
-                        "Name": "Apache v1.0"
+                        "Name": "Apache v2.0"
                     }
                 ]
             }
