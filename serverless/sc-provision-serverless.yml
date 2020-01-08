@@ -30,7 +30,7 @@ Parameters:
     - nodejs
     - nodejs4.3
     - nodejs6.10
-    - nodejs8.10
+    - nodejs10.x
     - nodejs4.3-edge
     - java8
     - python2.7
