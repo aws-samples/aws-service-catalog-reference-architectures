@@ -29,7 +29,7 @@ Parameters:
     AllowedValues:
     - nodejs
     - nodejs4.3
-    - nodejs6.10
+    - nodejs10.x
     - nodejs8.10
     - nodejs4.3-edge
     - java8
