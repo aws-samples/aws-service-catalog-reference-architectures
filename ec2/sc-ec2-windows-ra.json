@@ -10,7 +10,6 @@
                     },
                     "Parameters": [
                         "VPC",
-                        "KeyPair",
                         "RemoteAccessCIDR"
                     ]
                 },
@@ -22,7 +21,8 @@
                         "WindowsInstanceType",
                         "WindowsSubnet",
                         "WindowsRDPPort",
-                        "LatestAmiId"
+                        "LatestAmiId",
+                        "KeyPair"
                     ]
                 }
             ],
@@ -30,7 +30,7 @@
                 "VPC": {
                     "default": "VPC"
                 },
-                "KeyPair": {
+                    "KeyPair": {
                     "default": "Key Pair"
                 },
                 "RemoteAccessCIDR": {
@@ -420,11 +420,6 @@
         "WindowsInstanceId": {
             "Value": {
                 "Ref": "WindowsInstance"
-            }
-        },
-        "KeyPair": {
-            "Value": {
-                "Ref": "KeyPair"
             }
         },
         "WindowsSubet": {

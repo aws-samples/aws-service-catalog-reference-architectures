@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata: 
+  License: Apache-2.0
+Description: 'AWS CloudFormation Sample Template SageMaker NotebookInstance: This template demonstrates
+  the creation of a SageMaker NotebookInstance with encryption. You will be billed for the AWS resources used if you create a stack from
+  this template.'
+Parameters:
+  NotebookInstanceName:
+    AllowedPattern: '[A-Za-z0-9-]{1,63}'
+    ConstraintDescription: Maximum of 63 alphanumeric characters. Can include hyphens
+      (-), but not spaces. Must be unique within your account in an AWS Region.
+    Description: SageMaker Notebook instance name
+    MaxLength: '63'
+    MinLength: '1'
+    Type: String
+    Default: 'myNotebook'
+  NotebookInstanceType:
+    AllowedValues:
+      - ml.t2.medium
+    ConstraintDescription: Must select a valid notebook instance type.
+    Default: ml.t2.medium
+    Description: Select Instance type for the SageMaker Notebook
+    Type: String
+  KMSKeyId:
+    Description: AWS KMS key ID used to encrypt data at rest on the ML storage volume attached to notebook instance.
+    Type: String
+    Default: 'Replace it with your KMSKeyId'
+Resources:
+  SageMakerRole: 
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+  SageMakerNotebookInstance:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      KmsKeyId: !Ref KMSKeyId
+      NotebookInstanceName: !Ref NotebookInstanceName
+      InstanceType: !Ref NotebookInstanceType 
+      RoleArn: !GetAtt SageMakerRole.Arn
+Outputs:
+  SageMakerNoteBookURL:
+    Description: "URL for the newly created SageMaker Notebook Instance"
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/sagemaker/home?region=${AWS::Region}#/notebook-instances/openNotebook/${NotebookInstanceName}'
+  SageMakerNoteBookTerminalURL:
+    Description: "Terminal access URL for the newly created SageMaker Notebook Instance"
+    Value: !Sub 'https://${NotebookInstanceName}.notebook.${AWS::Region}.sagemaker.aws/terminals/1'
+  SageMakerNotebookInstanceARN:
+    Description: "ARN for the newly created SageMaker Notebook Instance"
+    Value: !Ref SageMakerNotebookInstance
