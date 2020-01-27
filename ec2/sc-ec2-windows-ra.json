@@ -22,7 +22,7 @@
                         "WindowsSubnet",
                         "WindowsRDPPort",
                         "LatestAmiId",
-						"KeyPair"
+                        "KeyPair"
                     ]
                 }
             ],
@@ -30,7 +30,7 @@
                 "VPC": {
                     "default": "VPC"
                 },
-				"KeyPair": {
+                    "KeyPair": {
                     "default": "Key Pair"
                 },
                 "RemoteAccessCIDR": {
@@ -87,7 +87,7 @@
             "MinValue": 1025,
             "MaxValue": 65535,
             "ConstraintDescription": "must be a number from 1025 to 65535"
-        },		
+        },
         "KeyPair": {
             "Description": "Name of existing EC2 key pair for Windows Instances",
             "Type": "AWS::EC2::KeyPair::KeyName"
@@ -189,7 +189,7 @@
                     {
                         "Ref": "WindowsSecurityGroup"
                     }
-                ],				
+                ],
                 "KeyName": {
                     "Ref": "KeyPair"
                 },

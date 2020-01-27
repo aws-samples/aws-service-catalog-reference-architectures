@@ -5,7 +5,7 @@ Resources:
     Properties:
       RoleName: SCEC2LaunchRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AmazonEC2FullAccess   
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
         - arn:aws:iam::aws:policy/AmazonSSMFullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -24,7 +24,7 @@ Resources:
             Statement:
               - Sid: SCLaunchPolicySID
                 Effect: Allow
-                Action:                  
+                Action:
                   - "servicecatalog:ListServiceActionsForProvisioningArtifact"
                   - "servicecatalog:ExecuteprovisionedProductServiceAction"
                   - "iam:AddRoleToInstanceProfile"
@@ -46,7 +46,7 @@ Resources:
                   - "iam:UntagRole"
                   - "iam:TagRole" 
                   - "iam:TagUser"
-                  - "iam:UntagUser"                  
+                  - "iam:UntagUser"
                   - "cloudformation:DescribeStackResource"
                   - "cloudformation:DescribeStackResources"
                   - "cloudformation:GetTemplate"
@@ -60,7 +60,7 @@ Resources:
                   - "cloudformation:GetTemplateSummary"
                   - "cloudformation:SetStackPolicy"
                   - "cloudformation:ValidateTemplate"
-                  - "cloudformation:UpdateStack"               
+                  - "cloudformation:UpdateStack"
                   - "s3:GetObject"
                 Resource: '*'
 Outputs:

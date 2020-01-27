@@ -25,7 +25,7 @@ Resources:
             Statement:
               - Sid: SCRSLaunchPolicySID
                 Effect: Allow
-                Action:                  
+                Action:
                   - "servicecatalog:ListServiceActionsForProvisioningArtifact"
                   - "servicecatalog:ExecuteprovisionedProductServiceAction"
                   - "iam:AddRoleToInstanceProfile"
@@ -47,7 +47,7 @@ Resources:
                   - "iam:UntagRole"
                   - "iam:TagRole" 
                   - "iam:TagUser"
-                  - "iam:UntagUser"                                   
+                  - "iam:UntagUser"
                   - "cloudformation:DescribeStackResource"
                   - "cloudformation:DescribeStackResources"
                   - "cloudformation:GetTemplate"
@@ -61,7 +61,7 @@ Resources:
                   - "cloudformation:GetTemplateSummary"
                   - "cloudformation:SetStackPolicy"
                   - "cloudformation:ValidateTemplate"
-                  - "cloudformation:UpdateStack"               
+                  - "cloudformation:UpdateStack"
                   - "s3:GetObject"
                 Resource: '*'
 Outputs:
