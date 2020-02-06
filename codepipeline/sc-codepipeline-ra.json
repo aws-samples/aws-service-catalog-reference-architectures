@@ -2,11 +2,7 @@
     "Description": "ServiceCatalog Portfolio CI/CD Automation Pipeline (fdp-1p4dlgcoo)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "DeployedTemplatesBucketName": {
-            "Type":"String",
-            "Description":"Bucket name for the Deployed Templates container",
-            "Default":"servicecatalog-deployedtemplates"
-        },"CodeCommitRepoName": {
+        "CodeCommitRepoName": {
             "Type":"String",
             "Description":"The project name, also the CodeCommit Repository name",
             "Default":"SCPortfoliosRepo"
@@ -28,8 +24,7 @@
         "DeployedTemplates": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "AccessControl": "Private",
-                "BucketName" : {"Fn::Sub":"${DeployedTemplatesBucketName}-${AWS::AccountId}"}
+                "AccessControl": "Private"
             }
         },
         "DeployedTemplatesBucketPolicy":{
@@ -116,7 +111,7 @@
                                 "logs:DescribeLogStreams"
                                 ],
                                   "Resource": [
-                                    {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}                                    
+                                    {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}
                                 ]
                             },{
                               "Effect": "Allow",
@@ -194,7 +189,7 @@
                                     "iam:PutRolePolicy",
                                     "iam:DeleteRolePolicy",
                                     "iam:DetachRolePolicy",
-                                    "iam:AttachRolePolicy",                                    
+                                    "iam:AttachRolePolicy",
                                     "iam:PutGroupPolicy",
                                     "iam:DeleteGroupPolicy",
                                     "iam:DetachGroupPolicy",
@@ -222,7 +217,7 @@
                               "Action":[
                                 "codebuild:ListBuildsForProject",
                                 "codebuild:UpdateProject",
-                                "codebuild:CreateProject"                                
+                                "codebuild:CreateProject"
                               ],
                               "Resource":[
                                  {"Fn::Sub":"arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/*"}
