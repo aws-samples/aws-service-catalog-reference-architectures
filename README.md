@@ -3,8 +3,11 @@
 [AWS Service Catalog](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html) allows you to centrally manage commonly deployed AWS services, and helps you achieve consistent governance which meets your compliance requirements, while enabling users to quickly deploy only the approved AWS services they need. 
 
 This guide will help you deploy and manage your AWS ServiceCatalog using Infrastructure as Code (IaC).
- Read the [documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
- for more information on ServiceCatalog and CloudFormation.  
+Read the [documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
+for more information on ServiceCatalog and CloudFormation.  
+ 
+ [![HowToVideo](https://img.youtube.com/vi/LzvhTcqqyog/0.jpg)](https://www.youtube.com/watch?v=LzvhTcqqyog&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP&index=39&t=0s)
+
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
  a launch constraint and linked roles for provisioning.  
