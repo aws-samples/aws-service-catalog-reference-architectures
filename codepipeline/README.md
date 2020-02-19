@@ -72,7 +72,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
   f. Deploy to only 1 region - this guide assumes us-east-1  
 
 5. Launch the Portfolio StackSet from the hub account.  
-  a. Template Source - Amazon S3 URL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2VPC.json  
+  a. Template Source - Amazon S3 URL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json  
   c. StackSet Name: SC-IAC-automated-portfolio  
   d. If you copied this Repo to your own S3 bucket then supply it in the _RepoRootURL_ value, otherwise leave the default.  
   e. Include each spoke account ID.  The Hub account may also be a spoke account if you wish to use ServiceCatalog from the hub.  
