@@ -10,7 +10,7 @@ CreateEndUsers=$(echo $CreateEndUser|tr '[:lower:]' '[:upper:]')
 ACC=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
 # add child accounts as space delimited list. 
 # You will need to ensure StackSet IAM roles are correctly setup in each child account
-childAcc="378333648686 545998377191"
+childAcc=""
 childAccComma=${childAcc// /,}
 allACC="$ACC $childAcc"
 allACCCount=$(echo $allACC |wc -w)
