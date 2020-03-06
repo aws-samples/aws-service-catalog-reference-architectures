@@ -404,7 +404,7 @@ Outputs:
     Description: The name of the ECS cluster
     Value: !Ref 'ECSCluster'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ClusterName' ] ]
+      Name: 'FargateClusterName'
   InternalUrl:
     Description: The url of the internal load balancer
     Value: !Join ['', ['http://', !GetAtt 'PrivateLoadBalancer.DNSName']]
@@ -415,11 +415,11 @@ Outputs:
     Value: !Join ['', ['http://', !GetAtt 'PublicLoadBalancer.DNSName']]
     Export:
       Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ExternalUrl' ] ]
-  ECSRole:
-    Description: The ARN of the ECS role
-    Value: !GetAtt 'ECSRole.Arn'
+  ECSPublicLoadBalancer:
+    Description: The ARN of the Public LoadBalancer
+    Value: !Ref 'PublicLoadBalancer'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'ECSRole' ] ]
+      Name: 'ECSPublicLoadBalancer'
   ECSTaskExecutionRole:
     Description: The ARN of the ECS role
     Value: !GetAtt 'ECSTaskExecutionRole.Arn'
@@ -444,12 +444,12 @@ Outputs:
     Description: Private subnet one
     Value: !Ref 'PrivateSubnetOne'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PrivateSubnetOne' ] ]
+      Name: 'ECSPrivateSubnetOne'
   PrivateSubnetTwo:
     Description: Private subnet two
     Value: !Ref 'PrivateSubnetTwo'
     Export:
-      Name: !Join [ ':', [ !Ref 'AWS::StackName', 'PrivateSubnetTwo' ] ]
+      Name: 'ECSPrivateSubnetTwo'
   FargateContainerSecurityGroup:
     Description: A security group for Fargate containers, tasks, and services
     Value: !Ref 'FargateContainerSecurityGroup'

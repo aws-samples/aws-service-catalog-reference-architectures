@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "ECS Fargate Cluster ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Description": "ECS Service ServiceCatalog product. (fdp-1p4dlgcoi)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -21,11 +21,11 @@
         }
       },
     "Resources": {
-        "fargatecluster": {
+        "ECSTaskProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "ECS Fargate Cluster",
-                "Description": "This product builds an ECS cluster for Fargate.",
+                "Name": "Amazon ECS Service",
+                "Description": "This product creates a simple ECS Service for Fargate with public loadbalancing.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -34,11 +34,11 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "Fargate Cluster",
+                        "Description": "Fargate Task",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/fargate-private-vpc.yml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ecs/fargate-service.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }
@@ -47,7 +47,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"fargatecluster"}
+            "ProductId" :   {"Ref":"ECSTaskProduct"}
           }
         },
         "constraintnginxcf":{
@@ -55,13 +55,13 @@
           "DependsOn" : "Associatenginxcf",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"fargatecluster"},
+            "ProductId" :   {"Ref":"ECSTaskProduct"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
     },
     "Outputs": {
-        "ProductId":{"Value": { "Ref":"fargatecluster" } }
+        "ProductId":{"Value": { "Ref":"ECSTaskProduct" } }
     }
 }
