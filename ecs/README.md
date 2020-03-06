@@ -10,6 +10,8 @@ The Portfolio provides 3 products which will create a full DevOps pipeline from 
 3. Once the container is in ECR you can provision the supplied Fargate Task product in Service Catalog.  
   This will create an ECS task definition which can then be launched in the previously provisioned Fargate Cluster.
 
+For more examples and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
+
 ### Install  
 Launch the Container portfolio stack:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=SC-RA-ECS-Portfolio&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/ecs/sc-portfolio-ecs.json)
