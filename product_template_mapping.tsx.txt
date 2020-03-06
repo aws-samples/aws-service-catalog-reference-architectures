@@ -15,6 +15,8 @@ ec2/sc-ec2-linux-apache.json	Amazon EC2 Linux Apache Webserver	This product buil
 ec2/sc-ec2-linux-nginx.json	Amazon EC2 Linux NGINX Webserver	This product builds one Amazon Linux EC2 webserver NGINX instance.
 emr/sc-emr-ra.json	Amazon EMR	This product builds an Amazon Elastic MapReduce cluster with 1 master nodes and 2 core nodes.
 emr/sc-emr-SparkHbase.json	Amazon EMR cluster for Spark or S3 backed Hbase	This product builds an Amazon Elastic MapReduce cluster for Spark or S3 backed Hbase best practices.
-ecs/fargate-task.json	Amazon ECS task	This product creates a simple ECS task for Fargate.
-ecs/fargate-private-vpc.yaml	Amazon ECS Fargate Cluster	This product builds an ECS cluster for Fargate.glue/sc-glue-ra.yaml	AWS Glue crawler	This product creates a glue crawler
+ecs/fargate-task.json	Amazon ECS task definition	This product creates a simple ECS task definition for Fargate.
+ecs/fargate-private-vpc.yaml	Amazon ECS Fargate Cluster	This product builds an ECS cluster for Fargate.
+ecs/fargate-service.json	Amazon ECS Service	This product creates a publicly loadbalanced ECS Service for Fargate.
+ecs/container-codepipeline-ra.json	Container CI/CD Automation Pipeline	The product creates a CodePipeline for managing and deploying containers to ECR
 glue/sc-glue-ra.yaml	AWS Glue Crawler	This product creates a glue crawler
