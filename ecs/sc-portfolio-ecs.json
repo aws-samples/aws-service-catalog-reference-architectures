@@ -184,8 +184,7 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ecs/sc-product-fargatecluster.json"},
             "TimeoutInMinutes" : 5
           }
-        },
-        
+        },        
         "ecstaskproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
@@ -200,6 +199,23 @@
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ecs/sc-product-fargatetask.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"ecsserviceproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCECSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ecs/sc-product-fargateservice.json"},
             "TimeoutInMinutes" : 5
           }
         }
@@ -227,6 +243,7 @@
         },
         "containerpipelineproductId":{"Value":     { "Fn::GetAtt":["containerpipelineproduct","Outputs.ProductId"]} },
         "fargateclusterproductId":{"Value":     { "Fn::GetAtt":["fargateclusterproduct","Outputs.ProductId"]} },
-        "ecstaskproductId":{"Value":         { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} }
+        "ecstaskproductId":{"Value":         { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} },
+		"ecsserviceproduct":{"Value":         { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} }
     }
 }

@@ -1,28 +1,28 @@
 {
-    "Description": "Container Fargate Task Definition (fdp-1p5s1037g)",
+    "Description": "Container Fargate Service (fdp-1p5s1037g)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "ECRImageURI": {
             "Type": "String",
             "Description" : "URI for the container from Amazon Elastic Container Registry."
         },
-        "ContainerDefinitionName": {
+        "TaskDefinitionName": {
             "Type": "String",
-            "Description" : "This will set the Task and Container Definition name in Fargate."
+            "Description" : "This will set the Container, Task Definition, and Service name in Fargate."
         },
         "ContainerPort": {
             "Type":"Number",
             "Description" : "port number exposed from the container image.",
             "Default":80
-        },        
+        },  		
         "ContainerSize": {
             "Type":"String",
             "Description" : "Size of container for Fargate task.",
             "Default":"Small",
             "AllowedValues": ["Small","Medium","Large"]
         }
-    },
-    "Mappings" : {
+    },    
+	"Mappings" : {
         "MapContainerSize" : {
             "Small" : {
                 "cpu" : "512" ,
@@ -39,10 +39,10 @@
         }
     },
     "Resources": {
-        "TaskLogGroup": {
+      "TaskLogGroup": {
           "Type" : "AWS::Logs::LogGroup",
           "Properties" : {
-              "LogGroupName" : {"Fn::Sub":"/ecs/${ContainerDefinitionName}"},
+              "LogGroupName" : {"Fn::Sub":"/ecs/${TaskDefinitionName}"},
               "RetentionInDays" : 5
             }
         },    
@@ -54,7 +54,7 @@
                   "FARGATE"
                 ],
                 "Memory":  { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "mem"]},
-                "Family": {"Ref":"ContainerDefinitionName"},
+                "Family": {"Ref":"TaskDefinitionName"},
                 "NetworkMode": "awsvpc",
                 "Cpu": { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "cpu"]},
                 "ContainerDefinitions" : [
@@ -77,10 +77,69 @@
                             }
                       ],
                       "Image": {"Ref":"ECRImageURI"},
-                      "Name": {"Ref":"ContainerDefinitionName"}
+                      "Name": {"Ref":"TaskDefinitionName"}
                     }
                 ]
             }
-        }
+        },      
+	    "ecsservice" : {
+		  "Type" : "AWS::ECS::Service",
+		  "DependsOn": ["PublicLoadBalancerListener"],
+		  "Properties" : {			
+			"TaskDefinition" : { "Ref" : "taskdefinition" },
+			"DesiredCount" : "1",
+			"LoadBalancers" : [{
+			  "TargetGroupArn" : { "Ref" : "TargetGroup" },
+			  "ContainerPort" : { "Ref" : "ContainerPort" },
+			  "ContainerName" : {"Ref":"TaskDefinitionName"}
+			}],
+			"Cluster" : { "Fn::ImportValue" : "FargateClusterName" },
+			"LaunchType": "FARGATE",
+			"ServiceName": {"Ref":"TaskDefinitionName"},
+			"NetworkConfiguration":{
+				"AwsvpcConfiguration" : {
+				  "AssignPublicIp": "DISABLED",
+				  "SecurityGroups":[
+					 {"Fn::ImportValue": "ECSFargateContainerSecurityGroup" }
+				   ],
+				  "Subnets": [
+					{ "Fn::ImportValue": "ECSPrivateSubnetOne"},
+					{ "Fn::ImportValue": "ECSPrivateSubnetTwo"}
+					]
+			}}
+			
+		  }
+		},
+		 "TargetGroup" : {
+		   "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+		   "Properties" : {
+		     "HealthCheckIntervalSeconds" : 30,
+		     "HealthCheckPath" : "/",
+		     "HealthCheckProtocol" : "HTTP",
+		     "HealthCheckTimeoutSeconds" : 5,
+		     "HealthyThresholdCount" : 2,
+		     "TargetType" : "ip",
+		     "Name" : { "Ref": "TaskDefinitionName" },
+		     "Port" : { "Ref": "ContainerPort"},
+		     "Protocol" : "HTTP",
+		     "UnhealthyThresholdCount" : 2,
+		     "VpcId" : { "Fn::ImportValue" : "FargateClusterVPCId" }
+		  }
+		},
+		
+		"PublicLoadBalancerListener" : {
+			"Type" : "AWS::ElasticLoadBalancingV2::Listener",			
+			"Properties" : {
+				"DefaultActions" : [
+					{ "TargetGroupArn" : {"Ref":"TargetGroup"} ,
+					"Type" : "forward" }
+					],
+				"LoadBalancerArn" : { "Fn::ImportValue" :"ECSPublicLoadBalancer"},
+				"Port" : {"Ref": "ContainerPort"},
+				"Protocol" : "HTTP"
+			}
+		}
+		
+		
     }
 }
