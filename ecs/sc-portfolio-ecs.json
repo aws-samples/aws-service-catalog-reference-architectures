@@ -240,10 +240,11 @@
         "LaunchConstraintRoleName":{
           "Condition":"CreateLaunchConstraint",
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] } 
-        },
-        "containerpipelineproductId":{"Value":     { "Fn::GetAtt":["containerpipelineproduct","Outputs.ProductId"]} },
-        "fargateclusterproductId":{"Value":     { "Fn::GetAtt":["fargateclusterproduct","Outputs.ProductId"]} },
-        "ecstaskproductId":{"Value":         { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} },
-		"ecsserviceproduct":{"Value":         { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} }
+        },		
+        "ECSPortfolioID":{ "Value": { "Ref":"SCECSportfolio" } },
+        "containerpipelineproductId":{"Value": { "Fn::GetAtt":["containerpipelineproduct","Outputs.ProductId"]} },
+        "fargateclusterproductId":{"Value":    { "Fn::GetAtt":["fargateclusterproduct","Outputs.ProductId"]} },
+        "ecstaskproductId":{"Value":  { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} },
+		"ecsserviceproduct":{"Value": { "Fn::GetAtt":["ecstaskproduct","Outputs.ProductId"]} }
     }
 }

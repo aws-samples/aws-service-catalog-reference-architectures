@@ -114,7 +114,8 @@
                             },
                             {
                               "Action": [
-                                "ecr:GetAuthorizationToken"
+                                "ecr:GetAuthorizationToken",
+								"ecs:UpdateService"
                               ],
                               "Resource": "*",
                               "Effect": "Allow"

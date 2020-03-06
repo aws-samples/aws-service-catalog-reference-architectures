@@ -138,8 +138,9 @@
 				"Port" : {"Ref": "ContainerPort"},
 				"Protocol" : "HTTP"
 			}
-		}
-		
-		
+		}		
+    },
+	"Outputs": {
+        "FargateService":{"Value": { "Ref":"ecsservice" } }
     }
 }
