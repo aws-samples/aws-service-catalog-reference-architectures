@@ -17,6 +17,8 @@ The portfolio templates in each section will create a ServiceCatalog Portfolio w
  * [Simple Storage Service (S3)](s3)
  * [Relational Database Service (RDS)](rds)
  * [Elastic MapReduce (EMR)](emr)
+ * [Fargate Elastic Container Service (ECS)](ecs)
+ * [Glue](glue)
  * [Automated CodePipeline](codepipeline)
 
 ### Assumptions  

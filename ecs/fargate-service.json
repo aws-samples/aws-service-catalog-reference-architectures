@@ -1,5 +1,8 @@
 {
     "Description": "Container Fargate Service (fdp-1p5s1037g)",
+	"Metadata" : {
+	  "Source":"https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/services/ECS/FargateLaunchType/services/private-subnet-public-service.yml"
+	},
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "ECRImageURI": {
@@ -138,8 +141,9 @@
 				"Port" : {"Ref": "ContainerPort"},
 				"Protocol" : "HTTP"
 			}
-		}
-		
-		
+		}		
+    },
+	"Outputs": {
+        "FargateService":{"Value": { "Ref":"ecsservice" } }
     }
 }
