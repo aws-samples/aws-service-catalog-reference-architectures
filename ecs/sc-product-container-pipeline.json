@@ -21,7 +21,7 @@
         }
       },
     "Resources": {
-        "WebserverProduct": {
+        "containerpipeline": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
                 "Name": "Container Codepipeline project",
@@ -47,7 +47,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"}
+            "ProductId" :   {"Ref":"containerpipeline"}
           }
         },
         "constraintnginxcf":{
@@ -55,13 +55,13 @@
           "DependsOn" : "Associatenginxcf",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"},
+            "ProductId" :   {"Ref":"containerpipeline"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
     },
     "Outputs": {
-        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
+        "ProductId":{"Value": { "Ref":"containerpipeline" } }
     }
 }

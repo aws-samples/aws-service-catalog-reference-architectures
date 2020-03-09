@@ -170,17 +170,16 @@
                         "Version": "2012-10-17",
                         "Statement": [
                             {"Effect": "Allow",
-                            "Action": [
-                                "codecommit:GetBranch",
-                                "codecommit:GetCommit",
-                                "codecommit:UploadArchive",
-                                "codecommit:GetUploadArchiveStatus",
-                                "codecommit:CancelUploadArchive"
-                            ],
-                            "Resource": { "Fn::GetAtt" : [ETLTasksRepo, Arn ] }
-                            
-                            },{
-                              "Effect":"Allow",
+								"Action": [
+									"codecommit:GetBranch",
+									"codecommit:GetCommit",
+									"codecommit:UploadArchive",
+									"codecommit:GetUploadArchiveStatus",
+									"codecommit:CancelUploadArchive"
+								],
+								"Resource": { "Ref" : "ETLTasksRepo" }
+							},{
+							"Effect":"Allow",
                               "Action":[
                                 "codebuild:StartBuild",
                                 "codebuild:StartBuild",
@@ -205,9 +204,8 @@
                               "Resource":"*"
                             }
                         ]
-                    }
-                    }
-                
+                    }                    
+                  }
                 ]
             }            
         },        
@@ -420,5 +418,5 @@
           "Value": { "Fn::GetAtt": ["ETLTasksRepo","CloneUrlSsh"] },
           "Description": "URL for ssh cloning the Product Repo"
         }
-    }
+    }  
 }

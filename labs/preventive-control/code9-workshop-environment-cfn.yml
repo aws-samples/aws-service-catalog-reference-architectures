@@ -1,0 +1,178 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: This AWS CloudFormation Template creates the necessary resources for the Service Catalog Workshop
+
+Parameters:
+    ResourcePrefix:
+        Type: String
+        Default: service-catalog-workshop
+        Description: Prefix for resources created by this template.
+
+    InstanceType:
+        Type: String
+        Default: t2.small
+        AllowedValues:
+            - t2.small
+            - t2.medium
+            - t3.small
+            - t3.medium
+        Description: Instance type for the Cloud9 environment
+
+Resources:
+   SystemVPC:
+      Type: AWS::EC2::VPC
+      Properties:
+         CidrBlock: 10.0.0.0/16
+         EnableDnsHostnames: true
+         EnableDnsSupport: true
+         Tags:
+            - Key: Name
+              Value: !Ref ResourcePrefix
+
+   InternetGateway:
+      Type: AWS::EC2::InternetGateway
+      Properties:
+         Tags:
+            - Key: Name
+              Value: !Ref ResourcePrefix
+
+   GatewayAttachment:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+         InternetGatewayId:
+           Ref: InternetGateway
+         VpcId: !Ref SystemVPC
+
+   RouteTable:
+      DependsOn:
+      - SystemVPC
+      Type: AWS::EC2::RouteTable
+      Properties:
+         Tags:
+           - Key: Name
+             Value: !Ref ResourcePrefix
+         VpcId: !Ref SystemVPC
+
+   PublicRoute:
+      DependsOn:
+         - RouteTable
+         - GatewayAttachment
+      Type: AWS::EC2::Route
+      Properties:
+         DestinationCidrBlock: 0.0.0.0/0
+         GatewayId: !Ref InternetGateway
+         RouteTableId: !Ref RouteTable
+
+   Subnet:
+      Type: AWS::EC2::Subnet
+      Properties:
+         CidrBlock: 10.0.0.0/24
+         MapPublicIpOnLaunch: true
+         Tags:
+           - Key: Name
+             Value: !Ref ResourcePrefix
+         VpcId: !Ref SystemVPC
+         AvailabilityZone:
+            Fn::Select:
+               - 0
+               - Fn::GetAZs: ""
+
+   SubnetAssoc:
+      DependsOn:
+         - Subnet
+         - RouteTable
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+         RouteTableId: !Ref RouteTable
+         SubnetId: !Ref Subnet
+
+   PublicNACL:
+      Type: AWS::EC2::NetworkAcl
+      Properties:
+         VpcId: !Ref SystemVPC
+         Tags:
+           -
+            Key: Network
+            Value: Public
+
+   InboundPublicNACLEntry:
+      Type: AWS::EC2::NetworkAclEntry
+      Properties:
+         NetworkAclId: !Ref PublicNACL
+         RuleNumber: 100
+         Protocol: -1
+         RuleAction: allow
+         Egress: false
+         CidrBlock: '0.0.0.0/0'
+         PortRange:
+           From: 0
+           To: 65535
+
+   OutboundPublicNACLEntry:
+      Type: AWS::EC2::NetworkAclEntry
+      Properties:
+         NetworkAclId: !Ref PublicNACL
+         RuleNumber: 100
+         Protocol: -1
+         RuleAction: allow
+         Egress: true
+         CidrBlock: 0.0.0.0/0
+         PortRange:
+           From: 0
+           To: 65535
+
+   SubnetNACLAssociation:
+      Type: AWS::EC2::SubnetNetworkAclAssociation
+      Properties:
+         SubnetId: !Ref Subnet
+         NetworkAclId: !Ref PublicNACL
+
+   SCWorkshopCloud9Env:
+      Type : AWS::Cloud9::EnvironmentEC2
+      Properties:
+         Description: "Cloud9 environment for Service Catalog Workshop"
+         AutomaticStopTimeMinutes: 60
+         InstanceType: !Ref InstanceType
+         Name: !Sub '${ResourcePrefix}-environment'
+         SubnetId: !Ref Subnet
+
+   SCWorkshopCloud9Role:
+      Type : AWS::IAM::Role
+      Properties:
+         RoleName: !Sub '${ResourcePrefix}-cloud9-role'
+         AssumeRolePolicyDocument:
+           Version: "2012-10-17"
+           Statement:
+             -
+               Effect: "Allow"
+               Principal:
+                 Service:
+                   - "ec2.amazonaws.com"
+                   - "cloud9.amazonaws.com"
+               Action:
+                 - "sts:AssumeRole"
+
+   SCWorkshopCloud9Policy:
+      Type : AWS::IAM::Policy
+      Properties:
+         PolicyName : !Sub '${ResourcePrefix}-cloud9-policy'
+         PolicyDocument :
+            Version: "2012-10-17"
+            Statement:
+              -
+               Effect: "Allow"
+               Action:
+                 - s3:PutObject
+                 - acm:DeleteCertificate
+                 - acm:RemoveTagsFromCertificate
+                 - acm:AddTagsToCertificate
+                 - acm:ListCertificates
+                 - acm:ImportCertificate
+                 - acm:ListTagsForCertificate
+                 - iam:CreateServiceLinkedRole
+                 - cloudformation:DeleteStack
+                 - cloudformation:UpdateTerminationProtection
+                 - cloudformation:DescribeStacks
+               Resource: "*"
+         Roles:
+            - !Ref SCWorkshopCloud9Role

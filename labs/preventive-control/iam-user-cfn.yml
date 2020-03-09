@@ -101,7 +101,12 @@ Resources:
               -
                 Effect: "Allow"
                 Action:
-                  - s3:*
+                  - s3:AbortMultipartUpload
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket
+                  - s3:ListBucketMultipartUploads
+                  - s3:PutObject
                 Resource: "*"
 
 
@@ -129,7 +134,10 @@ Resources:
             Statement:
               -
                 Effect: "Allow"
-                Action: "s3:*"
+                Action: 
+                  - s3:GetBucketLocation
+                  - s3:GetObject
+                  - s3:ListBucket                
                 Resource: "*"
               -
                 Effect: "Allow"
