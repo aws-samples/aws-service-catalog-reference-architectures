@@ -177,7 +177,7 @@
 									"codecommit:GetUploadArchiveStatus",
 									"codecommit:CancelUploadArchive"
 								],
-								"Resource": { "Ref" : "ETLTasksRepo" }
+								"Resource": {"Fn::GetAtt": ["ETLTasksRepo","Arn"]}
 							},{
 							"Effect":"Allow",
                               "Action":[
