@@ -1,5 +1,5 @@
 {
-    "Description": "Container Fargate Task (fdp-1p5s1037g)",
+    "Description": "Container Fargate Task Definition (fdp-1p5s1037g)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "ECRImageURI": {
@@ -8,28 +8,12 @@
         },
         "ContainerDefinitionName": {
             "Type": "String",
-            "Description" : "This will set the Container Definition name in Fargate."
-        },
-        "TaskDefinitionFamily": {
-            "Type": "String",
-            "Description" : "Sets the Task defnition family name for the container.",
-            "Default":"ecs-task"
-        },
-        "LogGroupName": {
-            "Type": "String",
-            "Description" : "Sets Cloudwatch log group for the container.",
-            "Default":"ecs-task"
-        },
+            "Description" : "This will set the Task and Container Definition name in Fargate."
+        },       
         "ContainerPort": {
             "Type":"Number",
             "Description" : "port number exposed from the container image.",
             "Default":80
-        },
-        "CreateLogGroup":{
-            "Type":"String",
-            "Description":"Select Yes to Create the LogGroup. No if you have already created the group",
-            "AllowedValues": ["Yes","No"],
-            "Default":"Yes" 
         },
         "ContainerSize": {
             "Type":"String",
@@ -54,15 +38,12 @@
             }
         }
     },
-    "Conditions":{
-        "ConCreateLogGroup" : {"Fn::Equals" : [{"Ref" : "CreateLogGroup"}, "Yes"]}
-    },
     "Resources": {
         "TaskLogGroup": {
           "Type" : "AWS::Logs::LogGroup",
           "Condition":"ConCreateLogGroup",
           "Properties" : {
-              "LogGroupName" : {"Fn::Sub":"/ecs/${LogGroupName}"},
+              "LogGroupName" : {"Fn::Sub":"/ecs/${ContainerDefinitionName}"},
               "RetentionInDays" : 30
             }
         },    
@@ -74,7 +55,7 @@
                   "FARGATE"
                 ],
                 "Memory":  { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "mem"]},
-                "Family": {"Ref":"TaskDefinitionFamily"},
+                "Family": {"Ref":"ContainerDefinitionName"},
                 "NetworkMode": "awsvpc",
                 "Cpu": { "Fn::FindInMap" : [ "MapContainerSize", { "Ref" : "ContainerSize" }, "cpu"]},
                 "ContainerDefinitions" : [

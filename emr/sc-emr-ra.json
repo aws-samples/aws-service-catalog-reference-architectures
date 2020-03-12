@@ -155,25 +155,12 @@
         "KeyPair": {
             "Description": "Name of an existing EC2 KeyPair to enable SSH access.",
             "Type": "AWS::EC2::KeyPair::KeyName"
-        },
-        "CreateLogBucket": {
-            "Description": "Set to true to create the EMR Log bucket for this account. If false, then the existing bucket will be used.",
-            "Type": "String",
-            "Default": false,
-            "AllowedValues": [
-                true,
-                false
-            ]
         }
-    },
-    "Conditions": {
-        "CondCreateLogBucket": { "Fn::Equals": [{"Ref": "CreateLogBucket"}, true]}
     },
     "Resources": {
         "LogBucket": {
             "Type": "AWS::S3::Bucket",
-            "DeletionPolicy": "Retain",
-            "Condition":"CondCreateLogBucket",
+            "DeletionPolicy": "Retain",            
             "Properties": {
                 "AccessControl": "Private",
                 "BucketName":{"Fn::Sub": "${AWS::StackName}-sc-emr-logs"},
