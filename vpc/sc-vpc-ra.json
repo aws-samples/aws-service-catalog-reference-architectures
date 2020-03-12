@@ -138,6 +138,16 @@
         "LatestAmiId": {
             "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
             "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+        },
+        "EnableVPCFlowLogs": {
+            "Description": "Create a Flow logs for the VPC",
+            "Type": "String",
+            "Default": true,
+            "ConstraintDescription": "",
+            "AllowedValues": [
+                true,
+                false
+            ]
         }
     },
     "Conditions": {
@@ -159,6 +169,14 @@
                         }
                     ]
                 }
+            ]
+        },
+        "CreateVPCFlowLogs": {
+            "Fn::Equals": [
+                {
+                    "Ref": "EnableVPCFlowLogs"
+                },
+                true
             ]
         }
     },
@@ -182,6 +200,74 @@
                     {
                         "Key": "Description",
                         "Value": "Service-Catalog-VPC-Reference-Architecture"
+                    }
+                ]
+            }
+        },
+        "VPCFlowLogs": {
+            "Condition": "CreateVPCFlowLogs",
+            "Type": "AWS::EC2::FlowLog",
+            "Properties": {
+                "DeliverLogsPermissionArn": {
+                    "Fn::GetAtt": ["FlowLogsRole","Arn"]
+                },
+                "LogGroupName": {
+                    "Ref": "FlowLogGroup"
+                },
+                "ResourceId": {
+                    "Ref": "VPC"
+                },
+                "ResourceType": "VPC",
+                "TrafficType": "ALL"
+            }
+        },
+        "FlowLogGroup": {
+            "Condition": "CreateVPCFlowLogs",
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "RetentionInDays": 30
+            }
+        },
+        "FlowLogsRole": {
+            "Condition": "CreateVPCFlowLogs",
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "vpc-flow-logs.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": "flowlogs-policy",
+                        "PolicyDocument": {
+                           "Version" : "2012-10-17",
+                           "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents",
+                                        "logs:DescribeLogGroups",
+                                        "logs:DescribeLogStreams"
+                                    ],
+                                    "Resource": {
+                                        "Fn::GetAtt": ["FlowLogGroup","Arn"]
+                                    }
+                                }
+                            ]
+                        }
                     }
                 ]
             }

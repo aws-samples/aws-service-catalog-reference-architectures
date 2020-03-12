@@ -208,6 +208,15 @@
                         "Key": "Description",
                         "Value": "Service-Catalog-EC2-Reference-Architecture"
                     }
+                ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvdh",
+                        "Ebs": {
+                            "Encrypted": true,
+                            "VolumeSize": "50"
+                        }
+                    }
                 ]
             }
         },
@@ -226,7 +235,7 @@
                                     {
                                         "Key": "PRODUCT",
                                         "Values": [
-                                            "*"
+                                            "AmazonLinux2017.09"
                                         ]
                                     },
                                     {

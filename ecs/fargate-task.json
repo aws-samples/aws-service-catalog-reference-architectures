@@ -9,12 +9,12 @@
         "ContainerDefinitionName": {
             "Type": "String",
             "Description" : "This will set the Task and Container Definition name in Fargate."
-        },
+        },       
         "ContainerPort": {
             "Type":"Number",
             "Description" : "port number exposed from the container image.",
             "Default":80
-        },        
+        },
         "ContainerSize": {
             "Type":"String",
             "Description" : "Size of container for Fargate task.",
@@ -41,9 +41,10 @@
     "Resources": {
         "TaskLogGroup": {
           "Type" : "AWS::Logs::LogGroup",
+          "Condition":"ConCreateLogGroup",
           "Properties" : {
               "LogGroupName" : {"Fn::Sub":"/ecs/${ContainerDefinitionName}"},
-              "RetentionInDays" : 5
+              "RetentionInDays" : 30
             }
         },    
         "taskdefinition": {
@@ -66,7 +67,7 @@
                         "LogDriver": "awslogs",
                         "Options": {
                           "awslogs-group": {"Ref":"TaskLogGroup"},
-						  "awslogs-region": {"Ref":"AWS::Region"},
+                          "awslogs-region": {"Ref":"AWS::Region"},
                           "awslogs-stream-prefix": "ecs"
                         }
                       },

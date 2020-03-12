@@ -10,6 +10,7 @@
                     },
                     "Parameters": [
                         "VPC",
+                        "KeyPair",
                         "RemoteAccessCIDR"
                     ]
                 },
@@ -21,8 +22,7 @@
                         "WindowsInstanceType",
                         "WindowsSubnet",
                         "WindowsRDPPort",
-                        "LatestAmiId",
-                        "KeyPair"
+                        "LatestAmiId"
                     ]
                 }
             ],
@@ -30,7 +30,7 @@
                 "VPC": {
                     "default": "VPC"
                 },
-                    "KeyPair": {
+                "KeyPair": {
                     "default": "Key Pair"
                 },
                 "RemoteAccessCIDR": {
@@ -204,6 +204,15 @@
                     {
                         "Key": "Description",
                         "Value": "Service-Catalog-EC2-Reference-Architecture"
+                    }
+                ],
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvdh",
+                        "Ebs": {
+                            "Encrypted": true,
+                            "VolumeSize": "50"
+                        }
                     }
                 ]
             }
@@ -420,6 +429,11 @@
         "WindowsInstanceId": {
             "Value": {
                 "Ref": "WindowsInstance"
+            }
+        },
+        "KeyPair": {
+            "Value": {
+                "Ref": "KeyPair"
             }
         },
         "WindowsSubet": {

@@ -72,8 +72,52 @@
     }
   },
   "Resources": {
-    "EMRS3Bucket":{
-      "Type": "AWS::S3::Bucket"
+    "EMRS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "aws:kms",
+                "KMSMasterKeyID": {
+                  "Fn::GetAtt": ["KMSKey","Arn"]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "KMSKey" : {
+      "Type" : "AWS::KMS::Key",
+      "Properties" : {
+        "KeyPolicy" : {
+          "Version": "2012-10-17",
+          "Id": "key-default-1",
+          "Statement": [
+            {
+              "Sid": "Enable IAM User Permissions",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": { "Fn::Join" : ["" , ["arn:aws:iam::", {"Ref" : "AWS::AccountId"} ,":root" ]] }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "Enable IAM User Permissions",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": { "Fn::GetAtt" : ["EMRClusterinstanceProfileRole", "Arn"]}
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            }
+          ]
+        }
+      }
     },
     "EMRCluster": {
       "DependsOn": [
@@ -182,6 +226,34 @@
         "AutoScalingRole": "EMR_AutoScaling_DefaultRole",
         "ServiceRole": {
           "Ref": "EMRClusterServiceRole"
+        },
+        "SecurityConfiguration": {
+            "Ref": "ClusterSecurityConfiguration"
+        }
+      }
+    },
+    "ClusterSecurityConfiguration": {
+      "Type": "AWS::EMR::SecurityConfiguration",
+      "Properties": {
+        "SecurityConfiguration": {
+          "EncryptionConfiguration": {
+            "EnableInTransitEncryption": false,
+            "EnableAtRestEncryption": true,
+            "AtRestEncryptionConfiguration": {
+              "S3EncryptionConfiguration": {
+                "EncryptionMode": "SSE-KMS",
+                  "AwsKmsKey": {
+                    "Fn::GetAtt": ["KMSKey","Arn"]
+                  }
+                },
+                "LocalDiskEncryptionConfiguration": {
+                  "EncryptionKeyProviderType": "AwsKms",
+                    "AwsKmsKey": {
+                      "Fn::GetAtt": ["KMSKey","Arn"]
+                    }
+                }
+            }
+          }
         }
       }
     },

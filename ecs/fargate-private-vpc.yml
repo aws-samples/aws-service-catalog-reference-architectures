@@ -48,6 +48,22 @@ Resources:
           Key: "Name"
           Value: "FargateClusterVPC"
 
+  # VPC flow logs that that enables you to capture information about
+  # the IP traffic going to and from network interfaces in your VPC
+  VPCFlowLogs:
+    Type: AWS::EC2::FlowLog
+    Properties: 
+      DeliverLogsPermissionArn: !GetAtt FlowLogsRole.Arn
+      LogGroupName: !Ref FlowLogGroup
+      ResourceId: !Ref VPC
+      ResourceType: VPC
+      TrafficType: ALL
+
+  # VPC flow logs can publish data to CloudWatch logs
+  FlowLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        RetentionInDays: '30'
   # Two public subnets, where containers can have public IP addresses
   PublicSubnetOne:
     Type: AWS::EC2::Subnet
@@ -395,6 +411,29 @@ Resources:
                 - 'logs:DescribeLogStreams'                
               Resource: '*'
 
+  # This is a role which is used to publish flow logs to the specified log group in CloudWatch Logs
+  FlowLogsRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: 'vpc-flow-logs.amazonaws.com'
+          Action: 'sts:AssumeRole'
+      Policies:
+      - PolicyName: 'flowlogs-policy'
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            - 'logs:DescribeLogGroups'
+            - 'logs:DescribeLogStreams'
+            Resource: !GetAtt FlowLogGroup.Arn
 
 # These are the values output by the CloudFormation template. Be careful
 # about changing any of them, because of them are exported with specific
