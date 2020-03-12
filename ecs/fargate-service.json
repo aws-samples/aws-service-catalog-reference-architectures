@@ -46,7 +46,7 @@
           "Type" : "AWS::Logs::LogGroup",
           "Properties" : {
               "LogGroupName" : {"Fn::Sub":"/ecs/${TaskDefinitionName}"},
-              "RetentionInDays" : 5
+              "RetentionInDays" : 30
             }
         },    
         "taskdefinition": {

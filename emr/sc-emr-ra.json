@@ -176,8 +176,53 @@
             "Condition":"CondCreateLogBucket",
             "Properties": {
                 "AccessControl": "Private",
-                "BucketName":{"Fn::Sub":"sc-emr-logs-${AWS::AccountId}"}
+                "BucketName":{"Fn::Sub": "${AWS::StackName}-sc-emr-logs"},
+                "LoggingConfiguration": {
+                    "LogFilePrefix": { "Fn::Sub": "s3://${AWS::StackName}-sc-emr-logs/"}
+                },
+                "AccessControl": "LogDeliveryWrite",
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "aws:kms",
+                                "KMSMasterKeyID": {
+                                    "Fn::GetAtt": ["KMSKey","Arn"]
+                                }
+                            }
+                        }
+                    ]
+                }
             }
+        },
+        "KMSKey" : {
+            "Type" : "AWS::KMS::Key",
+            "Properties" : {
+                "KeyPolicy" : {
+                "Version": "2012-10-17",
+                "Id": "key-default-1",
+                "Statement": [
+                    {
+                        "Sid": "Enable IAM User Permissions",
+                        "Effect": "Allow",
+                        "Principal": {
+                            "AWS": { "Fn::Join" : ["" , ["arn:aws:iam::", {"Ref" : "AWS::AccountId"} ,":root" ]] }
+                        },
+                        "Action": "kms:*",
+                        "Resource": "*"
+                    },
+                    {
+                        "Sid": "Enable IAM User Permissions",
+                        "Effect": "Allow",
+                        "Principal": {
+                            "AWS": { "Fn::GetAtt" : ["EMREC2Role", "Arn"]}
+                        },
+                        "Action": "kms:*",
+                        "Resource": "*"
+                    }
+                ]
+            }
+          }
         },
         "Cluster": {
             "Type": "AWS::EMR::Cluster",
@@ -229,14 +274,42 @@
                 "ReleaseLabel": {
                     "Ref": "ReleaseLabel"
                 },
-                "LogUri": {"Fn::Sub": "s3://sc-emr-logs-${AWS::AccountId}"},
+                "LogUri": {"Fn::Sub": "s3://${AWS::StackName}-sc-emr-logs"},
                 "VisibleToAllUsers": true,
                 "Tags": [
                     {
                         "Key": "Name",
                         "Value": "service-catalog-emr-reference-architecture"
                     }
-                ]
+                ],
+                "SecurityConfiguration": {
+                    "Ref": "ClusterSecurityConfiguration"
+                }
+            }
+        },
+        "ClusterSecurityConfiguration": {
+            "Type": "AWS::EMR::SecurityConfiguration",
+            "Properties": {
+                "SecurityConfiguration": {
+                    "EncryptionConfiguration": {
+                        "EnableInTransitEncryption": false,
+                        "EnableAtRestEncryption": true,
+                        "AtRestEncryptionConfiguration": {
+                            "S3EncryptionConfiguration": {
+                                "EncryptionMode": "SSE-KMS",
+                                "AwsKmsKey": {
+                                    "Fn::GetAtt": ["KMSKey","Arn"]
+                                }
+                            },
+                            "LocalDiskEncryptionConfiguration": {
+                                "EncryptionKeyProviderType": "AwsKms",
+                                "AwsKmsKey": {
+                                    "Fn::GetAtt": ["KMSKey","Arn"]
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "RemoteAccessSecurityGroup": {

@@ -281,7 +281,8 @@
                             "GroupId"
                         ]
                     }
-                ]
+                ],
+                "StorageEncrypted": true
             },
             "DependsOn": "DBSubnetGroup",
             "DeletionPolicy": "Snapshot"

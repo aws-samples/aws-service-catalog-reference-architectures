@@ -263,10 +263,30 @@
                             "GroupId"
                         ]
                     }
-                ]
+                ],
+                "StorageEncrypted": true,
+                "DBParameterGroupName": {
+                    "Ref": "DBParameterGroup"
+                }
             },
             "DependsOn": "DBSubnetGroup",
             "DeletionPolicy": "Snapshot"
+        },
+        "DBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "The DB parameter group using SSL with Microsoft SQL Server DB Instance",
+                "Family": {
+                    "Fn::Sub":
+                    ["${DBEngine}-${DBEngineVersion}.0",
+                        {
+                            "DBEngine": {"Ref" : "DBEngine" },
+                            "DBEngineVersion": {"Fn::Select" : [ "0", { "Fn::Split": [".", {"Ref": "DBEngineVersion"}]}]}
+                        }
+                    ]
+                },
+                "Parameters": {"rds.force_ssl" : 1}
+            }
         }
     },
     "Outputs": {
