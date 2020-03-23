@@ -1,16 +1,17 @@
 # AWS Service Catalog ECS Reference architecture
 
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog Containers Reference Architecture"  
-The Portfolio provides 3 products which will create a full DevOps pipeline from code to container deployment in Fargate.  
+The Portfolio provides 3 products which will create a full DevOps deployment pipeline from code to container deployment in Fargate.  
 
 1. First create the portfolio, then provision the cluster and codepipeline products from Service Catalog.  
 2. The provisioned codepipeline product will create a new CodeCommit repo towhich you will use to check-in your code with a docker file and tests.  
-    a. Adjust the skeleton builspecs in the codepipeline subfolder to fit your project tests and build commands.  
+    a. Adjust the skeleton builspecs in the codepipeline/ subfolder to fit your project tests and build commands.  
     b. Check-in the code to the new codecommit repo. CodePipeline will validate, build, and push the container to ECR.  
-3. Once the container is in ECR you can provision the supplied Fargate Task product in Service Catalog.  
-  This will create an ECS task definition which can then be launched in the previously provisioned Fargate Cluster.
+3. Once the container is in ECR you can provision the supplied Fargate Service product in Service Catalog.  
+  This will create an ECS Service which is launched in the previously provisioned Fargate Cluster.  You may then view your new service using the ExternalUrl 
+  output parameter from the ECS Cluster product.
 
-For more examples and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
+For more example ECS tamplates and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
 
 ### Install  
 Launch the Container portfolio stack:  
@@ -24,7 +25,7 @@ Launch the Container portfolio stack:
   ```cd aws-service-catalog-reference-architectures```  
   ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
 3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
-  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/glue/sc-portfolio-ecs.json```  
+  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ecs/sc-portfolio-ecs.json```  
 5. Set the _LinkedRole1_ and _LinkedRole2_ parameters to any additional end user roles you may want to link to the Portfolio.
 6. Set the _CreateEndUsers_ parameter to No if you have already run a Portfolio stack from this repo (ServiceCatalogEndusers already exists).
 7. Change the _RepoRootURL_ parameter to your bucket's root url:  

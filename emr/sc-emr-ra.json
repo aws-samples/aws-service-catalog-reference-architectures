@@ -162,7 +162,6 @@
             "Type": "AWS::S3::Bucket",
             "DeletionPolicy": "Retain",            
             "Properties": {
-                "AccessControl": "Private",
                 "BucketName":{"Fn::Sub": "${AWS::StackName}-sc-emr-logs"},
                 "LoggingConfiguration": {
                     "LogFilePrefix": { "Fn::Sub": "s3://${AWS::StackName}-sc-emr-logs/"}
@@ -381,8 +380,7 @@
                 "Fn::Sub": "http://${Cluster.MasterPublicDNS}:8088"
             }
         },
-        "S3LogBucket": {
-            "Condition":"CondCreateLogBucket",
+        "S3LogBucket": {            
             "Description": "S3 Log Bucket",
             "Value": {
                 "Ref": "LogBucket"

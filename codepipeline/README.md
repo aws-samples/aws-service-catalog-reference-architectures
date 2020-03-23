@@ -89,7 +89,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
     -[Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
   The repo clone address is the **CloneUrlSsh** output variable from the SC-RA-IACPipeline CloudFormation Stack
   ```
-  git clone git@github.com:aws-service-catalog-reference-architectures.git
+  git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git
   git clone https://YOUR-USERNAME@YOUR-REPO-NAME
   cp -r aws-service-catalog-reference-architectures/* SCPortfoliosRepo/
   cd SCPortfoliosRepo
