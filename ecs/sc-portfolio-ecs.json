@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Containers Demo Portfolio for Service Catalog. (fdp-)",
+    "Description": "Containers Demo Portfolio for Service Catalog. (fdp-1qj64b33d)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [

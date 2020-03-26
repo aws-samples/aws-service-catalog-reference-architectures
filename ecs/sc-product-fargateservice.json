@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "ECS Service ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Description": "ECS Service ServiceCatalog product. (fdp-1qj64b33p)",
     "Parameters":
       {
         "PortfolioProvider": {

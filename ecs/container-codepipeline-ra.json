@@ -1,5 +1,5 @@
 {
-    "Description": "Container CI/CD Automation Pipeline (fdp-1p5s1037g)",
+    "Description": "Container CI/CD Automation Pipeline (fdp-1qj64b335)",
 	"Metadata" : {
 	  "AdditionalInformation":"The CodePipeline defined here requires three buildspec files in a subfolder to be checked in with the code.  See the link below for examples.",
 	  "ExampleLink":"https://github.com/aws-samples/aws-service-catalog-reference-architectures/tree/master/ecs/codepipeline"

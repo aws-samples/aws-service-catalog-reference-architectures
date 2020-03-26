@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "ECS Fargate Cluster ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Description": "ECS Fargate Cluster ServiceCatalog product. (fdp-1qj64b34k)",
     "Parameters":
       {
         "PortfolioProvider": {
