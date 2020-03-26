@@ -6,7 +6,7 @@ Description: This stack deploys a Fargate cluster that is in a VPC with both
              balancers. One is inside the public subnet, which can be used to
              send traffic to the containers in the private subnet, and one in
              the private subnet, which can be used for private internal traffic
-             between internal services.
+             between internal services. (fdp-1qj64b304)
 Mappings:
   # Hard values for the subnet masks. These masks define
   # the range of internal IP addresses that can be assigned.

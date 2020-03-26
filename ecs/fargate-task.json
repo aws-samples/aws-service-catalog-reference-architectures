@@ -1,5 +1,5 @@
 {
-    "Description": "Container Fargate Task Definition (fdp-1p5s1037g)",
+    "Description": "Container Fargate Task Definition (fdp-1qj64b32n)",
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
         "ECRImageURI": {
