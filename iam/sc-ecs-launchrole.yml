@@ -1,4 +1,4 @@
-Description: "ServiceCatalog ECS Launch Role. (fdp-1p5rtpgmo)"
+Description: "ServiceCatalog ECS Launch Role. (fdp-1qj64b35a)"
 Resources:
   SCEC2LaunchRole:
     Type: 'AWS::IAM::Role'
