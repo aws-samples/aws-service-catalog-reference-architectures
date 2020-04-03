@@ -90,6 +90,16 @@
             "DisplayName" : {"Ref":"PorfolioName"}
           }
         },
+		"TagOptionsTemplate": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+			"Parameters" : { 
+				"PortfolioId": {"Ref":"SCEC2portfolio"}
+			},
+			"TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-tagoptionLibrary.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
         "addrole1":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Condition":"CondLinkRole1",

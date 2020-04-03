@@ -66,49 +66,6 @@
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
-        },
-        
-        "TagOptionsTemplate": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-tagoptions.json"},
-            "TimeoutInMinutes" : 5
-          }
-        },     
-        "tagassocenvprod": {
-          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
-          "Properties" : {
-            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagEnvironmentProd"]},
-            "ResourceId" : {"Ref":"WebserverProduct"}
-          }
-        },     
-        "tagassocenvdev": {
-          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
-          "Properties" : {
-            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagEnvironmentDev"]},
-            "ResourceId" : {"Ref":"WebserverProduct"}
-          }
-        },     
-        "tagassoccbdatainsights": {
-          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
-          "Properties" : {
-            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagChargeBackDataInsights"]},
-            "ResourceId" : {"Ref":"WebserverProduct"}
-          }
-        },     
-        "tagassoccbcbds": {
-          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
-          "Properties" : {
-            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagChargeBackDBs"]},
-            "ResourceId" : {"Ref":"WebserverProduct"}
-          }
-        },     
-        "tagassocccbacc": {
-          "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
-          "Properties" : {
-            "TagOptionId" : {"Fn::GetAtt":["TagOptionsTemplate","Outputs.TagChargeBackAcc"]},
-            "ResourceId" : {"Ref":"WebserverProduct"}
-          }
         }
     },
     "Outputs": {
