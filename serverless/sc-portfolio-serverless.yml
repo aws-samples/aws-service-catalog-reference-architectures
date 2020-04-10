@@ -7,9 +7,9 @@ Metadata:
     - Label:
         default: Portfolio Information
       Parameters:
-      - PorfolioName
+      - PortfolioName
       - PortfolioProvider
-      - PorfolioDescription
+      - PortfolioDescription
     - Label:
         default: IAM Settings
       Parameters:
@@ -27,11 +27,11 @@ Parameters:
     Type: String
     Description: Provider Name
     Default: IT Services
-  PorfolioName:
+  PortfolioName:
     Type: String
     Description: Portfolio Name
     Default: Service Catalog Serverless Reference Architecture
-  PorfolioDescription:
+  PortfolioDescription:
     Type: String
     Description: Portfolio Description
     Default: Service Catalog Portfolio that contains reference architecture products
@@ -104,9 +104,9 @@ Resources:
       ProviderName:
         Ref: PortfolioProvider
       Description:
-        Ref: PorfolioDescription
+        Ref: PortfolioDescription
       DisplayName:
-        Ref: PorfolioName
+        Ref: PortfolioName
   addrole1:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Condition: CondLinkRole1

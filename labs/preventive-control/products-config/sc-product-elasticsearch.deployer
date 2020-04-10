@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "PorfolioStack": "var.portfolioCfn",
+    "PortfolioStack": "var.portfolioCfn",
     "ProductName": "elasticsearch",
     "ProductDescription": "ElasticSearch",
     "ProductVersion": "1.0",

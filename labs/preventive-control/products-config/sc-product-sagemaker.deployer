@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "PorfolioStack": "var.portfolioCfn",
+    "PortfolioStack": "var.portfolioCfn",
     "ProductName": "sagemaker",
     "ProductDescription": "Amazon SageMaker Notebook Instance",
     "ProductVersion": "1.0",

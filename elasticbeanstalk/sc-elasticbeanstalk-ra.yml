@@ -1,0 +1,149 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS Elastic Beanstalk sample application for Service Catalog. (fdp-1qj64b36c)",
+  "Resources": {
+    "sampleApplication": {
+      "Type": "AWS::ElasticBeanstalk::Application",
+      "Properties": {
+        "Description": "AWS Elastic Beanstalk Sample Service Catalog"
+      }
+    },
+    "sampleApplicationVersion": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS Elastic Beanstalk Sample Service Catalog Version",
+        "SourceBundle": {
+          "S3Bucket": { "Ref" : "S3Bucket" },
+          "S3Key": { "Ref" : "S3SourceBundle" }
+        }
+      }
+    },
+    "sampleConfigurationTemplate": {
+      "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS ElasticBeanstalk Sample Configuration Template Service Catalog",
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MinSize",
+            "Value": "1"
+          },
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MaxSize",
+            "Value": "6"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "EnvironmentType",
+            "Value": "LoadBalanced"
+          }
+        ],
+        "SolutionStackName": { "Ref": "SolutionStackName" }
+      }
+    },
+    "sampleEnvironment": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS ElasticBeanstalk Sample Environment",
+        "VersionLabel": { "Ref": "sampleApplicationVersion" }
+      }
+    }
+  },
+  "Parameters": {
+    "S3Bucket":{
+        "Type": "String",
+        "Description": "Enter the name of the S3 bucket that the application source bundle is in."
+    },
+    "S3SourceBundle":{
+        "Type": "String",
+        "Description": "Enter name of application bundle within the selected S3 Bucket. Example MyApp.Zip."
+
+    },
+    "SolutionStackName":{
+        "Type": "String",
+        "Description": "Enter the name of the solution stack. A list of available Solution Stacks can be found here:https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html .",
+        "Default":"64bit Amazon Linux 2 v3.0.0 running Python 3.7",
+        "AllowedValues": [
+            "64bit Windows Server Core 2019 v2.5.2 running IIS 10.0",
+            "64bit Windows Server 2019 v2.5.2 running IIS 10.0",
+            "64bit Windows Server Core 2016 v2.5.2 running IIS 10.0",
+            "64bit Windows Server 2016 v2.5.2 running IIS 10.0",
+            "64bit Windows Server Core 2012 R2 v2.5.2 running IIS 8.5",
+            "64bit Windows Server 2012 R2 v2.5.2 running IIS 8.5",
+            "64bit Windows Server Core 2019 v2.5.1 running IIS 10.0",
+            "64bit Windows Server 2019 v2.5.1 running IIS 10.0",
+            "64bit Windows Server Core 2019 v2.5.0 running IIS 10.0",
+            "64bit Windows Server 2019 v2.5.0 running IIS 10.0",
+            "64bit Windows Server Core 2019 v2.4.0 running IIS 10.0",
+            "64bit Windows Server 2019 v2.4.0 running IIS 10.0",
+            "64bit Windows Server Core 2016 v1.2.0 running IIS 10.0",
+            "64bit Windows Server 2016 v1.2.0 running IIS 10.0",
+            "64bit Windows Server Core 2012 R2 v1.2.0 running IIS 8.5",
+            "64bit Windows Server 2012 R2 v1.2.0 running IIS 8.5",
+            "64bit Windows Server 2012 v1.2.0 running IIS 8",
+            "64bit Amazon Linux 2018.03 v2.14.3 running GlassFish 5.0 Java 8 (Preconfigured - Docker)",
+            "64bit Amazon Linux 2018.03 v2.10.4 running Java 8",
+            "64bit Amazon Linux 2018.03 v2.10.4 running Java 7",
+            "64bit Amazon Linux 2018.03 v4.14.1 running Node.js",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 5.4",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 5.5",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 5.6",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 7.0",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 7.1",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 7.2",
+            "64bit Amazon Linux 2018.03 v2.9.4 running PHP 7.3",
+            "64bit Amazon Linux 2018.03 v2.9.7 running Python 3.6",
+            "64bit Amazon Linux 2018.03 v2.9.7 running Python 3.4",
+            "64bit Amazon Linux 2018.03 v2.9.7 running Python",
+            "64bit Amazon Linux 2018.03 v2.9.7 running Python 2.7",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.6 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.5 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.4 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.3 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.2 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.1 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.0 (Passenger Standalone)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 1.9.3",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.6 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.5 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.4 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.3 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.2 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.1 (Puma)",
+            "64bit Amazon Linux 2018.03 v2.11.4 running Ruby 2.0 (Puma)",
+            "64bit Amazon Linux 2018.03 v3.3.4 running Tomcat 8.5 Java 8",
+            "64bit Amazon Linux 2018.03 v3.3.4 running Tomcat 8 Java 8",
+            "64bit Amazon Linux 2018.03 v3.3.4 running Tomcat 7 Java 7",
+            "64bit Amazon Linux 2018.03 v3.3.4 running Tomcat 7 Java 6",
+            "64bit Windows Server Core 2012 R2 running IIS 8.5",
+            "64bit Windows Server 2012 R2 running IIS 8.5",
+            "64bit Windows Server 2012 running IIS 8",
+            "64bit Amazon Linux 2018.03 v2.14.3 running Docker 18.09.9-ce",
+            "64bit Amazon Linux 2018.03 v2.20.0 running Multi-container Docker 18.09.9-ce (Generic)",
+            "64bit Debian jessie v2.14.3 running Go 1.4 (Preconfigured - Docker)",
+            "64bit Debian jessie v2.14.3 running Go 1.3 (Preconfigured - Docker)",
+            "64bit Debian jessie v2.14.3 running Python 3.4 (Preconfigured - Docker)",
+            "64bit Amazon Linux 2 v3.0.0 running Docker",
+            "64bit Amazon Linux 2 v3.0.0 running Corretto 11",
+            "64bit Amazon Linux 2 v3.0.0 running Corretto 8",
+            "64bit Amazon Linux 2 v3.0.0 running Python 3.7",
+            "64bit Amazon Linux 2 v0.1.0 running PHP 7.4 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running PHP 7.3 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running PHP 7.2 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Node.js 12 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Node.js 10 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Go 1 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Ruby 2.7 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Ruby 2.6 (BETA)",
+            "64bit Amazon Linux 2 v0.1.0 running Ruby 2.5 (BETA)",
+            "64bit Amazon Linux 2018.03 v2.15.1 running Go 1.14.1",
+            "64bit Amazon Linux 2018.03 v2.6.20 running Packer 1.0.3"
+        ]
+    }
+
+  }
+}

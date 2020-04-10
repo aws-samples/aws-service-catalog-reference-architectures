@@ -1,0 +1,117 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service Catalog Tag options (fdp-1qj64b360)",
+	"Parameters": {
+		"PortfolioId":{
+            "Type":"String",
+            "Description":"The SC portfolio to associate with this tag option library."
+        }
+	},
+    "Resources": {
+      "productEnvironmentProd" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "PROD",
+          "Key" : "serviceEnvironment"
+        }
+      },
+	  "productEnvironmentProdassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "productEnvironmentProd" }
+	  	}
+	  },
+	  "productEnvironmentQA" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "QA",
+          "Key" : "serviceEnvironment"
+        }
+      },
+	  "productEnvironmentQAassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "productEnvironmentQA" }
+	  	}
+	  },
+      "productEnvironmentDev" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "DEV",
+          "Key" : "serviceEnvironment"
+        }
+      },
+	  "productEnvironmentDevassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "productEnvironmentDev" }
+	  	}
+	  },
+      "ChargeBackDataInsights" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "DATA-INSIGHTS",
+          "Key" : "Chargeback"
+        }
+      },
+	  "ChargeBackDataInsightsassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "ChargeBackDataInsights" }
+	  	}
+	  },
+      "ChargeBackMK" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "MARKETING",
+          "Key" : "Chargeback"
+        }
+      },
+	  "ChargeBackMKassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "ChargeBackMK" }
+	  	}
+	  },
+	  "ChargeBackSC" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "SUPPLYCHAIN",
+          "Key" : "Chargeback"
+        }
+      },
+	  "ChargeBackSCassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "ChargeBackSC" }
+	  	}
+	  },
+      "ChargeBackAccounting" : {
+        "Type" : "AWS::ServiceCatalog::TagOption",
+        "Properties" : {
+          "Active" : true,
+          "Value" : "ACCOUNTING",
+          "Key" : "Chargeback"
+        }
+      },
+	  "ChargeBackAccountingassoc":{
+	    "Type" : "AWS::ServiceCatalog::TagOptionAssociation",
+	    "Properties" : {
+	  	  "ResourceId" : {"Ref": "PortfolioId"},
+	  	  "TagOptionId" : { "Ref" : "ChargeBackAccounting" }
+	  	}
+	  }
+    }
+}

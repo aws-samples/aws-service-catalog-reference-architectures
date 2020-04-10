@@ -1,7 +1,7 @@
 # AWS Service Catalog VPC Reference architecture
 
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog VPC Reference Architecture". 
- The AWS Service Catalog Products reference cloudformation templates for the Amazon VPC which can be lauched by end users through 
+ The AWS Service Catalog Products reference cloudformation templates for the Amazon VPC which can be launched by end users through 
  AWS Service Catalog.  The product creates a VPC with two public and private subnets across two availability zones.  
  The VPC includes an Internet Gateway and a managed NAT Gateway in each public subnet as well as VPC Route Tables and 
  Network ACLs that allow for communication between the public and private subnets.  Optionally, an Amazon Linux bastion instance 

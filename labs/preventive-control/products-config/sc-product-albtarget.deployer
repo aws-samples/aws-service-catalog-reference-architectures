@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "albtarget",
     "ProductDescription" : "Application Load Balancer Target Group",
     "ProductVersion" : "1.0",

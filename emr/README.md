@@ -3,8 +3,8 @@
 This reference architecture creates an AWS Service Catalog Portfolio called 
  "Service Catalog EMR Reference Architecture" with one associated product.
  The AWS Service Catalog Product references a cloudformation template for the
- Amazon EMR cluster which can be lauched by end users through AWS Service Catalog.
- The AWS Service Catalog EMR product creates an Aamzon Elastic MapReduce cluster in the VPC and Subnets
+ Amazon EMR cluster which can be launched by end users through AWS Service Catalog.
+ The AWS Service Catalog EMR product creates an Amazon Elastic MapReduce cluster in the VPC and Subnets
  selected by the end user.  A remote access security group is also created to allow for a bastion host
  to connect to the instances used by EMR via SSH.
 

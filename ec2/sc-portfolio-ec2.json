@@ -9,9 +9,9 @@
                         "default": "Portfolio Information"
                     },
                     "Parameters": [
-                        "PorfolioName",
+                        "PortfolioName",
                         "PortfolioProvider",
-                        "PorfolioDescription"
+                        "PortfolioDescription"
                     ]
                 },{
                     "Label": {
@@ -41,12 +41,12 @@
             "Description":"Provider Name",
             "Default":"IT Services"
         },
-       "PorfolioName": {
+       "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
             "Default":"Service Catalog EC2 Reference Architecture"
         },
-        "PorfolioDescription": {
+        "PortfolioDescription": {
             "Type":"String",
             "Description":"Portfolio Description",
             "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
@@ -86,8 +86,8 @@
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
-            "Description" : {"Ref":"PorfolioDescription"},
-            "DisplayName" : {"Ref":"PorfolioName"}
+            "Description" : {"Ref":"PortfolioDescription"},
+            "DisplayName" : {"Ref":"PortfolioName"}
           }
         },
         "addrole1":{

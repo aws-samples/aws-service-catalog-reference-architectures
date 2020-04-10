@@ -1,31 +1,32 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Linux EC2 Demo Webserver ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Description": "AWS Elastic Beanstalk Service Catalog product. (fdp-1qj64b371)",
     "Parameters":
       {
         "PortfolioProvider": {
             "Type":"String",
-            "Description":"Provider Name"
+            "Description":"Owner and Distributor Name"
         },
         "LaunchConstraintARN": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for EC2 products."
+            "Description":"ARN of the launch constraint role for Beanstalk products."
         },
         "PortfolioId":{
             "Type":"String",
-            "Description":"The SC portfolio this product will be attached to."
+            "Description":"The ServiceCatalog portfolio this product will be attached to."
         },
         "RepoRootURL": {
             "Type":"String",
             "Description":"Root url for the repo containing the product templates."
         }
+        
       },
     "Resources": {
-        "WebserverProduct": {
+        "scbeanstalkproduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Demo Linux Webserver",
-                "Description": "This product builds a webserver (Apache or NGINX) EC2 instance.",
+                "Name": "AWS Elastic Beanstalk application",
+                "Description": "This product creates an Elastic Beanstalk application.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -34,41 +35,31 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "NGINX webserver",
+                        "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx-nokey.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-elasticbeanstalk-ra.yml"}
                         },
-                        "Name": "NGINX v1.0"
-                    },
-                    {
-                        "Description": "Apache webserver",
-                        "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache-nokey.json"}
-                        },
-                        "Name": "Apache v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }
         },
-        "Associatenginxcf":{
+        "Associatebeanstalk":{
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"}
+            "ProductId" :   {"Ref":"scbeanstalkproduct"}
           }
         },
-        "constraintnginxcf":{
+        "constraintbeanstalk":{
           "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
-          "DependsOn" : "Associatenginxcf",
+          "DependsOn" : "Associatebeanstalk",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"WebserverProduct"},
+            "ProductId" :   {"Ref":"scbeanstalkproduct"},
             "RoleArn" : {"Ref":"LaunchConstraintARN"},
             "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
-    },
-    "Outputs": {
-        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
     }
-}
+}    

@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Deploy Service Catalog Product
 Parameters:
-  PorfolioStack:
+  PortfolioStack:
     Description: Name of CloudFormation Stack used to Deploy Service Catalog Resources
     Type: String
   ProductName:
@@ -80,7 +80,7 @@ Resources:
     Properties:
       PortfolioId:
         Fn::ImportValue:
-          !Sub "${PorfolioStack}-PortfolioId"
+          !Sub "${PortfolioStack}-PortfolioId"
       ProductId: !Ref DeployProduct
   RoleConstraint:
     Type: "AWS::ServiceCatalog::LaunchRoleConstraint"
@@ -88,7 +88,7 @@ Resources:
       Description: !Sub 'Role Constraint for ${ProductName}'
       PortfolioId:
         Fn::ImportValue:
-          !Sub "${PorfolioStack}-PortfolioId"
+          !Sub "${PortfolioStack}-PortfolioId"
       ProductId: !Ref DeployProduct
       RoleArn: !GetAtt ProductRole.Outputs.ProductRoleArn
     DependsOn: AssociateProduct
@@ -99,7 +99,7 @@ Resources:
       Description: !Sub 'Template Constraint for ${ProductName}'
       PortfolioId:
         Fn::ImportValue:
-          !Sub "${PorfolioStack}-PortfolioId"
+          !Sub "${PortfolioStack}-PortfolioId"
       ProductId: !Ref DeployProduct
       Rules: !Ref TemplateRuleConstraint
     DependsOn: AssociateProduct
@@ -109,7 +109,7 @@ Resources:
     Properties:
       RoleArn:
         Fn::ImportValue:
-          !Sub "${PorfolioStack}-PipelineRoleArn"
+          !Sub "${PortfolioStack}-PipelineRoleArn"
       Name: !Sub 'sc-${ProductName}-product-pipeline'
       ArtifactStore:
         Location: !Ref DeploymentBucket

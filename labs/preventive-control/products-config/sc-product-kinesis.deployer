@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "kinesis",
     "ProductDescription" : "Kinesis",
     "ProductVersion" : "1.0",

@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "PorfolioStack": "var.portfolioCfn",
+    "PortfolioStack": "var.portfolioCfn",
     "ProductName": "elasticache",
     "ProductDescription": "ElastiCache",
     "ProductVersion": "1.0",
