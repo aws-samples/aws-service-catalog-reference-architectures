@@ -19,6 +19,7 @@ The portfolio templates in each section will create a ServiceCatalog Portfolio w
  * [Elastic MapReduce (EMR)](emr)
  * [Fargate Elastic Container Service (ECS)](ecs)
  * [Glue](glue)
+ * [Elastic Beanstalk](elasticbeanstalk)
  * [Automated CodePipeline](codepipeline)
 
 ### Assumptions  
