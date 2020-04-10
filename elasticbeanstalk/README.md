@@ -1,9 +1,11 @@
 # AWS Service Catalog Elastic Beanstalk Reference architecture
 
-This reference architecture creates an AWS Service Catalog Portfolio called 
- "Service Catalog - AWS Elastic Beanstalk Reference Architecture" with one associated product.
- The AWS Service Catalog Product references a cloudformation template for the
- a sample Elastic Beanstalk application which can be launched by end users through AWS Service Catalog.
+This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog Elastic Beanstalk Reference Architecture" with one associated product. The Service Catalog product references a CloudFormation template that deploys a web application bundle to a new Elastic Beanstalk environment.  To launch the environment, the user provides the web application name, the name of the S3 bucket where the web application is stored, and the name of the Elastic Beanstalk solution stack that the application will run on. A list of available Solution Stacks can be found here:
+https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html
+
+Get a list of Solution Stacks from the AWS CLI with this command:  
+```aws elasticbeanstalk list-available-solution-stacks```
+
 
 ### Install  
 Launch the Elastic Beanstalk portfolio stack:  
