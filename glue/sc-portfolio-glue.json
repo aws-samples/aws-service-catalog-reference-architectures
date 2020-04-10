@@ -9,9 +9,9 @@
                         "default": "Portfolio Information"
                     },
                     "Parameters": [
-                        "PorfolioName",
+                        "PortfolioName",
                         "PortfolioProvider",
-                        "PorfolioDescription"
+                        "PortfolioDescription"
                     ]
                 },
                 {
@@ -44,12 +44,12 @@
             "Description":"Provider Name",
             "Default":"IT Services"
         },
-       "PorfolioName": {
+       "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
             "Default":"Service Catalog - AWS Glue Reference Architecture"
         },
-        "PorfolioDescription": {
+        "PortfolioDescription": {
             "Type":"String",
             "Description":"Portfolio Description",
             "Default":"Service Catalog Portfolio that contains reference architecture products for AWS Glue (Glue)."
@@ -89,8 +89,8 @@
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
-            "Description" : {"Ref":"PorfolioDescription"},
-            "DisplayName" : {"Ref":"PorfolioName"}
+            "Description" : {"Ref":"PortfolioDescription"},
+            "DisplayName" : {"Ref":"PortfolioName"}
           }
         },
         "addrole1":{

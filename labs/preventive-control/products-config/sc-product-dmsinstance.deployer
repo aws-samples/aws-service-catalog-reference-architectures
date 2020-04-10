@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "PorfolioStack": "var.portfolioCfn",
+    "PortfolioStack": "var.portfolioCfn",
     "ProductName": "dmsinstance",
     "ProductDescription": "DMS Replication Instance",
     "ProductVersion": "1.0",

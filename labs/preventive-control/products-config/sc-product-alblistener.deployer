@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "alblistener",
     "ProductDescription" : "Application Load Balancer Listener",
     "ProductVersion" : "1.0",

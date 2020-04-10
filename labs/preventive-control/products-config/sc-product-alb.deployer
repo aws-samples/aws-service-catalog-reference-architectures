@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "alb",
     "ProductDescription" : "Application Load Balancer",
     "ProductVersion" : "1.0",

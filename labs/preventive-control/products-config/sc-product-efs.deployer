@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "efs",
     "ProductDescription" : "Elastic File System",
     "ProductVersion" : "1.0",

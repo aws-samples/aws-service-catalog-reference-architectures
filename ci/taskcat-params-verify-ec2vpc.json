@@ -3,10 +3,10 @@
         "ParameterKey": "PortfolioProvider",
         "ParameterValue": "IT Services"
     },{
-        "ParameterKey": "PorfolioName",
+        "ParameterKey": "PortfolioName",
         "ParameterValue": "Service Catalog EC2 Reference Architecture"
     },{
-        "ParameterKey": "PorfolioDescription",
+        "ParameterKey": "PortfolioDescription",
         "ParameterValue": "Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
     },{
         "ParameterKey": "LaunchRoleName",

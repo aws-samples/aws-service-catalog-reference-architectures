@@ -338,14 +338,14 @@ Resources:
       Description: !Ref PortfolioDescription
       DisplayName: !Ref PortfolioName
 
-  PorfolioDeveloperPermission:
+  PortfolioDeveloperPermission:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Properties:
       PortfolioId: !Ref Portfolio
       PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:user/${UserName}'
       PrincipalType: IAM
 
-  PorfolioRolePermission:
+  PortfolioRolePermission:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Condition: HasAccessRole
     Properties:
@@ -353,7 +353,7 @@ Resources:
       PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/${PortfolioAccessRole}'
       PrincipalType: IAM
 
-  PorfolioUserPermission:
+  PortfolioUserPermission:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
     Condition: HasAccessUser
     Properties:

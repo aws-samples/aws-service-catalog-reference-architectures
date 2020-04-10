@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "dynamodb",
     "ProductDescription" : "Amazon DynamoDB",
     "ProductVersion" : "1.0",

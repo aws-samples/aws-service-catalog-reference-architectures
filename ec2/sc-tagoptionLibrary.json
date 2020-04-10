@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Service Catalog Tag options",
+    "Description": "Service Catalog Tag options (fdp-1qj64b360)",
 	"Parameters": {
 		"PortfolioId":{
             "Type":"String",

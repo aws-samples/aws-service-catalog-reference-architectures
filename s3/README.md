@@ -2,7 +2,7 @@
 
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog S3 Reference Architecture"
  with five associated products. The AWS Service Catalog Product references cloudformation templates for the Amazon S3 buckets which
- can be lauched by end users through Service Catalog. The AWS Service Catalog S3 products create S3 buckets with varying 
+ can be launched by end users through Service Catalog. The AWS Service Catalog S3 products create S3 buckets with varying 
  configurations:  
  1. Read-Only bucket with access from anywhere
  2. Private bucket with access restricted to a source CIDR block

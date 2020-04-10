@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "PorfolioStack" : "var.portfolioCfn",
+    "PortfolioStack" : "var.portfolioCfn",
     "ProductName" : "sqs",
     "ProductDescription" : "SQS",
     "ProductVersion" : "1.0",
