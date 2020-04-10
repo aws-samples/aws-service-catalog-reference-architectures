@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Glue Portfolio for Service Catalog. (fdp-1p4dlgglue)",
+    "Description": "AWS Elastic Beanstalk Portfolio for Service Catalog. (fdp-1qj64b36k)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -47,16 +47,16 @@
        "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
-            "Default":"Service Catalog - AWS Glue Reference Architecture"
+            "Default":"Service Catalog - AWS Elastic Beanstalk Reference Architecture"
         },
         "PortfolioDescription": {
             "Type":"String",
             "Description":"Portfolio Description",
-            "Default":"Service Catalog Portfolio that contains reference architecture products for AWS Glue."
+            "Default":"Service Catalog Portfolio that contains reference architecture products for AWS Elastic Beanstalk."
         },
         "LaunchRoleName": {
             "Type":"String",
-            "Description":"Name of the launch constraint role for Glue products. leave this blank to create the role."            
+            "Description":"Name of the launch constraint role for Elastic Beanstalk products. leave this blank to create the role."            
         },
        "LinkedRole1": {
             "Type":"String",
@@ -149,11 +149,11 @@
           "Type" : "AWS::CloudFormation::Stack",
           "Condition":"CreateLaunchConstraint",
           "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-glue-launchrole.yml"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-elasticbeanstalk-launchrole.yml"},
             "TimeoutInMinutes" : 5
           }
         },        
-        "glueproduct": {
+        "beanstalkproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
@@ -166,7 +166,7 @@
                 "PortfolioId":{"Ref":"SCGLUEportfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}glue/sc-product-glue.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-product-elasticbeanstalk.json"},
             "TimeoutInMinutes" : 5
           }
         }
