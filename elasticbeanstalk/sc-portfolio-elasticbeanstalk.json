@@ -85,7 +85,7 @@
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
     },
     "Resources": {
-        "SCGLUEportfolio": {
+        "SCElasticBeanstalkportfolio": {
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
@@ -98,7 +98,7 @@
           "Condition":"CondLinkRole1",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -107,7 +107,7 @@
           "Condition":"CondLinkRole2",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
         },        
@@ -128,7 +128,7 @@
                     {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
                 ]},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -141,7 +141,7 @@
                     {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
                 ]},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -163,7 +163,7 @@
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
                 ]},
-                "PortfolioId":{"Ref":"SCGLUEportfolio"},
+                "PortfolioId":{"Ref":"SCElasticBeanstalkportfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-product-elasticbeanstalk.json"},
