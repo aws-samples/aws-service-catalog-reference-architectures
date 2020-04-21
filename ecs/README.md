@@ -3,20 +3,19 @@
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog Containers Reference Architecture"  
 The Portfolio provides 3 products which will create a full DevOps deployment pipeline from code to container deployment in Fargate.  
 
-1. First create the portfolio, then provision the cluster and codepipeline products from Service Catalog.  
-2. The provisioned codepipeline product will create a new CodeCommit repo towhich you will use to check-in your code with a docker file and tests.  
+1. Create the portfolio using the Launchstack: 
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=SC-RA-ECS-Portfolio&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/ecs/sc-portfolio-ecs.json)  
+2. Provision the cluster and codepipeline products from Service Catalog.  
+3. The provisioned codepipeline product will create a new CodeCommit repo.
+	a. Add your code, docker file, and tests.
     a. Adjust the skeleton builspecs in the codepipeline/ subfolder to fit your project tests and build commands.  
-    b. Check-in the code to the new codecommit repo. CodePipeline will validate, build, and push the container to ECR.  
+    b. Check-in the code to the new codecommit repo. CodePipeline will validate, build according to the buildspec files. 
+	c. If all stages complete then CodePipeline will push the container to ECR.   
 3. Once the container is in ECR you can provision the supplied Fargate Service product in Service Catalog.  
   This will create an ECS Service which is launched in the previously provisioned Fargate Cluster.  You may then view your new service using the ExternalUrl 
   output parameter from the ECS Cluster product.
 
 For more example ECS tamplates and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
-
-### Install  
-Launch the Container portfolio stack:  
-[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=SC-RA-ECS-Portfolio&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/ecs/sc-portfolio-ecs.json)
-
 
 ### Install from your own S3 bucket  
 1. clone this git repo:  
