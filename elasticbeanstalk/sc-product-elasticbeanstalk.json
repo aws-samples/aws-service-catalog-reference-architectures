@@ -37,9 +37,9 @@
                     {
                         "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-elasticbeanstalk-ra.yml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-elasticbeanstalk-ra.json"}
                         },
-                        "Name": "v1.1"
+                        "Name": "v1.0"
                     }
                 ]
             }
