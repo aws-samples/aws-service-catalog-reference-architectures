@@ -1,58 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "AWS Elastic Beanstalk sample application for Service Catalog. (fdp-1qj64b36c)",
-  "Resources": {
-    "sampleApplication": {
-      "Type": "AWS::ElasticBeanstalk::Application",
-      "Properties": {
-        "Description": "AWS Elastic Beanstalk Sample Service Catalog"
-      }
-    },
-    "sampleApplicationVersion": {
-      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
-      "Properties": {
-        "ApplicationName": { "Ref": "sampleApplication" },
-        "Description": "AWS Elastic Beanstalk Sample Service Catalog Version",
-        "SourceBundle": {
-          "S3Bucket": { "Ref" : "S3Bucket" },
-          "S3Key": { "Ref" : "S3SourceBundle" }
-        }
-      }
-    },
-    "sampleConfigurationTemplate": {
-      "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
-      "Properties": {
-        "ApplicationName": { "Ref": "sampleApplication" },
-        "Description": "AWS ElasticBeanstalk Sample Configuration Template Service Catalog",
-        "OptionSettings": [
-          {
-            "Namespace": "aws:autoscaling:asg",
-            "OptionName": "MinSize",
-            "Value": "1"
-          },
-          {
-            "Namespace": "aws:autoscaling:asg",
-            "OptionName": "MaxSize",
-            "Value": "6"
-          },
-          {
-            "Namespace": "aws:elasticbeanstalk:environment",
-            "OptionName": "EnvironmentType",
-            "Value": "LoadBalanced"
-          }
-        ],
-        "SolutionStackName": { "Ref": "SolutionStackName" }
-      }
-    },
-    "sampleEnvironment": {
-      "Type": "AWS::ElasticBeanstalk::Environment",
-      "Properties": {
-        "ApplicationName": { "Ref": "sampleApplication" },
-        "Description": "AWS ElasticBeanstalk Sample Environment",
-        "VersionLabel": { "Ref": "sampleApplicationVersion" }
-      }
-    }
-  },
   "Parameters": {
     "S3Bucket":{
         "Type": "String",
@@ -144,6 +92,105 @@
             "64bit Amazon Linux 2018.03 v2.6.20 running Packer 1.0.3"
         ]
     }
-
+  },
+  "Resources": {
+    "sampleApplication": {
+      "Type": "AWS::ElasticBeanstalk::Application",
+      "Properties": {
+        "Description": "AWS Elastic Beanstalk Sample Service Catalog"
+      }
+    },
+    "sampleApplicationVersion": {
+      "Type": "AWS::ElasticBeanstalk::ApplicationVersion",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS Elastic Beanstalk Sample Service Catalog Version",
+        "SourceBundle": {
+          "S3Bucket": { "Ref" : "S3Bucket" },
+          "S3Key": { "Ref" : "S3SourceBundle" }
+        }
+      }
+    },
+    "elasticbeanstalkec2role": {
+      "Type": "AWS::IAM::Role",      
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier",
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker",
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+        ],
+        "Path": "/"
+      }
+    },
+    "ElasticBeanstalkInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+          "Path": "/",
+          "Roles": [
+              {"Ref": "elasticbeanstalkec2role"}
+          ]
+      }
+    },
+    
+    "sampleConfigurationTemplate": {
+      "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS ElasticBeanstalk Sample Configuration Template Service Catalog",
+        "OptionSettings": [
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MinSize",
+            "Value": "1"
+          },
+          {
+            "Namespace": "aws:autoscaling:asg",
+            "OptionName": "MaxSize",
+            "Value": "6"
+          },
+          {
+            "Namespace": "aws:elasticbeanstalk:environment",
+            "OptionName": "EnvironmentType",
+            "Value": "LoadBalanced"
+          },
+          {
+            "Namespace": "aws:autoscaling:launchconfiguration",
+            "OptionName": "IamInstanceProfile",
+            "Value": { "Ref":"ElasticBeanstalkInstanceProfile"}
+          }
+        ],
+        "SolutionStackName": { "Ref": "SolutionStackName" }
+      }
+    },
+    "sampleEnvironment": {
+      "Type": "AWS::ElasticBeanstalk::Environment",
+      "Properties": {
+        "ApplicationName": { "Ref": "sampleApplication" },
+        "Description": "AWS ElasticBeanstalk Sample Environment",
+        "VersionLabel": { "Ref": "sampleApplicationVersion" },
+        "TemplateName":{ "Ref": "sampleConfigurationTemplate" }
+      }
+    }
+  },
+  "Outputs": {
+	"ElasticBeanstalkURL" :{
+		"Value": {"Fn::Sub": ["http://${endpoint}", {"endpoint": { "Fn::GetAtt": ["sampleEnvironment","EndpointURL"]}} ]} 
+	}
   }
 }
