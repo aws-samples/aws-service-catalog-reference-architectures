@@ -19,6 +19,43 @@
         }
       }
     },
+    "elasticbeanstalkec2role": {
+      "Type": "AWS::IAM::Role",      
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier",
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker",
+          "arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier"
+        ],
+        "Path": "/"
+      }
+    },
+    "ElasticBeanstalkInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+          "Path": "/",
+          "Roles": [
+              {"Ref": "elasticbeanstalkec2role"}
+          ]
+      }
+    },
+    
     "sampleConfigurationTemplate": {
       "Type": "AWS::ElasticBeanstalk::ConfigurationTemplate",
       "Properties": {
@@ -39,6 +76,11 @@
             "Namespace": "aws:elasticbeanstalk:environment",
             "OptionName": "EnvironmentType",
             "Value": "LoadBalanced"
+          },
+          {
+            "Namespace": "aws:autoscaling:launchconfiguration",
+            "OptionName": "IamInstanceProfile",
+            "Value": { "Ref":"ElasticBeanstalkInstanceProfile"}
           }
         ],
         "SolutionStackName": { "Ref": "SolutionStackName" }
@@ -49,7 +91,8 @@
       "Properties": {
         "ApplicationName": { "Ref": "sampleApplication" },
         "Description": "AWS ElasticBeanstalk Sample Environment",
-        "VersionLabel": { "Ref": "sampleApplicationVersion" }
+        "VersionLabel": { "Ref": "sampleApplicationVersion" },
+        "TemplateName":{ "Ref": "sampleConfigurationTemplate" }
       }
     }
   },
