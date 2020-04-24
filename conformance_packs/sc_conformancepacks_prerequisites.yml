@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS Config Conformance Packs - prerequisite (FTP-CCP-0001)
+Resources:
+
+  ###################################################
+  ## Config setup
+  ###################################################
+  ConfigServiceRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: config.amazonaws.com
+      Description: 'AWS Config Service Linked Role'
+
+  ConfigBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-config-data"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: "true"
+        IgnorePublicAcls: "true"
+        BlockPublicPolicy: "true"
+        RestrictPublicBuckets: "true"
+
+  ConfigBucketPolicy:
+    DependsOn:
+    - ConfigBucket
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ConfigBucket
+      PolicyDocument:
+        Id: ConfigAccess
+        Statement:
+        - Sid: Config Service General Access
+          Action:
+          - s3:GetBucketAcl
+          Effect: Allow
+          Resource:
+          - !Sub "arn:${AWS::Partition}:s3:::${ConfigBucket}"
+          Principal:
+            Service:
+            - config.amazonaws.com
+        - Sid: Config Service PutObject
+          Action:
+          - s3:PutObject
+          Effect: Allow
+          Resource:
+          - !Sub "arn:${AWS::Partition}:s3:::${ConfigBucket}/AWSLogs/${AWS::AccountId}/Config/*"
+          Principal:
+            Service:
+            - config.amazonaws.com
+          Condition:
+            StringEquals:
+              s3:x-amz-acl: bucket-owner-full-control
+
+  ConfigRecorder:
+    DependsOn:
+    - ConfigServiceRole
+    - ConfigBucket
+    Properties:
+      RecordingGroup:
+        AllSupported: 'true'
+        IncludeGlobalResourceTypes: 'true'
+      RoleARN: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/config.amazonaws.com/AWSServiceRoleForConfig"
+    Type: 'AWS::Config::ConfigurationRecorder'
+
+  ConfigDeliveryChannel:
+    DependsOn:
+    - ConfigBucket
+    Type: AWS::Config::DeliveryChannel
+    Properties:
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: One_Hour
+      S3BucketName: !Ref ConfigBucket
+
+  ###################################################
+  ## Conforms setup
+  ###################################################
+  ConformsServiceRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: config-conforms.amazonaws.com
+      Description: 'Service Linked Role for AWS Config Conformance Packs Service'
+  ParConformancePackDeliveryBucket:
+    Type: 'AWS::SSM::Parameter'
+    Properties:
+      Description: ConformancePackDeliveryBucket 
+      Name: /conformancepack/deliverybucket
+      Type: String
+      Value: !Ref ConformsDeliveryBucket
+  ConformsDeliveryBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::AccountId}-conforms-delivery"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: "true"
+        IgnorePublicAcls: "true"
+        BlockPublicPolicy: "true"
+        RestrictPublicBuckets: "true"
+
+  ConformsDeliveryBucketPolicy:
+    DependsOn:
+    - ConformsDeliveryBucket
+    - ConformsServiceRole
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ConformsDeliveryBucket
+      PolicyDocument:
+        Id: ConformsAccess
+        Statement:
+        - Sid: AWSConfigConformsBucketPermissionsCheck
+          Action:
+          - s3:GetBucketAcl
+          Effect: Allow
+          Resource:
+          - !Sub "arn:${AWS::Partition}:s3:::${ConformsDeliveryBucket}"
+          Principal:
+            AWS:
+            - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/config-conforms.amazonaws.com/AWSServiceRoleForConfigConforms"
+        - Sid: AWSConfigConformsBucketDelivery
+          Action:
+          - s3:PutObject
+          Effect: Allow
+          Resource:
+          - !Sub "arn:${AWS::Partition}:s3:::${ConformsDeliveryBucket}/AWSLogs/${AWS::AccountId}/Config/*"
+          Principal:
+            AWS:
+            - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/config-conforms.amazonaws.com/AWSServiceRoleForConfigConforms"
+          Condition:
+            StringEquals:
+              s3:x-amz-acl: bucket-owner-full-control
+        - Sid: AWSConfigConformsBucketReadAccess
+          Action:
+          - s3:GetObject
+          Effect: Allow
+          Resource:
+          - !Sub "arn:${AWS::Partition}:s3:::${ConformsDeliveryBucket}/AWSLogs/${AWS::AccountId}/Config/*"
+          Principal:
+            AWS:
+            - Fn::Sub: "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/aws-service-role/config-conforms.amazonaws.com/AWSServiceRoleForConfigConforms"
+
+  ###################################################
+  ## Remediation setup
+  ###################################################
+  RemediationSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: "RemediationSNSTopic"
+
+  RemediationSNSPublishPolicy:
+    Type: "AWS::IAM::Policy"
+    Description: Publish to SNS topic
+    Properties:
+      PolicyName: "RemediationSNSPublishPolicy"
+      Roles:
+      - Ref: RemediationSNSPublishRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        -
+          Effect: Allow
+          Action:
+          - sns:Publish
+          Resource: !Ref RemediationSNSTopic
+
+  RemediationSNSPublishRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "RemediationSNSPublishRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: ssm.amazonaws.com
+
+Outputs:
+  oParConformancePackDeliveryBucket:
+    Description: SSM parameter /conformancepack/deliverybucket
+    Value: !Ref ConformsDeliveryBucket
+  ConformsDeliveryBucketName:
+    Description: The S3 bucket to be used as conforms delivery bucket
+    Value: !Ref ConformsDeliveryBucket
+    Export:
+      Name: ConformsDeliveryBucketName
+
+  RemediationSNSTopicArn:
+    Description: The SNS topic where remediation will publish message
+    Value: !Ref RemediationSNSTopic
+    Export:
+      Name: RemediationSNSTopicArn
