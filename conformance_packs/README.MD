@@ -23,3 +23,9 @@ This conformance pack assumes you have already installed the prerequisite templa
 
 This conformance pack assumes you have already installed the prerequisite template titled "AWS Config Conformance Packs- prerequisite". This template installs config rules to monitor for the best practices associated with Identity and Access Management. The following Config rules are included with the template- IAMGroupHasUsersCheck; IAMPasswordPolicy; IAMPolicyBlacklistedCheck; IAMPolicyNoStatementsWithAdminAccess; IAMRoleManagedPolicyCheck; IAMRootAccessKeyCheck; IAMUserGroupMembershipCheck; IAMUserMFAEnabled; IAMUserNoPoliciesCheck; IAMUserUnusedCredentialsCheck; MFAEnabledForIAMConsoleAccess; RootAccountHardwareMFAEnabled; and, RootAccountMFAEnabled. Note-The Config Conformance Pack templates are intended to be samples for using AWS Config rules and remediation actions within a conformance pack. They do not guarantee thorough compliance check as is. You may need to modify the template by adding more AWS Config rules to meet your AWS Organizations requirements and ensuring thorough compliance of your AWS resources.
  
+
+
+This conformance pack assumes you have already installed the prerequisit template titled "AWS Config Conformance Packs - prerequisite".  This template installs 14 Config rules that comprise the detective guardrails available from AWS Control Tower.   This template can be used to help evaluate enrollment for a new account into Control Tower governance, or to add an account to a region that is not supported by AWS Control Tower at this time.
+
+*Note*:  
+The Config Conformance Pack templates are intended to be samples for using AWS Config rules and remediation actions within a conformance pack. They do not guarantee thorough compliance check as is. You may need to modify the template by adding more AWS Config rules to meet your AWS Organizations requirements and ensuring thorough compliance of your AWS resources. 
