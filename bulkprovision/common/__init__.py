@@ -66,9 +66,11 @@ class aws_clients:
         ret = None
         if key in self.EVENT_OBJECT:
             ret = self.EVENT_OBJECT[key]
-        elif key in self.EVENT_OBJECT["ResourceProperties"]: 
+        elif "ResourceProperties" in self.EVENT_OBJECT and key in self.EVENT_OBJECT["ResourceProperties"]: 
             # coming in from Cloudformation
             ret = self.EVENT_OBJECT["ResourceProperties"][key]
+        else:
+            logger.info("key {} not found in {}".format(key, self.EVENT_OBJECT))
         return(ret)
 
     def getDynamoTableName(self):

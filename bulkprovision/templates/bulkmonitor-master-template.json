@@ -2,16 +2,130 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Service Catalog Bulk Deploy Master template (fdp-1qj64b35n)",
   "Parameters": {        
-	"LambdaZipsBucket": {
+	"SourceBucket": {
 		"Type": "String",
-		"Description":"The bucket name containing Service Catalog templates"
+		"Description":"The bucket containing lambda bundles and templates",
+		"Default":"aws-service-catalog-reference-architectures"
 	},
 	"BulkDynamoTablename": {
 		"Type": "String",
 		"Default":"sc-bulkdeploy-details"
+	},
+	"LinkedRole1": {
+		"Type":"String",
+		"Description":"(Optional) The name of a role which can execute products in this portfolio."
 	}
   },
+  "Conditions":{
+	"CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]}
+  },
   "Resources": {
+	
+    "LambdaZipsBucket": {
+      "Type": "AWS::S3::Bucket"
+    },
+    "CopyZipsRoleDefine": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Path": "/",
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+        ],
+        "Policies": [
+          {
+            "PolicyName": "lambda-copier",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:GetObject"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${SourceBucket}/*"
+                    }
+                  ],
+                  "Effect": "Allow"
+                },
+                {
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:DeleteObject",
+                    "s3:Get*",
+                    "s3:List*"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}/*"
+                    },
+                    {
+                      "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}"
+                    }
+                  ],
+                  "Effect": "Allow"
+                }
+              ]
+            }
+          }
+        ],
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CopyZipsFunctionDefine": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "import json\nimport logging\nimport urllib3\nimport threading\nimport boto3\nhttp = urllib3.PoolManager()\ns3_client = boto3.client('s3')\nlogger = logging.getLogger()\ndef cfnresponse(event, context, responseStatus, responseData={}, physicalResourceId=None, noEcho=False):    \n    responseBody = {}\n    responseBody['Status'] = responseStatus\n    responseBody['Reason'] = 'See the details in CloudWatch Log Stream: ' + context.log_stream_name\n    responseBody['PhysicalResourceId'] = physicalResourceId or context.log_stream_name\n    responseBody['StackId'] = event['StackId']\n    responseBody['RequestId'] = event['RequestId']\n    responseBody['LogicalResourceId'] = event['LogicalResourceId']\n    responseBody['NoEcho'] = noEcho\n    responseBody['Data'] = responseData\n    json_responseBody = json.dumps(responseBody)    \n    headers = {'content-type' : '','content-length' : str(len(json_responseBody))}\n    try:\n        response = http.request('PUT',event['ResponseURL'],body=json_responseBody.encode('utf-8'),headers=headers)\n        logger.debug('Status code: ' + response.reason)\n    except Exception as e:\n        logger.error('cfnresponse(..) failed executing requests.put(..): ' + str(e))\ndef emptydbucket(bucket):\n    s3 = boto3.resource('s3')    \n    bucketi = s3.Bucket(bucket)\n    for obj in bucketi.objects.all():\n        s3_client.delete_object(Bucket=bucket,Key=obj.key)    \ndef copy_objects(source_bucket, dest_bucket, prefix, objects):    \n    for o in objects:\n        key = prefix + o\n        copy_source = {\n            'Bucket': source_bucket,\n            'Key': key\n        }\n        print('copy_source: %s' % copy_source)\n        print('dest_bucket = %s'%dest_bucket)\n        print('key = %s' %key)\n        s3_client.copy_object(CopySource=copy_source, Bucket=dest_bucket,Key=key)\ndef timeout(event, context):\n    logging.error('Execution is about to time out, sending failure response to CloudFormation')\n    cfnresponse(event, context, 'FAILED')    \ndef handler(event, context):\n    # make sure we send a failure to CloudFormation if the function\n    # is going to timeout    \n    timer = threading.Timer((context.get_remaining_time_in_millis()\n              / 1000.00) - 0.5, timeout, args=[event, context])\n    timer.start()    \n    status = 'SUCCESS'\n    try:\n        source_bucket = event['ResourceProperties']['SourceBucket']\n        dest_bucket = event['ResourceProperties']['DestBucket']\n        prefix = event['ResourceProperties']['Prefix']\n        objects = event['ResourceProperties']['Objects']\n        if event['RequestType'] == 'Delete':             \n            emptydbucket(event['ResourceProperties']['DestBucket'])       \n        else:\n            copy_objects(source_bucket, dest_bucket, prefix, objects)\n    except Exception as e:\n        logging.error('Exception: %s' % e, exc_info=True)\n        status = 'FAILED'\n    finally:\n        timer.cancel()\n        cfnresponse(event, context, status)"
+        },
+        "Description": "Copies objects from a source S3 bucket to a destination",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "CopyZipsRoleDefine",
+            "Arn"
+          ]
+        },
+        "Timeout": 240,
+        "Runtime": "python3.7"
+      }
+    },
+    "CopyZipsRun": {
+      "Type": "Custom::CopyZipsRun",
+      "Properties": {
+        "DestBucket": {
+          "Ref": "LambdaZipsBucket"
+        },
+        "Prefix": "",
+        "Objects": [
+          "lambda/bulkexecute_lambda.zip",
+		  "lambda/bulkmonitor_lambda.zip",
+		  "lambda/bulkreport_lambda.zip",
+		  "lambda/start_stepf_lambda.zip"
+        ],
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "CopyZipsFunctionDefine",
+            "Arn"
+          ]
+        },
+        "SourceBucket": {
+          "Ref": "SourceBucket"
+        }
+      }
+    },
+  
     "SCBulkPortfolio": {
       "Type": "AWS::ServiceCatalog::Portfolio",
       "Properties": {
@@ -21,7 +135,15 @@
         "AcceptLanguage": "en"
       }
     },
-  
+	"addrole1":{
+      "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+      "Condition":"CondLinkRole1",
+      "Properties" : {
+        "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
+        "PortfolioId" : {"Ref":"SCBulkPortfolio"},
+        "PrincipalType" : "IAM"
+      }
+    },
     "LambdabulkdeployRole": {
       "Type": "AWS::IAM::Role",      
       "Properties": {
@@ -77,22 +199,7 @@
             "PolicyName": "dynamosessc_mgt",
             "PolicyDocument": {
               "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Action": [
-                    "iam:ListRoles"
-                  ],
-                  "Resource": "arn:aws:iam::*:*",
-                  "Effect": "Allow"
-                },              
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "organizations:List*",
-                    "organizations:Describe*"
-                  ],
-                  "Resource": "*"
-                },                              
+              "Statement": [                            
                 {
                   "Effect": "Allow",
                   "Action": [
@@ -113,16 +220,29 @@
                     "servicecatalog:SearchProducts",
                     "servicecatalog:SearchProductsAsAdmin",
                     "servicecatalog:SearchProvisionedProducts",
-                    "servicecatalog:TerminateProvisionedProduct"
+                    "servicecatalog:TerminateProvisionedProduct",
+					"logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+					"dynamodb:ListTables",
+					"S3:*",
+					"organizations:List*",
+                    "organizations:Describe*",
+					"iam:ListRoles",
+					"ses:SendEmail",
+					"ses:GetEmailIdentity",
+					"ses:VerifyEmailAddress",
+					"ses:VerifyEmailIdentity",
+					"ses:ListVerifiedEmailAddresses"
                   ],
                   "Resource": "*"
-                },
-                {
+                },                
+				{
                   "Effect": "Allow",
                   "Action": [
-                    "S3:*"                    
+                    "states:StartExecution"                    
                   ],
-                  "Resource": "*"
+                  "Resource": {"Fn::Sub":"arn:aws:states:${AWS::Region}:${AWS::AccountId}:stateMachine:BulkMonitor-executionStatemachine"}
                 },
 				{
                   "Effect": "Allow",
@@ -132,27 +252,17 @@
                   "Resource": [
 					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/*"},
 					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspacebundle/*"},
-					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspace/*"}					
-				  ]
-					
-                },
-				{
-                  "Effect": "Allow",
-                  "Action": [
-                    "logs:CreateLogGroup",
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ],
-                  "Resource": "*"
-                },
+					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspace/*"},
+					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspaceipgroup/*"}											
+				  ]					
+                },				
                 {
                   "Effect": "Allow",
                   "Action": [
                     "dynamodb:GetItem",
                     "dynamodb:CreateTable",
                     "dynamodb:DeleteItem",
-                    "dynamodb:DescribeTable",
-                    "dynamodb:ListTables",
+                    "dynamodb:DescribeTable",                    
                     "dynamodb:PutItem",
                     "dynamodb:Query",
                     "dynamodb:Scan",
@@ -165,19 +275,7 @@
                       "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BulkDynamoTablename}"
                     }
                   ]
-                },
-                {
-                  "Effect": "Allow",
-                  "Action": [
-                    "ses:ListVerifiedEmailAddresses",
-                    "ses:SendEmail",
-                    "ses:ListTemplates",
-                    "ses:VerifyEmailIdentity"
-                  ],
-                  "Resource": {
-                    "Fn::Sub": "*"
-                  }
-                },
+                },                
                 {
                   "Effect": "Allow",
                   "Action": [
@@ -200,7 +298,7 @@
 		"Parameters" : {
 			"BulkDynamoTablename":{"Ref":"BulkDynamoTablename"}
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-dynamo.json"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-dynamo.json"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -216,7 +314,7 @@
 			"LambdabulkdeployRoleArn":{ "Fn::GetAtt": ["LambdabulkdeployRole", "Arn"]},
 			"DynamoTablename" : {"Fn::GetAtt":["BulkDynamoDetailsTable","Outputs.BulkDynamoTablename"] }
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-lambdas.json"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-lambdas.json"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -230,7 +328,7 @@
 		"Parameters" : {
 			"lambdaInvokeRoleARN":{"Fn::GetAtt":["BulkLambdas","Outputs.lambdaInvokeRoleARN"]}
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-stepfunction.yml"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-stepfunction.yml"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -266,34 +364,81 @@
       "Properties": {
         "Owner": "MP Team",
         "SupportDescription": "Support Description",
-        "Description": "This is the bulk deploy product",
+        "Description": "This is the bulk deploy workspace product",
         "Distributor": "AWS MP Team",
         "SupportEmail": "awsmp@example.com",
         "AcceptLanguage": "en",
         "SupportUrl": "https://support.com",
-        "Name": "Bulk Deploy Product",
+        "Name": "Bulk Deploy Workspace Product",
         "ProvisioningArtifactParameters": [
           {
-            "Description": "Bulk Deployment S3 PA. For testin, uses the same params as the workspace template.",
+            "Description": "Bulk Deployment test product. Use this product to test the provisioning process. This uses the same params as the workspace template.",
             "Info": {
               "LoadTemplateFromURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulk-s3-demo.json"
+                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulk-cf-testprod.json"
               }
             },
-            "Name": "S3 Bucket"
+            "Name": "Test Product"
           },{
-            "Description": "Bulk Deployment Workspace PA",
+            "Description": "Workspace template for bulk deploy",
             "Info": {
               "LoadTemplateFromURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/sc_workspace.json"
+                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/workspaces/sc-workspaces-ra.json"
               }
             },
-            "Name": "Workspace"
+            "Name": "Bulk Deploy Workspace"
           }
         ]
       }
     },
     
+	
+	"ProdAssociateKickoffBulkDeploy": {
+      "Type": "AWS::ServiceCatalog::PortfolioProductAssociation",
+      "DependsOn": [
+        "SCBulkPortfolio",
+        "KickoffBulkDeploy"
+      ],
+      "Properties": {
+        "AcceptLanguage": "en",
+        "PortfolioId": {
+          "Ref": "SCBulkPortfolio"
+        },
+        "ProductId": {
+          "Ref": "KickoffBulkDeploy"
+        }
+      }
+    },
+	
+	 "KickoffBulkDeploy": {
+      "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+      "DependsOn": [
+        "BulkMonitorStepFunction"
+      ],
+      "Properties": {
+        "Owner": "MP Team",
+        "SupportDescription": "Support Description",
+        "Description": "Start or continue a bulk deployment",
+        "Distributor": "AWS MP Team",
+        "SupportEmail": "awsmp@example.com",
+        "AcceptLanguage": "en",
+        "SupportUrl": "https://support.com",
+        "Name": "Start Bulk Deploy Workspace",
+        "ProvisioningArtifactParameters": [
+          {
+            "Description": "start or continue a bulk deployment",
+            "Info": {
+              "LoadTemplateFromURL": {
+                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/sc-start-bulk.json"
+              }
+            },
+            "Name": "v1.0"
+          }
+        ]
+      }
+    },
+	
+	
     "DeployProvisionIDssm": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
@@ -312,7 +457,6 @@
         "Value": {"Ref":"BulkDeployProduct"}
       }
     }
-
   },
   "Outputs": {
 	

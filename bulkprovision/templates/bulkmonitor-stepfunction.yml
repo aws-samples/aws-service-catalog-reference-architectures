@@ -40,7 +40,7 @@ Resources:
               "Type": "Wait",
               "SecondsPath": "$.waitseconds",
               "Next": "Monitor Cycle"
-            },
+            },            
            "Monitor Continue": {
              "Type": "Choice",
              "OutputPath": "$[0]",

@@ -1,0 +1,97 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Service Catalog bulk add csv",
+  "Parameters": {
+    "S3CSVkey": {
+      "Default": "",
+      "Description": "What is the CSV file Key",
+      "Type": "String"
+    },
+    "S3CSVbucket": {
+      "Default": "",
+      "Description": "Which bucket is your CSV file in",
+      "Type": "String"
+    },
+	"UploadCSV": {
+      "Default": "True",
+      "Description": "If True, will upload the csv to dynamo.  Set this to false to run the monitor process without adding additional entries from CSV",
+      "Type": "String",
+	  "AllowedValues": ["True","False"]
+    },
+    "BatchId": {
+      "Default": "",
+      "Description": "What is a batch description",
+      "Type": "String"
+    },
+	"ProductParameters": {
+      "Default": "DirectoryId,UserName,BundleId,KMSKey",
+      "Description": "List of parameter inputs for the product.  this must match exactly with the product template and the csv file headers",
+      "Type": "String"
+    },
+	"WaitSeconds":{
+		"Type":"Number",
+		"Description":"Time in seconds to wait between cycles.  Set this high for long running tasks like workspaces and lower for faster resources like S3.",
+		"Default":300,
+		"MinValue":10		
+	},
+	"ReportEmail": {
+      "Description": "Which emails should get Reports",
+      "Type": "String"
+    }
+	
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [        
+        {
+          "Label": {
+            "default": "CSV File"
+          },
+          "Parameters": [
+            "S3CSVbucket",
+            "S3CSVkey",
+			"UploadCSV"
+          ]
+        },{
+          "Label": {
+            "default": "Product Information"
+          },
+          "Parameters": [
+			"ProductParameters",
+			"BatchId"
+          ]
+        }
+      ]      	
+    }
+  },
+  "Resources": {
+    "CSVadd": {
+      "Type": "Custom::CSVadd",
+      "Properties": {
+        "ServiceToken": {"Fn::Sub":"arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-START"},
+		"doupload":{"Ref":"UploadCSV"},
+		"waitseconds":{"Ref":"WaitSeconds"},
+		"BatchId":{"Ref":"BatchId"},
+    	"csvbucket":{ "Ref": "S3CSVbucket"},
+		"csvkey":{ "Ref": "S3CSVkey" },
+		"scparams":{"Ref": "ProductParameters"},						
+		"tags":[ {"Key":"Bulk_Batch","Value": {"Ref":"BatchId"} }],
+		"ReportEmail":{ "Ref": "ReportEmail"}
+      }
+    }
+  },
+  "Outputs": {
+    "BatchIdOutput": {
+      "Description": "BatchId",
+      "Value": {
+        "Ref": "BatchId"
+      }
+    },
+    "S3CSVkey": {
+      "Description": "S3CSVkey",
+      "Value": {
+        "Ref": "S3CSVkey"
+      }
+    }
+  }
+}

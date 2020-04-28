@@ -8,7 +8,7 @@
 	}
   },
   "Resources": {
-    "DynamodbWPbulkdeployDetails2": {
+    "DynamodbWPbulkdeployDetails": {
       "Type": "AWS::DynamoDB::Table",
       "Properties": {
         "AttributeDefinitions": [

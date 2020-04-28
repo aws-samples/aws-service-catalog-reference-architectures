@@ -3,14 +3,23 @@
 lambda: .clean
 	mkdir -p build/
 	mkdir -p lambda/
+	cp -r common build
+	cp lambda_startSF.py build
+	cd build; zip -9qr ../start_stepf_lambda.zip *	
+	
+	rm -rf build/lambda_startSF.py
 	cp -r bulkexecute build
 	cp -r bulkmonitor build
-	cp -r common build
-	cp lambda_function.py build
-	cd build; zip -9qr ../bulkexecute_lambda.zip *
-	cd build; zip -9qr ../bulkmonitor_lambda.zip *
+	cp lambda_function.py build	
+	cd build; zip -9qr ../bulkexecute_lambda.zip *	
+	cd build; zip -9qr ../bulkmonitor_lambda.zip *		
+		
+	zip -9 bulkreport_lambda.zip ./lambda_email.py
+	
 	mv bulkexecute_lambda.zip lambda/
 	mv bulkmonitor_lambda.zip lambda/
+	mv bulkreport_lambda.zip lambda/
+	mv start_stepf_lambda.zip lambda/
 
 .clean:
 	find . -name "*.pyc" -exec rm -f {} \;

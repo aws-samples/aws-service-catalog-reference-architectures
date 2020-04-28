@@ -1,5 +1,5 @@
 {
-  "Description": "placeholder sample template to deploy a workspace from SC.  this will simply show the inputs in the outputs and provision an S3 bucket",
+  "Description": "Testing template to confirm bulk provisioning process.  Use this to confirm your CSV file and lambda parameters match with Service Catalog. This will simply wait 10 seconds then show the inputs in the outputs",
   "Parameters": { 
     "DirectoryId": {
       "Description": "DirectoryId ",

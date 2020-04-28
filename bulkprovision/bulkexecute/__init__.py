@@ -16,11 +16,14 @@ class SC_Provision(aws_clients):
         # get the csv file
         csv_bucket = self.get_config_value("csvbucket")
         csv_key = self.get_config_value("csvkey")        
-        input_dict = self.s3_get_csvasdict(csv_bucket, csv_key)       
+        BatchId = self.get_config_value("BatchId")
+        input_dict = self.s3_get_csvasdict(csv_bucket, csv_key)    
         
         # build the dynamo object
         arr = [ ]
         for item in input_dict:
+            if BatchId is not None:
+                item["BatchId"] = BatchId
             obj={
                 "guidkey": str(uuid.uuid4()),
                 "status": "NEW" ,                
