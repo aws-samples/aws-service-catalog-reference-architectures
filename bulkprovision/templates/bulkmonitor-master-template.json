@@ -298,7 +298,7 @@
 		"Parameters" : {
 			"BulkDynamoTablename":{"Ref":"BulkDynamoTablename"}
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-dynamo.json"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/bulkmonitor-dynamo.json"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -314,7 +314,7 @@
 			"LambdabulkdeployRoleArn":{ "Fn::GetAtt": ["LambdabulkdeployRole", "Arn"]},
 			"DynamoTablename" : {"Fn::GetAtt":["BulkDynamoDetailsTable","Outputs.BulkDynamoTablename"] }
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-lambdas.json"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/bulkmonitor-lambdas.json"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -328,7 +328,7 @@
 		"Parameters" : {
 			"lambdaInvokeRoleARN":{"Fn::GetAtt":["BulkLambdas","Outputs.lambdaInvokeRoleARN"]}
 		},
-		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulkmonitor-stepfunction.yml"},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/bulkmonitor-stepfunction.yml"},
 		"TimeoutInMinutes" : 5
 	  }
 	},
@@ -375,7 +375,7 @@
             "Description": "Bulk Deployment test product. Use this product to test the provisioning process. This uses the same params as the workspace template.",
             "Info": {
               "LoadTemplateFromURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/bulk-cf-testprod.json"
+                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/bulk-cf-testprod.json"
               }
             },
             "Name": "Test Product"
@@ -429,7 +429,7 @@
             "Description": "start or continue a bulk deployment",
             "Info": {
               "LoadTemplateFromURL": {
-                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/templates/sc-start-bulk.json"
+                "Fn::Sub": "https://s3.amazonaws.com/${SourceBucket}/bulkprovision/sc-start-bulk.json"
               }
             },
             "Name": "v1.0"
