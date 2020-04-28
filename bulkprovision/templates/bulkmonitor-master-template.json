@@ -1,0 +1,343 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Service Catalog Bulk Deploy Master template (fdp-1qj64b35n)",
+  "Parameters": {        
+	"LambdaZipsBucket": {
+		"Type": "String",
+		"Description":"The bucket name containing Service Catalog templates"
+	},
+	"BulkDynamoTablename": {
+		"Type": "String",
+		"Default":"sc-bulkdeploy-details"
+	}
+  },
+  "Resources": {
+    "SCBulkPortfolio": {
+      "Type": "AWS::ServiceCatalog::Portfolio",
+      "Properties": {
+        "ProviderName": "AWS MP",
+        "Description": "AWS MP Sample bulk Portfolio",
+        "DisplayName": "SC Bulk deployment Portfolio",
+        "AcceptLanguage": "en"
+      }
+    },
+  
+    "LambdabulkdeployRole": {
+      "Type": "AWS::IAM::Role",      
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/AWSOrganizationsReadOnlyAccess",
+          "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess",		  
+		  "arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess"	
+        ],
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "zipbucket_mgt",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": {
+                "Action": [
+                  "s3:PutObject",
+                  "s3:DeleteObject",
+                  "s3:Get*",
+                  "s3:List*"
+                ],
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}/*"
+                  },
+                  {
+                    "Fn::Sub": "arn:aws:s3:::${LambdaZipsBucket}"
+                  }
+                ],
+                "Effect": "Allow"
+              }
+            }
+          },
+          
+          {
+            "PolicyName": "dynamosessc_mgt",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "iam:ListRoles"
+                  ],
+                  "Resource": "arn:aws:iam::*:*",
+                  "Effect": "Allow"
+                },              
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "organizations:List*",
+                    "organizations:Describe*"
+                  ],
+                  "Resource": "*"
+                },                              
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "servicecatalog:AcceptPortfolioShare",
+                    "servicecatalog:AssociatePrincipalWithPortfolio",
+                    "servicecatalog:AssociateProductWithPortfolio",
+                    "servicecatalog:DescribePortfolio",
+                    "servicecatalog:DescribeProductView",
+                    "servicecatalog:DescribeProvisionedProduct",
+                    "servicecatalog:DescribeProvisionedProductPlan",
+                    "servicecatalog:DescribeProvisioningArtifact",
+                    "servicecatalog:DescribeProvisioningParameters",
+                    "servicecatalog:DescribeProduct",
+                    "servicecatalog:DescribeProductAsAdmin",
+                    "servicecatalog:DescribeProvisionedProduct",
+                    "servicecatalog:DescribeProvisioningArtifact",
+                    "servicecatalog:DisassociateProductFromPortfolio",
+                    "servicecatalog:SearchProducts",
+                    "servicecatalog:SearchProductsAsAdmin",
+                    "servicecatalog:SearchProvisionedProducts",
+                    "servicecatalog:TerminateProvisionedProduct"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "S3:*"                    
+                  ],
+                  "Resource": "*"
+                },
+				{
+                  "Effect": "Allow",
+                  "Action": [
+                    "workspaces:*"                    
+                  ],
+                  "Resource": [
+					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/*"},
+					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspacebundle/*"},
+					{"Fn::Sub":"arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:workspace/*"}					
+				  ]
+					
+                },
+				{
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:CreateTable",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:ListTables",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:UpdateTable",
+					"dynamodb:BatchWriteItem"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BulkDynamoTablename}"
+                    }
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:ListVerifiedEmailAddresses",
+                    "ses:SendEmail",
+                    "ses:ListTemplates",
+                    "ses:VerifyEmailIdentity"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "*"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ssm:GetParameter"
+                  ],
+                  "Resource": [{
+                    "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bulkdeploy/*"
+                  }]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    
+	"BulkDynamoDetailsTable": {
+	  "Type" : "AWS::CloudFormation::Stack",
+	  "Properties" : {		
+		"Parameters" : {
+			"BulkDynamoTablename":{"Ref":"BulkDynamoTablename"}
+		},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-dynamo.json"},
+		"TimeoutInMinutes" : 5
+	  }
+	},
+	"BulkLambdas": {
+	  "Type" : "AWS::CloudFormation::Stack",
+	  "DependsOn": [
+		"BulkDynamoDetailsTable",
+		"LambdabulkdeployRole"
+	  ],
+	  "Properties" : {
+		"Parameters" : {
+			"BucketName": {"Ref":"LambdaZipsBucket"},		
+			"LambdabulkdeployRoleArn":{ "Fn::GetAtt": ["LambdabulkdeployRole", "Arn"]},
+			"DynamoTablename" : {"Fn::GetAtt":["BulkDynamoDetailsTable","Outputs.BulkDynamoTablename"] }
+		},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-lambdas.json"},
+		"TimeoutInMinutes" : 5
+	  }
+	},
+	
+	"BulkMonitorStepFunction": {
+	  "Type" : "AWS::CloudFormation::Stack",
+	  "DependsOn": [
+		"BulkLambdas"
+	  ],
+	  "Properties" : {		
+		"Parameters" : {
+			"lambdaInvokeRoleARN":{"Fn::GetAtt":["BulkLambdas","Outputs.lambdaInvokeRoleARN"]}
+		},
+		"TemplateURL" : {"Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulkmonitor-stepfunction.yml"},
+		"TimeoutInMinutes" : 5
+	  }
+	},
+	
+	"AssocLambdaRole":{
+	  "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",	  
+	  "Properties" : {
+		"PrincipalARN" : { "Fn::GetAtt": ["LambdabulkdeployRole", "Arn"]},
+		"PortfolioId" : {"Ref":"SCBulkPortfolio"},
+		"PrincipalType" : "IAM"
+	  }
+    },
+	
+	"ProdAssociateBulkDeployProduct": {
+      "Type": "AWS::ServiceCatalog::PortfolioProductAssociation",
+      "DependsOn": [
+        "SCBulkPortfolio",
+        "BulkDeployProduct"
+      ],
+      "Properties": {
+        "AcceptLanguage": "en",
+        "PortfolioId": {
+          "Ref": "SCBulkPortfolio"
+        },
+        "ProductId": {
+          "Ref": "BulkDeployProduct"
+        }
+      }
+    },
+    
+    "BulkDeployProduct": {
+      "Type": "AWS::ServiceCatalog::CloudFormationProduct",      
+      "Properties": {
+        "Owner": "MP Team",
+        "SupportDescription": "Support Description",
+        "Description": "This is the bulk deploy product",
+        "Distributor": "AWS MP Team",
+        "SupportEmail": "awsmp@example.com",
+        "AcceptLanguage": "en",
+        "SupportUrl": "https://support.com",
+        "Name": "Bulk Deploy Product",
+        "ProvisioningArtifactParameters": [
+          {
+            "Description": "Bulk Deployment S3 PA. For testin, uses the same params as the workspace template.",
+            "Info": {
+              "LoadTemplateFromURL": {
+                "Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/bulk-s3-demo.json"
+              }
+            },
+            "Name": "S3 Bucket"
+          },{
+            "Description": "Bulk Deployment Workspace PA",
+            "Info": {
+              "LoadTemplateFromURL": {
+                "Fn::Sub": "https://s3.amazonaws.com/${LambdaZipsBucket}/templates/sc_workspace.json"
+              }
+            },
+            "Name": "Workspace"
+          }
+        ]
+      }
+    },
+    
+    "DeployProvisionIDssm": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Bulk deploy Provisioning artifact ID",
+        "Name": "/bulkdeploy/provisioningid",
+        "Type": "String",
+        "Value": {"Fn::GetAtt": ["BulkDeployProduct","ProvisioningArtifactIds" ] }
+      }
+    },
+	"DeployProductIDssm": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Description": "Bulk deploy ProductID",
+        "Name": "/bulkdeploy/productid",
+        "Type": "String",
+        "Value": {"Ref":"BulkDeployProduct"}
+      }
+    }
+
+  },
+  "Outputs": {
+	
+	"BulkDeployProductID": {
+      "Description": "Bulk Deploy ProductID",
+      "Value": {"Ref":"BulkDeployProduct"}
+    },
+	"BulkDeployProvisioningArtifactID": {
+      "Description": "Bulk Deploy ProductID",
+      "Value": {"Fn::GetAtt": ["BulkDeployProduct","ProvisioningArtifactIds" ] }
+    },
+    "LambdabulkdeployRole": {
+      "Description": "LambdabulkdeployRole",
+      "Value": {
+        "Fn::GetAtt": [
+          "LambdabulkdeployRole",
+          "Arn"
+        ]
+      }
+    },    
+    "ServiceCatalogPortfolio": {
+      "Description": "Service Catalog Console",
+      "Value": {
+        "Fn::Sub": "https://${AWS::Region}.console.aws.amazon.com/servicecatalog/home?region=${AWS::Region}#portfolios/${SCBulkPortfolio}"
+      }
+    }
+  }
+}

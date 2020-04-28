@@ -1,0 +1,228 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates the lambda functions and roles to monitor and execute SC bulk provisioning",
+  "Parameters": {
+	"BucketName": {
+		"Type": "String"            			
+	},
+	"LambdabulkdeployRoleArn": {
+		"Type": "String"            			
+	},
+	"DynamoTablename": {
+		"Type": "String"            			
+	},
+	"Memory": {
+		"Type":"Number",
+		"Default":512,
+		"MinValue":128,
+		"MaxValue":3008
+	},
+	"Timeout": {
+		"Type":"Number",
+		"Default":300,
+		"MinValue":3,
+		"MaxValue":900
+	}
+	
+  },
+  
+  "Resources": {
+
+	"LambdaUploadCSV": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key":   "lambda/bulkexecute_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-CSV-DYNAMO",
+        "Handler": "lambda_function.uploadcsv_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+
+	"LambdaProvision": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key": "lambda/bulkexecute_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-PROVISION",
+        "Handler": "lambda_function.provision_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+
+	"LambdaTerminate": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key": "lambda/bulkexecute_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-TERMINATE",
+        "Handler": "lambda_function.terminate_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+
+    "LambdaMonitor": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key":"lambda/bulkmonitor_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-MONITOR",
+        "Handler": "lambda_function.monitor_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+	
+	"LambdaHandleFailed": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key":"lambda/bulkmonitor_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-HANDLE-FAILED",
+        "Handler": "lambda_function.failure_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+	
+	"LambdaCleanup": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+		  "S3Bucket": {"Ref": "BucketName"},
+		  "S3Key":"lambda/bulkmonitor_lambda.zip"
+        },
+        "FunctionName": "SC-BULK-CLEANUP",
+        "Handler": "lambda_function.cleanup_handler",
+        "Role": { "Ref":"LambdabulkdeployRoleArn" },
+        "Runtime": "python3.8",
+		"Timeout":   {"Ref":"Timeout"},
+		"MemorySize":{"Ref":"Memory"},
+		"Environment":{ 
+		  "Variables" : {"DynamoTablename" : {"Ref":"DynamoTablename"} }
+		}
+      }
+    },
+	
+	"LambdaInvokeRole": {
+	  "Type": "AWS::IAM::Role",      
+      "Properties": {
+		"Path": "/",
+		"AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "states.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+			{
+				"PolicyName": "BulkLambdasInvoke",
+				"PolicyDocument": {
+				  "Version": "2012-10-17",
+				  "Statement": [
+					{
+						"Effect": "Allow",
+						"Action": [
+							"xray:PutTraceSegments",
+							"xray:PutTelemetryRecords",
+							"xray:GetSamplingRules",
+							"xray:GetSamplingTargets"
+						],
+						"Resource": [
+							"*"
+						]
+					},{
+						"Effect": "Allow",
+						"Action": [
+							"logs:CreateLogDelivery",
+							"logs:GetLogDelivery",
+							"logs:UpdateLogDelivery",
+							"logs:DeleteLogDelivery",
+							"logs:ListLogDeliveries",
+							"logs:PutResourcePolicy",
+							"logs:DescribeResourcePolicies",
+							"logs:DescribeLogGroups"
+						],
+						"Resource": "*"
+					},{
+						"Effect": "Allow",
+						"Action": [
+							"lambda:InvokeFunction"
+						],
+						"Resource": [
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaUploadCSV", "Arn"] } } ] },
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaProvision", "Arn"] } } ] },
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaTerminate", "Arn"] } } ] },
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaMonitor", "Arn"] } } ] },
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaHandleFailed", "Arn"] } } ] },
+							{ "Fn::Sub": [ "${func}:*", { "func": {"Fn::GetAtt": ["LambdaCleanup", "Arn"] } } ] },
+							{"Fn::GetAtt": ["LambdaUploadCSV", "Arn"] },
+							{"Fn::GetAtt": ["LambdaProvision", "Arn"] },
+							{"Fn::GetAtt": ["LambdaTerminate", "Arn"] },
+							{"Fn::GetAtt": ["LambdaMonitor", "Arn"] },
+							{"Fn::GetAtt": ["LambdaHandleFailed", "Arn"] },
+							{"Fn::GetAtt": ["LambdaCleanup", "Arn"] }
+						]
+					}
+				  ]
+				}
+			}]
+		}
+	}
+  },
+
+  "Outputs": {
+	"lambdaInvokeRoleARN": {
+      "Description": "Bulk Deploy ProductID",
+      "Value": {"Fn::GetAtt": ["LambdaInvokeRole","Arn" ] }
+    }
+  }
+}

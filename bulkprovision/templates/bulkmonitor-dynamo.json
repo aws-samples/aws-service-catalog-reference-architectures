@@ -1,0 +1,49 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "DynamoDB",
+  "Parameters": {
+	"BulkDynamoTablename": {
+		"Type": "String",
+		"Default":"sc-bulkdeploy-details"
+	}
+  },
+  "Resources": {
+    "DynamodbWPbulkdeployDetails2": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "guidkey",
+            "AttributeType": "S"
+          },
+		  {
+            "AttributeName": "status",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "status",
+            "KeyType": "HASH"
+          },
+		  {
+            "AttributeName": "guidkey",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "25"
+        },
+        "TableName": {"Ref":"BulkDynamoTablename"}        
+      }
+    }
+  },
+  "Outputs": {
+	"BulkDynamoTablename": {
+      "Description": "Bulk Dynamo Tablename",
+      "Value": {"Ref": "BulkDynamoTablename"}
+    }
+  }
+
+}

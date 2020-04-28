@@ -1,0 +1,55 @@
+{
+  "Description": "placeholder sample template to deploy a workspace from SC.  this will simply show the inputs in the outputs and provision an S3 bucket",
+  "Parameters": { 
+    "DirectoryId": {
+      "Description": "DirectoryId ",
+      "Type": "String" 
+    },
+    "UserName": {
+      "Description": "Workspaces AD user",
+      "Type": "String" 
+    },
+    "BundleId": {
+      "Description": "BundleId  ",
+      "Type": "String"        
+    },
+    "KMSKey":{
+      "Description": "KMS Key  ",
+      "Type": "String"  
+    }
+  },
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private"
+      }
+    }
+  },
+  "Outputs": {
+    "DirectoryId": {
+      "Description": "The DirectoryId input",
+      "Value": {
+        "Ref": "DirectoryId"
+      }
+    },
+	"UserName": {
+      "Description": "The username input",
+      "Value": {
+        "Ref": "UserName"
+      }
+    },
+	"BundleId": {
+      "Description": "The BundleId input",
+      "Value": {
+        "Ref": "BundleId"
+      }
+    },
+	"KMSKey": {
+      "Description": "The KMSKey input",
+      "Value": {
+        "Ref": "KMSKey"
+      }
+    }	
+  }
+}

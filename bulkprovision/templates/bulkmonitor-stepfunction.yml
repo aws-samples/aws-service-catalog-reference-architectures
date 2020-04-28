@@ -1,0 +1,177 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Bulk monitor Step Functions state machine.
+Parameters:
+    lambdaInvokeRoleARN:
+        Type: String
+        Default: arn:aws:iam::067155963943:role/service-role/StepFunctions-BulkWorkflow-role-0871f73b
+Resources:
+  MyStateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: BulkMonitor-executionStatemachine
+      DefinitionString: !Sub |        
+        {
+         "Comment": "State Machine for running the bulk provisioning process",
+         "StartAt": "Check Upload",
+         "States": {
+           "Check Upload": {
+             "Type": "Choice",
+             "Choices": [
+               {
+                 "Variable": "$.doupload",
+                 "BooleanEquals": true,
+                 "Next": "upload CSV"
+               },
+               {
+                 "Variable": "$.doupload",
+                 "BooleanEquals": false,
+                 "Next": "Monitor Cycle"
+               }
+             ]
+           },
+           "upload CSV": {
+             "Type": "Task",
+             "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-CSV-DYNAMO",
+             "InputPath": "$.csv",
+             "ResultPath": "$.csv",
+             "Next": "Monitor Cycle"
+           },
+           "wait timer": {
+              "Type": "Wait",
+              "SecondsPath": "$.waitseconds",
+              "Next": "Monitor Cycle"
+            },
+           "Monitor Continue": {
+             "Type": "Choice",
+             "OutputPath": "$[0]",
+             "Choices": [
+               {
+                 "Or": [
+                   {
+                     "Variable": "$[0].provision.statusCount",
+                     "NumericGreaterThan": 0
+                   },
+                   {
+                     "Variable": "$[1]",
+                     "NumericGreaterThan": 0
+                   },
+                   {
+                     "Variable": "$[2]",
+                     "NumericGreaterThan": 0
+                   }
+                 ],
+                 "Next": "wait timer"
+               }
+             ],
+             "Default": "Final"
+           },
+           "Monitor Cycle": {
+             "Type": "Parallel",
+             "Branches": [
+               {
+                 "StartAt": "Provision Handler",
+                 "States": {
+                   "Provision Handler": {
+                     "Type": "Task",
+                     "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-PROVISION",
+                     "InputPath": "$.provision",
+                     "ResultPath": "$.provision",
+                     "End": true
+                   }
+                 }
+               },
+               {
+                 "StartAt": "Monitor Hanlder",
+                 "States": {
+                   "Monitor Hanlder": {
+                     "Type": "Task",
+                     "Resource": "arn:aws:states:::lambda:invoke",
+                     "Parameters": {
+                       "FunctionName": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-MONITOR",
+                       "Payload": {
+                         "status": [
+                           "PROVISIONING",
+                           "TERMINATING"
+                         ]
+                       }
+                     },
+                     "OutputPath": "$.Payload.statusCount",
+                     "End": true
+                   }
+                 }
+               },
+               {
+                 "StartAt": "Failure Handler",
+                 "States": {
+                   "Failure Handler": {
+                     "Type": "Task",
+                     "Resource": "arn:aws:states:::lambda:invoke",
+                     "Parameters": {
+                       "FunctionName": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-HANDLE-FAILED",
+                       "Payload": {
+                         "status": [
+                           "TERMINATING-FAILURE",
+                           "STATUS-ERROR",
+                           "PRODUCT-ERROR",
+                           "PROVISION-ERROR"
+                         ],
+                         "retrythreshold": 5
+                       }
+                     },
+                     "ResultPath": "$.provision.failhandle",
+                     "Next": "Check Failure"
+                   },
+                   "Check Failure": {
+                     "Type": "Choice",
+                     "Choices": [
+                       {
+                         "Variable": "$.provision.failhandle.Payload.statusCount",
+                         "NumericGreaterThan": 0,
+                         "Next": "Retry Handler"
+                       }
+                     ],
+                     "Default": "no fail"
+                   },
+                   "Retry Handler": {
+                     "Type": "Task",
+                     "Resource": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-PROVISION",
+                     "InputPath": "$.provision",              
+                     "OutputPath": "$.failhandle.Payload.statusCount",
+                     "End": true
+                   },
+                   "no fail": {
+                     "Type": "Pass",
+                     "InputPath": "$.provision",
+                     "OutputPath": "$.failhandle.Payload.statusCount",
+                     "End": true
+                   }
+                 }
+               },
+               {
+                 "StartAt": "Cleanup Handler",
+                 "States": {
+                   "Cleanup Handler": {
+                     "Type": "Task",
+                     "Resource": "arn:aws:states:::lambda:invoke",
+                     "Parameters": {
+                       "FunctionName": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:SC-BULK-CLEANUP",
+                       "Payload": {
+                         "status": [
+                           "TERMINATED"
+                         ]
+                       }
+                     },
+                     "OutputPath": "$.Payload.statusCount",
+                     "End": true
+                   }
+                 }
+               }
+             ],
+             "Next": "Monitor Continue"
+           },
+           "Final": {
+             "Type": "Succeed"
+           }
+         }
+        }
+      RoleArn: !Ref lambdaInvokeRoleARN
