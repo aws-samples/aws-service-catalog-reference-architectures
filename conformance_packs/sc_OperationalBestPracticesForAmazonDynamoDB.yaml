@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Best practice for Amaon DynamoDB (FTP-CCP-0002)
+Outputs:
+  ConformancePackDeployed:
+    Description: Conformance Pack
+    Value: !Ref SCConformancePackDynamo
+  ConformancePackConsole:
+    Description: Link to conformance pack console
+    Value: !Sub >-
+      https://${AWS::Region}.console.aws.amazon.com/config/home?region=${AWS::Region}&v2=true#/conformance-packs
+Resources:
+  SCConformancePackDynamo:
+    Type: 'AWS::Config::ConformancePack'
+    Properties:
+      ConformancePackName: !Join 
+        - ''
+        - - DynamoDbBestPractice
+          - !Select 
+            - 1
+            - !Split 
+              - '-'
+              - !Select 
+                - 2
+                - !Split 
+                  - /
+                  - !Ref 'AWS::StackId'
+      DeliveryS3Bucket: '{{resolve:ssm:/conformancepack/deliverybucket:1}}'
+      TemplateBody: |-
+        AWSTemplateFormatVersion: 2010-09-09
+        Resources:
+          DynamoDbAutoscalingEnabled:
+            Properties:
+              ConfigRuleName: DynamoDbAutoscalingEnabled
+              Description: >-
+                This rule checks whether Auto Scaling is enabled on your DynamoDB
+                tables. Optionally you can set the read and write capacity units for the
+                table.
+              MaximumExecutionFrequency: Six_Hours
+              Scope:
+                ComplianceResourceTypes:
+                  - 'AWS::DynamoDB::Table'
+              Source:
+                Owner: AWS
+                SourceIdentifier: DYNAMODB_AUTOSCALING_ENABLED
+            Type: 'AWS::Config::ConfigRule'
+          DynamoDbTableEncryptionEnabled:
+            Properties:
+              ConfigRuleName: DynamoDbTableEncryptionEnabled
+              Description: >-
+                Checks whether the Amazon DynamoDB tables are encrypted and checks their
+                status. The rule is compliant if the status is enabled or enabling.
+              Scope:
+                ComplianceResourceTypes:
+                  - 'AWS::DynamoDB::Table'
+              Source:
+                Owner: AWS
+                SourceIdentifier: DYNAMODB_TABLE_ENCRYPTION_ENABLED
+            Type: 'AWS::Config::ConfigRule'
+          DynamoDbThroughputLimitCheck:
+            Properties:
+              ConfigRuleName: DynamoDbThroughputLimitCheck
+              Description: >-
+                Checks whether provisioned DynamoDB throughput is approaching the
+                maximum limit for your account.
+              MaximumExecutionFrequency: Six_Hours
+              Source:
+                Owner: AWS
+                SourceIdentifier: DYNAMODB_THROUGHPUT_LIMIT_CHECK
+            Type: 'AWS::Config::ConfigRule'
