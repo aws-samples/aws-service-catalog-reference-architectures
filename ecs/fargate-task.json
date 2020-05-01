@@ -40,8 +40,7 @@
     },
     "Resources": {
         "TaskLogGroup": {
-          "Type" : "AWS::Logs::LogGroup",
-          "Condition":"ConCreateLogGroup",
+          "Type" : "AWS::Logs::LogGroup",          
           "Properties" : {
               "LogGroupName" : {"Fn::Sub":"/ecs/${ContainerDefinitionName}"},
               "RetentionInDays" : 30
