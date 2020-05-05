@@ -2,6 +2,8 @@
 
 This reference architecture creates a framework of lambdas, Step functions, and Service Catalog products which demonstrate how to provision and track many Service Catalog Products.
 
+## Bulk Deployment for Amazon Workspaces
+
 
 ### Install  
 Launch the stack:  
