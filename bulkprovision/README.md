@@ -22,6 +22,12 @@ The values contains:
 - The Amazon WorkSpaces Bundlel id to use
 - An Amazon KMS key for encryption
 
+The WorkSpace information is located in the Amazon WorkSpaces console
+<img src=images/workspacescreen.png>
+
+The KMS information is located in the Amazon KMS console
+<img src=images/kms.png>
+
 
 
 
