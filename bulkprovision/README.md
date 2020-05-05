@@ -5,6 +5,7 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 ## Bulk Deployment for Amazon Workspaces
 
 <img src=images/wait.jpeg width=90>
+
 ### Prerequisites
 
 There are several prerequisites you will need to deploy Amazon Workspaces in bulk.
