@@ -10,7 +10,12 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 There are several prerequisites you will need to deploy Amazon Workspaces in bulk.
 
-You have to create a comma seprated value file (CSV) that contains:
+You have to create a comma seprated value file (CSV) with this format:
+
+```
+DirectoryId,UserName,BundleId,KMSKey
+```
+The values contains:
 
 - An Amazon KMS key for encryption
 - A set of Amazon Workspaces Directory users
