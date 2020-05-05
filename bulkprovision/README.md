@@ -2,13 +2,13 @@
 
 This reference architecture creates a framework of lambdas, Step functions, and Service Catalog products which demonstrate how to provision and track many Service Catalog Products.
 
-## Bulk Deployment for Amazon Workspaces
+## Bulk Deployment for Amazon WorkSpaces
 
 <img src=images/wait.jpeg width=90>
 
 ### Prerequisites
 
-There are several prerequisites you will need to deploy Amazon Workspaces in bulk.
+There are several prerequisites you will need to deploy Amazon WorkSpaces in bulk.
 
 You have to create a comma seprated value file (CSV) with this format:
 
@@ -17,10 +17,11 @@ DirectoryId,UserName,BundleId,KMSKey
 ```
 The values contains:
 
+- The Amazon WorkSpaces Drirectory to use
+- A set of Amazon WorkSpaces Directory users
+- The Amazon WorkSpaces Bundlel id to use
 - An Amazon KMS key for encryption
-- A set of Amazon Workspaces Directory users
-- The Amazon Worksspaces Bundlel id to use
-- The Amazon Sorkpaces Drirectory to use
+
 
 
 
