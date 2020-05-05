@@ -4,6 +4,9 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ## Bulk Deployment for Amazon Workspaces
 
+### Preq
+
+![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)
 
 ### Install  
 Launch the stack:  
