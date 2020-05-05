@@ -6,7 +6,10 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ### Preq
 
-![CreateStack](bulkprovision/images/wait.jpeg)
+![Wait](images/wait.jpeg)
+
+There are several prerequisites you will need to deploy Amazon Workspaces in bulk.
+
 
 ### Install  
 Launch the stack:  
