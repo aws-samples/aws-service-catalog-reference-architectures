@@ -4,13 +4,18 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ## Bulk Deployment for Amazon Workspaces
 
-### Preq
-
 <img src=images/wait.jpeg width=90>
-
-![Wait](images/wait.jpeg)
+### Prerequisites
 
 There are several prerequisites you will need to deploy Amazon Workspaces in bulk.
+
+You have to create a comma seprated value file (CSV) that contains:
+
+- An Amazon KMS key for encryption
+- A set of Amazon Workspaces Directory users
+- The Amazon Worksspaces Bundlel id to use
+- The Amazon Sorkpaces Drirectory to use
+
 
 
 ### Install  
