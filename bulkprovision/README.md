@@ -10,9 +10,9 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 There are several prerequisites you will need to deploy Amazon WorkSpaces in bulk.
 
-You have to create a comma seprated value file (CSV) with this format:
-
 ** Note ** You can get this information if you use the Amazon WorkSpace Console to create 1 test WorkSpace instance.
+
+You have to create a comma seprated value file (CSV) with this format:
 
 ```
 DirectoryId,UserName,BundleId,KMSKey
@@ -30,12 +30,12 @@ The values contains:
   The KMS information is located in the Amazon KMS console (copy the ARN)
   <img src=images/kms.png>
 
-Once you have the information needed you CSV should look like this.
+Once you have the information needed your CSV file should look like this.
 
 ```
 DirectoryId,UserName,BundleId,KMSKey
-d-906772680b,scwpuser001,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
-d-906772680b,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
+d-YourDirectoryId,scwpuser001,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
+d-YourDirectoryId,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
 ```
 
 - Upload the file to an Amazon S3 bucket in your account
