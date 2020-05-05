@@ -6,7 +6,7 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ### Preq
 
-![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)
+![CreateStack](bulkprovision/images/wait.jpeg)
 
 ### Install  
 Launch the stack:  
