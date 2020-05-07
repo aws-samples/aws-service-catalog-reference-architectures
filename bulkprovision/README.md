@@ -39,7 +39,9 @@ d-YourDirectoryId,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:k
 ```
 
 - Upload the file to an Amazon S3 bucket in your account
-- Make note of the bucket name and the key of your file
+- Make note of:
+  - The **bucket name** e.g. mybucket123
+  - The **key of your file** e.g content/keyfile.csv
 
 
 
