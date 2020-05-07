@@ -45,6 +45,17 @@ d-YourDirectoryId,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:k
 
 
 
-### Install  
+### Install  and Configuration
+
+#### Base Components
+
+This CloudFormation stack will install the base component needed. It will create conponents like:
+
+- Roles for AWS Lambda and StepFunctions
+- AWS Lambda
+- AWS StepFunction
+- S3 Bucket
+- AWS 
+
 Launch the stack:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-BulkDeployer-Master&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/bulkprovision/bulkmonitor-master-template.json)
