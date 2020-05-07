@@ -36,8 +36,8 @@ aws cloudformation delete-stack-set --stack-set-name SC-IAC-automated-IAMroles
 
 echo "Clearing out the Automation pipeline S3 buckets"
 # edit your bucket names here
-# aws s3 rb s3://servicecatalog-pipelineartifacts-$ACC --force
-aws s3 rb s3://servicecatalog-deployedtemplates-$ACC --force
+aws s3 rb s3://sc-ra-iacpipeline-pipelineartifacts-????? --force
+aws s3 rb s3://sc-ra-iacpipeline-deployedtemplates-????? --force
 
 echo "Deleting the automated pipeline stack."
 aws cloudformation delete-stack --stack-name SC-RA-IACPipeline
