@@ -73,7 +73,10 @@ Launch the stack:
   - I acknowledge that AWS CloudFormation might create IAM resources with custom names.
   - I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND
 - Select **Create Stack**
+  <img src=images/scwp003.png width=400>
 - Wait untill the **Status** is **CREATE_COMPLETE**
+
+
 
 
   
