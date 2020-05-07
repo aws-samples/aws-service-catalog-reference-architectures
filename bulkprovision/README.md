@@ -57,5 +57,25 @@ This CloudFormation stack will install the base component needed. It will create
 - S3 Bucket
 - AWS 
 
+- Select the **LaunchStack** button
 Launch the stack:  
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=SC-RA-BulkDeployer-Master&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/bulkprovision/bulkmonitor-master-template.json)
+
+- On the **Create stack** page select **Next**
+- On the **Specify stack details** page inputs:
+  - **Stack name** use default
+  - **BulkDynamoTablename** use default
+  - **LinkedRole1** (Optional) The name of the Role who can **View** the AWS Service Catalog portfolio and launch the bulk provisioning process.
+  - **SourceBucket** use default (this is where the components live)
+- Select **Next**
+- On the **Configure stack options** page select **Next**
+- On the **Review** page select :
+  - I acknowledge that AWS CloudFormation might create IAM resources with custom names.
+  - I acknowledge that AWS CloudFormation might require the following capability: CAPABILITY_AUTO_EXPAND
+- Select **Create Stack**
+- Wait untill the **Status** is **CREATE_COMPLETE**
+
+
+  
+  
+
