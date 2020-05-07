@@ -98,7 +98,7 @@
           ]
         },
         "Timeout": 240,
-        "Runtime": "python3.7"
+        "Runtime": "python2.7"
       }
     },
     "CopyZipsRun": {
