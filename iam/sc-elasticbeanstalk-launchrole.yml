@@ -6,6 +6,12 @@ Resources:
       RoleName: ElasticBeanstalkLaunchRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
+        - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeCommitFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -33,6 +39,9 @@ Resources:
                   - "iam:GetRole"
                   - "iam:PassRole"
                   - "iam:ListRoles"
+                  - "iam:GetRolePolicy"
+                  - "iam:PutRolePolicy"
+                  - "iam:DeleteRolePolicy"
                   - "iam:CreateInstanceProfile"
                   - "iam:DeleteInstanceProfile"
                   - "iam:AddRoleToInstanceProfile"

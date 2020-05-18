@@ -169,6 +169,23 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-product-elasticbeanstalk.json"},
             "TimeoutInMinutes" : 5
           }
+        },        
+        "pipelineproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCElasticBeanstalkportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-product-beanstalk-pipeline.json"},
+            "TimeoutInMinutes" : 5
+          }
         }
 
     }  
