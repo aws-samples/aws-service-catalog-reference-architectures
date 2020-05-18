@@ -1,0 +1,375 @@
+{
+    "Description": "Elastic Beanstalk CI/CD Automation Pipeline (fdp-1qj64b335)",
+	"Metadata" : {
+	  "AdditionalInformation":"The CodePipeline defined here requires three buildspec files in a subfolder to be checked in with the code.  See the link below for examples.",
+	  "ExampleLink":"https://github.com/aws-samples/aws-service-catalog-reference-architectures/tree/master/elasticbeanstalk"
+	},
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "CodeCommitRepoName": {
+            "Type":"String",
+            "Description":"The project name, also the CodeCommit Repository name",
+            "Default":"ebapprepo"
+        }
+    },
+    "Resources": {
+        "PipelineArtifacts": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private"                
+            }
+        },
+        "EBCCRepo": {
+          "Type" : "AWS::CodeCommit::Repository",
+          "Properties" : {
+            "RepositoryDescription" : "Repository for Service Catalog Portfolios and products",
+            "RepositoryName" : {"Ref":"CodeCommitRepoName"},
+            "Triggers" : [ ]
+          }
+        },
+        "CodeBuildRole" :{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "Description":"CodePipelie role for building and deploying artifacts. This role will need expansive powers to test templates.",                
+                "AssumeRolePolicyDocument": {
+                    "Version":"2012-10-17",
+                    "Statement":{
+                        "Effect":"Allow",
+                        "Principal":{
+                            "Service":"codebuild.amazonaws.com"
+                        },
+                        "Action":"sts:AssumeRole"
+                    }
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
+                    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess",
+					"arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess"
+                ],
+                "Policies": [ { 
+                    "PolicyName":"CodeBuildManageS3Artifacts",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:CreateBucket",
+                                    "s3:DeleteBucket",
+                                    "s3:DeleteBucketPolicy",
+                                    "s3:GetBucketPolicy",
+                                    "s3:GetBucketPolicyStatus",
+                                    "s3:PutBucketPolicy",
+                                    "s3:GetBucketLocation",
+                                    "s3:DeleteObject",
+                                    "s3:GetObject",
+                                    "s3:PutObject",
+                                    "s3:ListBucket"
+                                ],
+                                "Resource": [
+                                    {"Fn::GetAtt":["PipelineArtifacts", "Arn"]},
+                                    {"Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["PipelineArtifacts", "Arn"]}}] }                                    
+                                ]
+                            },{
+                              "Effect": "Allow",
+                              "Action": [
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents",
+                                "logs:DescribeLogStreams"
+                                ],
+                                  "Resource": [
+                                    {"Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/codebuild/*"}                                    
+                                ]
+                            },{
+                              "Effect": "Allow",
+                              "Action": [
+                                "logs:CreateLogGroup"
+                                ],
+                                  "Resource": "*"
+                            }
+                        ]
+                    }
+                }
+                ]
+            }
+        },
+        "CodePipelineArtifactsRole":{
+            "Type":"AWS::IAM::Role",
+            "Properties":{
+                "Description":"CodePipelie role for moving objects through the build and deploy stages.",
+                "AssumeRolePolicyDocument": {
+                    "Version":"2012-10-17",
+                    "Statement":{
+                        "Effect":"Allow",
+                        "Principal":{
+                            "Service":"codepipeline.amazonaws.com"
+                        },
+                        "Action":"sts:AssumeRole"
+                    }
+                },
+                "Policies": [ { 
+                    "PolicyName":"CodePipelineManageS3Artifacts",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:GetObject",
+                                    "s3:GetObjectVersion",
+                                    "s3:GetBucketVersioning",
+                                    "s3:PutObject"
+                                ],
+                                "Resource": [
+                                    {"Fn::GetAtt":["PipelineArtifacts", "Arn"]},
+                                    {"Fn::Sub" : ["${bucketarn}/*", {"bucketarn": { "Fn::GetAtt": ["PipelineArtifacts", "Arn"]}}] }
+                                ]
+                            }
+                        ]
+                    }
+                    },{ 
+                    "PolicyName":"codepipeline-codecommit",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {"Effect": "Allow",
+								"Action": [
+									"codecommit:GetBranch",
+									"codecommit:GetCommit",
+									"codecommit:UploadArchive",
+									"codecommit:GetUploadArchiveStatus",
+									"codecommit:CancelUploadArchive"
+								],
+								"Resource": {"Fn::GetAtt": ["EBCCRepo","Arn"]}
+							},{
+							"Effect":"Allow",
+                              "Action":[
+                                "codebuild:StartBuild",
+                                "codebuild:StartBuild",
+                                "codebuild:StopBuild",
+                                "codebuild:BatchGetProjects",
+                                "codebuild:BatchGetBuilds",
+                                "codebuild:ListBuildsForProject"                                
+                              ],
+                              "Resource":[
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjBuildApplication"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjValidateApplication"}} ]},
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjDeployApplication"}} ]}
+                             ]                              
+                            },{
+                              "Effect":"Allow",
+                              "Action":[
+                                "codebuild:ListBuilds",
+                                "codebuild:ListProjects",
+                                "codebuild:ListCuratedEnvironmentImages",
+                                "codebuild:ListSourceCredentials"
+                              ],
+                              "Resource":"*"
+                            }
+                        ]
+                    }                    
+                  }
+                ]
+            }            
+        },        
+        "ProjDeployApplication" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "DeployToBeanstalk",
+              "Description": "Update the application in beanstalk.",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/standard:2.0",
+                "EnvironmentVariables":[
+                      {
+                        "Name": "AWS_DEFAULT_REGION",
+                        "Value": {"Fn::Sub":"${AWS::Region}" },
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "AWS_ACCOUNT_ID",
+                        "Value": {"Fn::Sub":"${AWS::AccountId}"},
+                        "Type": "PLAINTEXT"
+                      }
+                ],
+                "PrivilegedMode": true
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-deploy.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },
+        "ProjBuildApplication" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "Build",
+              "Description": "build the container",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/standard:2.0",
+                "EnvironmentVariables":[
+                      {
+                        "Name": "AWS_DEFAULT_REGION",
+                        "Value": {"Fn::Sub":"${AWS::Region}" },
+                        "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "AWS_ACCOUNT_ID",
+                        "Value": {"Fn::Sub":"${AWS::AccountId}"},
+                        "Type": "PLAINTEXT"
+                      }
+                ]
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-build.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },
+        "ProjValidateApplication" : {
+            "Type": "AWS::CodeBuild::Project",
+            "Properties": {
+              "Name": "Validate",
+              "Description": "run validations on the code",
+              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
+              "Artifacts": {
+                "Type": "CODEPIPELINE"
+              },
+              "Environment": {
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/python:3.6.5",
+                "EnvironmentVariables":[
+                    {
+                      "Name":  "PROJECTNAME",
+                      "Value": {"Ref":"CodeCommitRepoName"},
+                      "Type": "PLAINTEXT"
+                    },{
+                      "Name": "ARTIFACT_BUCKET",
+                      "Value": {"Ref":"PipelineArtifacts"},
+                      "Type": "PLAINTEXT"
+                    }
+                ]
+              },
+              "Source": {
+                "Type": "CODEPIPELINE",
+                "BuildSpec":"codepipeline/buildspec-validate.yml"
+              },
+              "TimeoutInMinutes": 10
+            }            
+        },      
+        "ProductPipeline" :{
+          "Type" : "AWS::CodePipeline::Pipeline",          
+          "Properties" : {
+            "ArtifactStore" :{
+                "Type": "S3",
+                "Location":{"Ref":"PipelineArtifacts"}
+            },
+            "Name" : "ElasticBeanstalk-ProductPipeline",
+            "RoleArn" : {"Fn::GetAtt":["CodePipelineArtifactsRole","Arn"]},
+            "Stages" : [ 
+                {
+                    "Name": "SourceStageCodeCommit",
+                    "Actions": [
+                        {                          
+                          "Name":"Source",
+                          "ActionTypeId": {
+                              "Category": "Source",
+                              "Owner": "AWS",
+                              "Version": "1",
+                              "Provider": "CodeCommit"
+                          },
+                          "Configuration": {
+                              "RepositoryName":{"Fn::GetAtt":["EBCCRepo","Name"]},
+                              "BranchName":"master"
+                          },
+                          "OutputArtifacts":[
+                              {
+                                "Name":"SourceArtifacts"
+                              }
+                          ]
+                        }
+                    ]
+                },{
+                    "Name": "BuildAndValidate",
+                    "Actions": [
+                        {
+                            "InputArtifacts": [
+                                { "Name": "SourceArtifacts" }
+                            ],
+                            "Name": "ApplicationBuild",
+                            "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Version": "1",
+                                "Provider": "CodeBuild"
+                            },
+                            "OutputArtifacts": [
+                                { "Name": "BuildArtifacts" }
+                            ],
+                            "Configuration": {
+                                "ProjectName":{"Ref":"ProjBuildApplication"}
+                            },
+                            "RunOrder": 1
+                        },{
+                            "InputArtifacts": [
+                                { "Name": "BuildArtifacts" }
+                            ],
+                            "Name": "CodeValidation",
+                            "ActionTypeId": {
+                                "Category": "Build",
+                                "Owner": "AWS",
+                                "Version": "1",
+                                "Provider": "CodeBuild"
+                            },
+                            "Configuration": {
+                                "ProjectName":{"Ref":"ProjValidateApplication"}
+                            },
+                            "RunOrder": 2
+                        }
+                     ]
+                },{
+                    "Name": "Deploy",
+                    "Actions": [{
+                      "InputArtifacts":[{"Name":"BuildArtifacts"}],
+                      "Name":"Update-Beanstalk",
+                      "ActionTypeId": {
+                          "Category": "Build",
+                          "Owner": "AWS",
+                          "Version": "1",
+                          "Provider": "CodeBuild"
+                      },
+                      "Configuration": {
+                          "ProjectName":{"Ref":"ProjDeployApplication"}
+                      },
+                      "OutputArtifacts":[
+                          {
+                            "Name":"DeployOutput"
+                          }
+                      ]
+                    }]
+                }
+            ]
+          }
+        }
+    },
+    "Outputs": {
+        "CloneUrlSsh": {
+          "Value": { "Fn::GetAtt": ["EBCCRepo","CloneUrlSsh"] },
+          "Description": "URL for ssh cloning the Product Repo"
+        }
+    }  
+}
