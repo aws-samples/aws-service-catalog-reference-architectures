@@ -10,7 +10,11 @@
             "Type":"String",
             "Description":"The project name, also the CodeCommit Repository name",
             "Default":"ebapprepo"
-        }
+        },
+		"ElasitcBeanstalkApplicationName":{
+		   "Type":"String",
+            "Description":"The Applicaiton Name from Elasitc Beanstalk."            
+        }		
     },
     "Resources": {
         "PipelineArtifacts": {
@@ -195,6 +199,15 @@
                         "Name": "AWS_ACCOUNT_ID",
                         "Value": {"Fn::Sub":"${AWS::AccountId}"},
                         "Type": "PLAINTEXT"
+                      },
+                      {
+                        "Name": "EB_APPLICATION_NAME",
+                        "Value": {"Ref":"ElasitcBeanstalkApplicationName"},
+                        "Type": "PLAINTEXT"
+                      },{
+                        "Name": "ARTIFACT_BUCKET",
+                        "Value": {"Ref":"PipelineArtifacts"},
+                        "Type": "PLAINTEXT"
                       }
                 ],
                 "PrivilegedMode": true
@@ -210,7 +223,7 @@
             "Type": "AWS::CodeBuild::Project",
             "Properties": {
               "Name": "Build",
-              "Description": "build the container",
+              "Description": "build the application",
               "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
               "Artifacts": {
                 "Type": "CODEPIPELINE"

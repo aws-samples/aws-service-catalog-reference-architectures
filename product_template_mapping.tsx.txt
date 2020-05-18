@@ -19,3 +19,5 @@ ecs/fargate-private-vpc.yaml	Amazon ECS Fargate Cluster	This product builds an E
 ecs/fargate-service.json	Amazon ECS Service	This product creates a publicly loadbalanced ECS Service for Fargate.
 ecs/container-codepipeline-ra.json	Container CI/CD Automation Pipeline	The product creates a CodePipeline for managing and deploying containers to ECR
 glue/sc-glue-ra.yaml	AWS Glue Crawler	This product creates a glue crawler
+elasticbeanstalk/sc-elasticbeanstalk-ra.json	AWS Elastic Beanstalk Application	This product creates an Elastic Beanstalk application.
+workspaces/sc-workspaces-ra.json	Amazon WorkSpaces	This product creates an Amazon Workspace desktop.

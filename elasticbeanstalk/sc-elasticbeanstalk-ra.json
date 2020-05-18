@@ -179,6 +179,7 @@
         "Description": "AWS ElasticBeanstalk Sample Environment",
         "VersionLabel": { "Ref": "sampleApplicationVersion" },
         "TemplateName":{ "Ref": "sampleConfigurationTemplate" },
+		"EnvironmentName":{"Fn::Sub":"EB-ENV-${ApplicationName}"},
 		"CNAMEPrefix":{ "Fn::If" : [
             "CondCNAMEPrefix",
             {"Ref" : "CNAMEPrefix"},
@@ -195,6 +196,12 @@
 	"ElasticBeanstalkURL" :{
 	  "Value": {"Fn::Sub": "http://${CNAMEPrefix}.${AWS::Region}.elasticbeanstalk.com" },
 	  "Condition":"CondCNAMEPrefix"
+	},
+	"ApplicationName":{
+	  "Value":{ "Ref": "sampleApplication" }
+	},
+	"EnvironmentName":{
+	  "Value": {"Fn::Sub":"EB-ENV-${sampleApplication}"}
 	}
   }
 }
