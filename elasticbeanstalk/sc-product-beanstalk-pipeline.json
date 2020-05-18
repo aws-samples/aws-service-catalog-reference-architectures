@@ -38,7 +38,7 @@
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/beanstalk-codepipeline-ra.json"}
                         },
-                        "Name": "v1.1"
+                        "Name": "v1.0"
                     }
                 ]
             }
