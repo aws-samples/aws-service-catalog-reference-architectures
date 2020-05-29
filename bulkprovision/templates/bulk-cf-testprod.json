@@ -1,0 +1,55 @@
+{
+  "Description": "Testing template to confirm bulk provisioning process.  Use this to confirm your CSV file and lambda parameters match with Service Catalog. This will simply wait 10 seconds then show the inputs in the outputs",
+  "Parameters": { 
+    "DirectoryId": {
+      "Description": "DirectoryId ",
+      "Type": "String" 
+    },
+    "UserName": {
+      "Description": "Workspaces AD user",
+      "Type": "String" 
+    },
+    "BundleId": {
+      "Description": "BundleId  ",
+      "Type": "String"        
+    },
+    "KMSKey":{
+      "Description": "KMS Key  ",
+      "Type": "String"  
+    }
+  },
+  "Resources": {
+    "S3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "AccessControl": "Private"
+      }
+    }
+  },
+  "Outputs": {
+    "DirectoryId": {
+      "Description": "The DirectoryId input",
+      "Value": {
+        "Ref": "DirectoryId"
+      }
+    },
+	"UserName": {
+      "Description": "The username input",
+      "Value": {
+        "Ref": "UserName"
+      }
+    },
+	"BundleId": {
+      "Description": "The BundleId input",
+      "Value": {
+        "Ref": "BundleId"
+      }
+    },
+	"KMSKey": {
+      "Description": "The KMSKey input",
+      "Value": {
+        "Ref": "KMSKey"
+      }
+    }	
+  }
+}
