@@ -56,8 +56,6 @@ Resources:
             Properties:
               ConfigRuleName: CheckForEc2VolumesInUs
               Description: Disallow EBS volumes that are unattached to an EC2 instance - Checks whether EBS volumes are attached to EC2 instances
-              InputParameters:
-                deleteOnTermination: None
               Source:
                 Owner: AWS
                 SourceIdentifier: EC2_VOLUME_INUSE_CHECK
