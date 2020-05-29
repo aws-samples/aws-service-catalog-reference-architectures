@@ -92,6 +92,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
   git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git
   git clone https://YOUR-USERNAME@YOUR-REPO-NAME
   cp -r aws-service-catalog-reference-architectures/* SCPortfoliosRepo/
+  rsync -av --exclude=.git aws-service-catalog-reference-architectures/ SCPortfoliosRepo/
   cd SCPortfoliosRepo
   ```
 

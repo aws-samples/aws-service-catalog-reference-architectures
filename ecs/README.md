@@ -15,6 +15,9 @@ The Portfolio provides 3 products which will create a full DevOps deployment pip
   This will create an ECS Service which is launched in the previously provisioned Fargate Cluster.  You may then view your new service using the ExternalUrl 
   output parameter from the ECS Cluster product.
 
+Be aware, running this service as demonstrated here is non-SSL http.  In production you must protect all web traffic with SSL.  
+The example templates here cannot create and manage SSL for you, so it must be done as an additional task in your account.
+
 For more example ECS tamplates and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
 
 ### Install from your own S3 bucket  

@@ -20,7 +20,16 @@
         "PipelineArtifacts": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
-                "AccessControl": "Private"                
+                "AccessControl": "Private",
+				"BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                }              
             }
         },
         "EBCCRepo": {
