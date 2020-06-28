@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates a Lambda function to delegate GuardDuty master account in an AWS Organization.  A custom resource is created to immediately invoke the lambda function upon successful deployment.
+
+Parameters:
+  OrganizationId:
+    Type: String
+    Description: >
+      The Amazon Organizations ID for the Control Tower.
+    MinLength: 12
+    MaxLength: 12
+    AllowedPattern: '^[o][\-][a-z0-9]{10}$'
+    ConstraintDescription: >
+      The Org Id must be a 12 character string starting with o- and followed by 10 lower case alphanumeric characters
+  GDDelegatedAdminAccountId:
+    Type: String
+    Description: >
+      The Amazon GuardDuty master account ID.
+    AllowedPattern: '^[0-9]{12}$'
+    ConstraintDescription: >
+      The Security Account ID must be a 12 character string.
+    MinLength: 12
+    MaxLength: 12
+  S3SourceBucket:
+    Type: String
+    Default: 'aws-service-catalog-reference-architectures'
+    Description: >
+      The S3 bucket that contains the lambda solution file
+  S3Key:
+    Type: String
+    Default: 'guardduty/function.zip'
+    Description: >
+      The S3 path to the lambda solution file
+  RoleToAssume:
+    Type: String
+    Default: 'AWSControlTowerExecution'
+    Description: >
+      What role should be assumed in child accounts to enable GuardDuty?  The default is AWSControlTowerExecution for a control tower environment.
+
+Resources:
+  EnableGDDelegatedAdminRole: 
+    Type: "AWS::IAM::Role"
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Principal: 
+              Service: 
+                - "lambda.amazonaws.com"
+            Action: 
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies: 
+      - PolicyName: EnableGDDelegatedAdminPolicy
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:CreateLogStream'
+              - 'logs:PutLogEvents'
+            Resource: 
+              -  !Sub 'arn:aws:logs:us-east-1:${AWS::AccountId}:log-group:/aws/lambda/*'
+          - Effect: Allow
+            Action:
+              - 'sts:AssumeRole'
+            Resource: !Sub 'arn:aws:iam::*:role/${RoleToAssume}'
+            Condition:
+              StringEquals:
+                "aws:PrincipalOrgId": !Ref OrganizationId
+          - Effect: Allow
+            Action:
+              - "organizations:RegisterDelegatedAdministrator"
+              - "organizations:DescribeOrganization"
+              - "organizations:ListDelegatedAdministrators"
+              - "organizations:ListAWSServiceAccessForOrganization"
+              - "cloudtrail:DescribeTrails"
+              - "guardduty:DisableOrganizationAdminAccount"
+              - "guardduty:EnableOrganizationAdminAccount"
+              - "guardduty:ListDetectors"
+              - "guardduty:CreatePublishingDestination"
+            Resource: '*'
+
+  EnableGDDelegatedAdminLambda: 
+    Type: "AWS::Lambda::Function"
+    Properties: 
+      Handler: "index.handler"
+      Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${EnableGDDelegatedAdminRole}"
+      Code: 
+        S3Bucket: !Ref S3SourceBucket
+        S3Key: !Ref S3Key
+      Runtime: "python3.8"
+      MemorySize: 128
+      Timeout: 600
+      Environment:
+        Variables:
+            role_to_assume: !Ref RoleToAssume
+            ct_root_account: !Sub ${AWS::AccountId}
+            gd_master_account: !Sub ${GDDelegatedAdminAccountId}
+    DependsOn: EnableGDDelegatedAdminRole
+
+  FirstRun:
+    Type: 'AWS::CloudFormation::CustomResource'
+    DependsOn: EnableGDDelegatedAdminLambda
+    Version: '1.0'
+    Properties:
+      ServiceToken: !GetAtt EnableGDDelegatedAdminLambda.Arn

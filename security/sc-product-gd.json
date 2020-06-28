@@ -1,0 +1,67 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "GuardDuty ServiceCatalog product.",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Owner and Distributor Name"
+        },
+        "LaunchConstraintARN": {
+            "Type":"String",
+            "Description":"ARN of the launch constraint role for GuardDuty products."
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The ServiceCatalog portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+    "Resources": {
+        "scgdproduct": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "Amazon GuardDuty",
+                "Description": "This product enabled GuardDuty Delegated Admin account and enable GuardDuty in all member account of the AWS Organization.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Security Team",
+                "SupportEmail": "security@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://security.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "baseline version",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}/guardduty/deploy_guardduty.yml"}
+                        },
+                        "Name": "v1.0"
+                    }
+                ]
+            }
+        },
+        "Associategd":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scgdproduct"}
+          }
+        },
+        "constraintec2linux":{
+          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
+          "DependsOn" : "Associategd",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"scgdproduct"},
+            "RoleArn" : {"Ref":"LaunchConstraintARN"},
+            "Description": {"Ref":"LaunchConstraintARN"}
+          }
+        }
+    },
+    "Outputs": {
+        "ProductId":{"Value": { "Ref":"scgdproduct" } }
+    }
+}    
