@@ -1,0 +1,157 @@
+{
+    "Description": "ServiceCatalog EC2 and VPC Launch Role. (fdp-1p5rtpgmo)",
+    "Parameters": {
+        "OrganizationID": {
+            "Type": "String",
+            "Description": "The Amazon Organizations ID for the Landing Zone.\n",
+            "MinLength": 12,
+            "MaxLength": 12,
+            "ConstraintDescription": "The Org Id must be a 12 character string starting with o- and followed by 10 lower case alphanumeric characters\n"
+        }
+    },
+    "Resources": {
+        "SCGDLaunchRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName": "SCGDLaunchRole",
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "servicecatalog.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "SCLaunchPolicy",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Sid": "SCLaunchPolicySID",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "servicecatalog:ListServiceActionsForProvisioningArtifact",
+                                        "servicecatalog:ExecuteprovisionedProductServiceAction",
+                                        "iam:AddRoleToInstanceProfile",
+                                        "iam:ListRolePolicies",
+                                        "iam:ListPolicies",
+                                        "iam:DeleteRole",
+                                        "iam:GetRole",
+                                        "iam:ListRoles",
+                                        "iam:CreateRole",
+                                        "iam:getRolePolicy",
+                                        "iam:PutRolePolicy",
+                                        "iam:DetachRolePolicy",
+                                        "iam:AttachRolePolicy",
+                                        "iam:DeleteRolePolicy",
+                                        "iam:UntagRole",
+                                        "iam:TagRole",
+                                        "iam:TagUser",
+                                        "iam:UntagUser",
+                                        "cloudformation:DescribeStackResource",
+                                        "cloudformation:DescribeStackResources",
+                                        "cloudformation:GetTemplate",
+                                        "cloudformation:List*",
+                                        "cloudformation:DescribeStackEvents",
+                                        "cloudformation:DescribeStacks",
+                                        "cloudformation:CreateStack",
+                                        "cloudformation:DeleteStack",
+                                        "cloudformation:DescribeStackEvents",
+                                        "cloudformation:DescribeStacks",
+                                        "cloudformation:GetTemplateSummary",
+                                        "cloudformation:SetStackPolicy",
+                                        "cloudformation:ValidateTemplate",
+                                        "cloudformation:UpdateStack",
+                                        "s3:GetObject",
+                                        "lambda:CreateFunction",
+                                        "lambda:DeleteFunction",
+                                        "lambda:GetFunctionConfiguration",
+                                        "lambda:InvokeFunction"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Sid": "PassRoleSID",
+                                    "Effect": "Allow",
+                                    "Action": "iam:PassRole",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/SC-*"
+                                        }
+                                    ]
+                                },                                
+                                {
+                                    "Sid": "GuardDutyPolicySID",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "organizations:RegisterDelegatedAdministrator",
+                                        "organizations:DescribeOrganization",
+                                        "organizations:ListDelegatedAdministrators",
+                                        "organizations:ListAWSServiceAccessForOrganization",
+                                        "cloudtrail:DescribeTrails",
+                                        "guardduty:DisableOrganizationAdminAccount",
+                                        "guardduty:EnableOrganizationAdminAccount",
+                                        "guardduty:ListDetectors",
+                                        "guardduty:CreatePublishingDestination"
+                                    ],
+                                    "Resource": "*"
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogGroup",
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "sts:AssumeRole"
+                                    ],
+                                    "Resource": "arn:aws:iam::*:role/AWSControlTowerExecution",
+                                    "Condition": {
+                                            "StringEquals": {
+                                                "aws:PrincipalOrgID": "${OrganizationID}"
+                                            }
+                                        }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "LaunchRoleArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "SCGDLaunchRole",
+                    "Arn"
+                ]
+            }
+        },
+        "LaunchRoleName": {
+            "Value": {
+                "Ref": "SCGDLaunchRole"
+            }
+        }
+    }
+}

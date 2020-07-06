@@ -1,0 +1,69 @@
+{
+  "Description": "ServiceCatalog End User policy and group (fdp-1p4dlgcp7)",
+  "Resources": {
+      "SCEnduserGroup": {
+          "Type": "AWS::IAM::Group",
+          "Properties": {
+              "GroupName": "ServiceCatalogEndusers",
+              "ManagedPolicyArns": [
+                  "arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess"
+              ],
+              "Path": "/"
+          }
+      },
+      "SCEnduserRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+              "RoleName": "ServiceCatalogEndusers",
+              "ManagedPolicyArns": [
+                  "arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess"
+              ],
+              "Path": "/",
+              "AssumeRolePolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Principal": {
+                              "AWS": {
+                                  "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:root"
+                              }
+                          },
+                          "Action": [
+                              "sts:AssumeRole"
+                          ]
+                      }
+                  ]
+              }
+          }
+      }
+  },
+  "Outputs": {
+      "EndUserGroupArn": {
+          "Value": {
+              "Fn::GetAtt": [
+                  "SCEnduserGroup",
+                  "Arn"
+              ]
+          }
+      },
+      "EndUserGroupName": {
+          "Value": {
+              "Ref": "SCEnduserGroup"
+          }
+      },
+      "EndUserRoleArn": {
+          "Value": {
+              "Fn::GetAtt": [
+                  "SCEnduserRole",
+                  "Arn"
+              ]
+          }
+      },
+      "EndUserRoleName": {
+          "Value": {
+              "Ref": "SCEnduserRole"
+          }
+      }
+  }
+}
