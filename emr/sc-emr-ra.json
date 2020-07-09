@@ -192,7 +192,7 @@
                         "Sid": "Enable IAM User Permissions",
                         "Effect": "Allow",
                         "Principal": {
-                            "AWS": { "Fn::Join" : ["" , ["arn:aws:iam::", {"Ref" : "AWS::AccountId"} ,":root" ]] }
+                            "AWS": {"Fn::Sub":"arn:aws:iam::${AWS::AccountId}:root"}
                         },
                         "Action": "kms:*",
                         "Resource": "*"

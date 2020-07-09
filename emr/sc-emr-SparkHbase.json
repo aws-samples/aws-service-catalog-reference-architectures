@@ -101,7 +101,7 @@
               "Sid": "Enable IAM User Permissions",
               "Effect": "Allow",
               "Principal": {
-                "AWS": { "Fn::Join" : ["" , ["arn:aws:iam::", {"Ref" : "AWS::AccountId"} ,":root" ]] }
+                "AWS": {"Fn::Sub":"arn:aws:iam::${AWS::AccountId}:root"}
               },
               "Action": "kms:*",
               "Resource": "*"
@@ -160,15 +160,7 @@
             "Classification": "hbase-site",
             "ConfigurationProperties": {
               "hbase.rootdir":{
-                "Fn::Join": [
-                    "", [
-                      "s3://",
-                      {
-                        "Ref": "EMRS3Bucket"
-                      },
-                      "/data",
-                    ]
-                  ]
+                "Fn::Sub": "s3://${EMRS3Bucket}/data"
               }
             }
           },
@@ -210,16 +202,8 @@
           "Ref": "ReleaseLabel"
         },
         "LogUri": {
-          "Fn::Join": [
-              "", [
-                "s3://",
-                {
-                  "Ref": "EMRS3Bucket"
-                },
-                "/log",
-              ]
-            ]
-        },
+		  "Fn::Sub": "s3://${EMRS3Bucket}/log"
+		},
         "Name": {
           "Ref": "EMRClusterName"
         },
