@@ -27,7 +27,7 @@ Parameters:
       The S3 bucket that contains the lambda solution file
   S3Key:
     Type: String
-    Default: 'guardduty/function.zip'
+    Default: 'security/guardduty/function.zip'
     Description: >
       The S3 path to the lambda solution file
   RoleToAssume:
