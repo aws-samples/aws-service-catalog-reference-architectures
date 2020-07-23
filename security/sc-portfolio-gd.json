@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "GuardDuty Portfolio for Service Catalog.",
+  "Description": "GuardDuty Portfolio for Service Catalog. (fdp-1qj64b3a8)",
   "Metadata": {
       "AWS::CloudFormation::Interface": {
           "ParameterGroups": [
