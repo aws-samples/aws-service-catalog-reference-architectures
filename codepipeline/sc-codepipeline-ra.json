@@ -517,6 +517,10 @@
         "CloneUrlSsh": {
           "Value": { "Fn::GetAtt": ["SCPortfoliosRepo","CloneUrlSsh"] },
           "Description": "URL for ssh cloning the Product Repo"
+        },		
+		"CloneUrlHttp": {		
+          "Value": { "Fn::GetAtt": ["SCPortfoliosRepo","CloneUrlHttp"] },
+          "Description": "URL for https cloning the Product Repo"
         }
     }
 }

@@ -212,6 +212,18 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
             "TimeoutInMinutes" : 5
           }
+        },
+        "cloud9product": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}codepipeline/sc-product-cloud9.json"},
+            "TimeoutInMinutes" : 5
+          }
         }
     },
     "Outputs": {

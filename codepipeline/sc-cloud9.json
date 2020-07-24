@@ -1,0 +1,84 @@
+{
+    "Description": "AWS Cloud9 IDE (fdp-1qj64b3c2)",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Cloud9 Environment"
+                    },
+                    "Parameters": [
+                        "EnvironmentName",
+                        "InstanceType",
+						"HibernateMinutes"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Linked Git Repo"
+                    },
+                    "Parameters": [
+                        "LinkedRepoPath",
+                        "LinkedRepoCloneUrl"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "EnvironmentName": {
+            "Type": "String",
+			"Default":"IAC sample IDE",
+			"Description":"Name of the Cloud9 environment"
+		},		
+        "LinkedRepoPath": {
+            "Type": "String",
+			"Default":"",
+			"Description":"Instance's local path for the repo you wish to clone"
+		},
+		"LinkedRepoCloneUrl": {
+            "Type": "String",
+			"Default":"",
+			"Description":"Name of the repo you wish to include in the IDE"
+		},
+		"InstanceType": {
+            "Type": "String",
+            "Default":"t3.micro",
+            "AllowedValues": ["t2.micro","t2.medium","t3.micro","t3.medium","t3.large" 	]
+        },
+		"HibernateMinutes" :{
+			"Type": "Number",
+			"Default":60,
+			"Description": "Minutes until instance hibernates after last use"
+		}
+    },
+    
+    "Resources": {
+		"cloud9ide": {
+		  "Type" : "AWS::Cloud9::EnvironmentEC2",
+		  "Properties" : {
+			  "AutomaticStopTimeMinutes" : {"Ref": "HibernateMinutes"},
+			  "Description" : "Sample Cloud9 IDE from Service Catalog reference architecture",
+			  "InstanceType" : {"Ref": "InstanceType"},
+			  "Name" : {"Ref":"EnvironmentName"},
+			  "Repositories" : [ 				
+				{
+				  "PathComponent" : "/aws-service-catalog-reference-architectures",
+				  "RepositoryUrl" : "https://github.com/aws-samples/aws-service-catalog-reference-architectures.git"
+				},
+				{
+				  "PathComponent" : {"Ref":"LinkedRepoPath"},
+				  "RepositoryUrl" : {"Ref":"LinkedRepoCloneUrl"}
+				}
+			  ]			  
+			}
+		}
+	
+    },
+    "Outputs": {
+	"Cloud9Url":{
+		"Value": { "Fn::Sub" : [ "http://${AWS::Region}.console.aws.amazon.com/cloud9/ide/${cloud9env}", 
+			{ "cloud9env": { "Fn::Select" : [ 6, { "Fn::Split" : [ ":", {"Fn::GetAtt":["cloud9ide","Arn"] }]} ]} }
+	]}}	
+  }
+}

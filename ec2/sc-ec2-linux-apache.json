@@ -409,11 +409,11 @@
     "Outputs": {
     "WebsiteURL": {
       "Description": "DNS root URL of the new webserver",
-      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["WebServerInstance", "PublicDnsName"] }]]}
+      "Value" : { "Fn::Sub" : [ "http://${dns}", { "dns": { "Fn::GetAtt" : ["WebServerInstance", "PublicDnsName"] }} ]}  
     },
     "WebsiteIP": {
       "Description": "IP root URL of the new webserver",
-      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["WebServerInstance", "PublicIp"] }]]}
+      "Value" : { "Fn::Sub" : [ "http://${dns}", { "dns": { "Fn::GetAtt" : ["WebServerInstance", "PublicIp"] }} ]}
     }
   }
 }

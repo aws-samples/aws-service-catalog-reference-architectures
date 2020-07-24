@@ -426,6 +426,10 @@
         "CloneUrlSsh": {
           "Value": { "Fn::GetAtt": ["ETLTasksRepo","CloneUrlSsh"] },
           "Description": "URL for ssh cloning the Product Repo"
+        },		
+		"CloneUrlHttp": {		
+          "Value": { "Fn::GetAtt": ["ETLTasksRepo","CloneUrlHttp"] },
+          "Description": "URL for https cloning the Product Repo"
         }
     }  
 }

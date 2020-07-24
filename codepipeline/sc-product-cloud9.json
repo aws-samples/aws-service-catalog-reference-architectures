@@ -1,0 +1,53 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Cloud9 ServiceCatalog product. (fdp-1qj64b3cq)",
+    "Parameters":
+      {
+        "PortfolioProvider": {
+            "Type":"String",
+            "Description":"Provider Name"
+        },
+        "PortfolioId":{
+            "Type":"String",
+            "Description":"The SC portfolio this product will be attached to."
+        },
+        "RepoRootURL": {
+            "Type":"String",
+            "Description":"Root url for the repo containing the product templates."
+        }
+      },
+    "Resources": {
+        "Cloud9Product": {
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct",
+            "Properties": {
+                "Name": "AWS Cloud9 IDE",
+                "Description": "This product provisions one Cloud9 Developer IDE instance.",
+                "Owner": {"Ref":"PortfolioProvider"},
+                "Distributor": {"Ref":"PortfolioProvider"},
+                "SupportDescription": "Operations Team",
+                "SupportEmail": "support@yourcompany.com",
+                "AcceptLanguage": "en",
+                "SupportUrl": "http://helpdesk.yourcompany.com",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "v1.0",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}codepipeline/sc-cloud9.json"}
+                        },
+                        "Name": "Cloud9 IDE"
+                    }
+                ]
+            }
+        },
+        "Associatenginxcf":{
+          "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
+          "Properties" : {
+            "PortfolioId" : {"Ref":"PortfolioId"},
+            "ProductId" :   {"Ref":"Cloud9Product"}
+          }
+        }
+    },
+    "Outputs": {
+        "ProductId":{"Value": { "Ref":"Cloud9Product" } }
+    }
+}
