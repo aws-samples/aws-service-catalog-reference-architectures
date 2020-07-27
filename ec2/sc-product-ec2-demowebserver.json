@@ -7,9 +7,9 @@
             "Type":"String",
             "Description":"Provider Name"
         },
-        "LaunchConstraintARN": {
+        "LaunchConstraintRole": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for EC2 products."
+            "Description":"Name of the launch constraint role for EC2 products."
         },
         "PortfolioId":{
             "Type":"String",
@@ -24,8 +24,8 @@
         "WebserverProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Amazon Elastic Compute Cloud (EC2) Linux Webserver",
-                "Description": "This product builds one Amazon Linux EC2 webserver (Apache or NGINX) instance.",
+                "Name": "Demo Linux Webserver",
+                "Description": "This product builds a webserver (Apache or NGINX) EC2 instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -63,8 +63,8 @@
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"WebserverProduct"},
-            "RoleArn" : {"Ref":"LaunchConstraintARN"},
-            "Description": {"Ref":"LaunchConstraintARN"}
+            "LocalRoleName" : {"Ref":"LaunchConstraintRole"},
+            "Description": {"Ref":"LaunchConstraintRole"}
           }
         }
     },

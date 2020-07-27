@@ -9,9 +9,9 @@
                         "default": "Portfolio Information"
                     },
                     "Parameters": [
-                        "PorfolioName",
+                        "PortfolioName",
                         "PortfolioProvider",
-                        "PorfolioDescription"
+                        "PortfolioDescription"
                     ]
                 },{
                     "Label": {
@@ -41,12 +41,12 @@
             "Description":"Provider Name",
             "Default":"IT Services"
         },
-       "PorfolioName": {
+       "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
             "Default":"Service Catalog EC2 Reference Architecture"
         },
-        "PorfolioDescription": {
+        "PortfolioDescription": {
             "Type":"String",
             "Description":"Portfolio Description",
             "Default":"Service Catalog Portfolio that contains reference architecture products for Amazon Elastic Compute Cloud (EC2)."
@@ -86,8 +86,18 @@
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
-            "Description" : {"Ref":"PorfolioDescription"},
-            "DisplayName" : {"Ref":"PorfolioName"}
+            "Description" : {"Ref":"PortfolioDescription"},
+            "DisplayName" : {"Ref":"PortfolioName"}
+          }
+        },
+		"TagOptionsTemplate": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+			"Parameters" : { 
+				"PortfolioId": {"Ref":"SCEC2portfolio"}
+			},
+			"TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-tagoptionLibrary.json"},
+            "TimeoutInMinutes" : 5
           }
         },
         "addrole1":{
@@ -124,7 +134,20 @@
             "TimeoutInMinutes" : 5
           }
         },        
-        "LinkEndusers":{
+        "LinkEndusersRole":{
+          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+          "Properties" : {
+            "PrincipalARN" : 
+                {"Fn::If" : [
+                    "CondCreateEndUsers",
+                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
+                ]},
+            "PortfolioId" : {"Ref":"SCEC2portfolio"},
+            "PrincipalType" : "IAM"
+          }
+        },
+        "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Properties" : {
             "PrincipalARN" : 
@@ -142,10 +165,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -160,10 +183,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -178,10 +201,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -189,10 +212,26 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-windows.json"},
             "TimeoutInMinutes" : 5
           }
+        },
+        "cloud9product": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}codepipeline/sc-product-cloud9.json"},
+            "TimeoutInMinutes" : 5
+          }
         }
     },
     "Outputs": {
-		"EndUserGroupArn":{
+		"EndUserRoleArn":{
+          "Condition":"CondCreateEndUsers",
+          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]}
+        },
+        "EndUserGroupArn":{
           "Condition":"CondCreateEndUsers",
           "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
         },

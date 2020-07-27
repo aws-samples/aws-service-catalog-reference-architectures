@@ -11,23 +11,23 @@ ACC=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
 childAcc=""
 childAccComma=${childAcc// /,}
 allACC="$ACC $childAcc"
+export AWS_DEFAULT_REGION=us-east-1
 allregions="us-east-1 us-east-2 us-west-1"
 LinkedRole1=""
 S3RootURL="https://s3.amazonaws.com/aws-service-catalog-reference-architectures"
 
 date
-export AWS_DEFAULT_REGION=us-east-1
 echo "Using Account:$ACC  Region:$AWS_DEFAULT_REGION Child Accounts:$childAcc All Regions:$allregions"
 
 echo "Creating the StackSet IAM roles"
-aws cloudformation create-stack --region us-east-1 --stack-name IAM-StackSetAdministrator --template-url https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
-aws cloudformation create-stack --region us-east-1 --stack-name IAM-StackSetExecution --parameters "[{\"ParameterKey\":\"AdministratorAccountId\",\"ParameterValue\":\"$ACC\"}]" --template-url https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
+aws cloudformation create-stack --region $AWS_DEFAULT_REGION --stack-name IAM-StackSetAdministrator --template-url https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetAdministrationRole.yml --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
+aws cloudformation create-stack --region $AWS_DEFAULT_REGION --stack-name IAM-StackSetExecution --parameters "[{\"ParameterKey\":\"AdministratorAccountId\",\"ParameterValue\":\"$ACC\"}]" --template-url https://s3.amazonaws.com/cloudformation-stackset-sample-templates-us-east-1/AWSCloudFormationStackSetExecutionRole.yml --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 echo "waiting for stacks to complete..."
 aws cloudformation wait stack-create-complete --stack-name IAM-StackSetAdministrator
 aws cloudformation wait stack-create-complete --stack-name IAM-StackSetExecution
 
 echo "creating the automation pipeline stack"
-aws cloudformation create-stack --region us-east-1 --stack-name SC-RA-IACPipeline --parameters "[{\"ParameterKey\":\"ChildAccountAccess\",\"ParameterValue\":\"$childAccComma\"}]" --template-url "$S3RootURL/codepipeline/sc-codepipeline-ra.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack --region $AWS_DEFAULT_REGION --stack-name SC-RA-IACPipeline --parameters "[{\"ParameterKey\":\"ChildAccountAccess\",\"ParameterValue\":\"$childAccComma\"}]" --template-url "$S3RootURL/codepipeline/sc-codepipeline-ra.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 
 echo "creating the ServiceCatalog IAM roles StackSet"
 aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-IAMroles --template-url "$S3RootURL/iam/sc-demosetup-iam.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
@@ -40,8 +40,8 @@ until [ "$STATUS" = "SUCCEEDED" ]; do
 done
 
 echo "creating the ServiceCatalog Portfolio StackSet"
-aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"LinkedRole1\",\"ParameterValue\":\"$LinkedRole1\"},{\"ParameterKey\":\"LinkedRole2\",\"ParameterValue\":\"\"},{\"ParameterKey\":\"LaunchRoleName\",\"ParameterValue\":\"SCEC2LaunchRole\"},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"$S3RootURL/\"}]" --template-url "$S3RootURL/ec2/sc-portfolio-ec2VPC.json"
-aws cloudformation create-stack-instances --stack-set-name SC-IAC-automated-portfolio --regions $allregions --accounts $allACC --operation-preferences FailureToleranceCount=0,MaxConcurrentCount=3
+aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"CreateEndUsers\",\"ParameterValue\":\"No\"},{\"ParameterKey\":\"LinkedRole1\",\"ParameterValue\":\"$LinkedRole1\"},{\"ParameterKey\":\"LinkedRole2\",\"ParameterValue\":\"\"},{\"ParameterKey\":\"LaunchRoleName\",\"ParameterValue\":\"SCEC2LaunchRole\"},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"$S3RootURL/\"}]" --template-url "$S3RootURL/ec2/sc-portfolio-ec2demo.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack-instances --stack-set-name SC-IAC-automated-portfolio --regions $allregions --accounts $ACC --operation-preferences FailureToleranceCount=0,MaxConcurrentCount=3
 
 date
 echo "Complete.  See CloudFormation Stacks and StackSets Console in each region for more details: $allregions"

@@ -7,9 +7,9 @@
             "Type":"String",
             "Description":"Owner and Distributor Name"
         },
-        "LaunchConstraintARN": {
+        "LaunchConstraintRole": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for EC2 products."
+            "Description":"Name of the launch constraint role for EC2 products."
         },
         "PortfolioId":{
             "Type":"String",
@@ -56,8 +56,8 @@
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"scec2linuxproduct"},
-            "RoleArn" : {"Ref":"LaunchConstraintARN"},
-            "Description": {"Ref":"LaunchConstraintARN"}
+            "LocalRoleName" : {"Ref":"LaunchConstraintRole"},
+            "Description": {"Ref":"LaunchConstraintRole"}
           }
         }
     },
