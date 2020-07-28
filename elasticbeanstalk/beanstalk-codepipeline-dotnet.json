@@ -1,7 +1,7 @@
 {
-    "Description": "Elastic Beanstalk CI/CD Automation Pipeline (fdp-1qj64b3df)",
+    "Description": "Elastic Beanstalk CI/CD Automation Pipeline for windows dotnet (fdp-1qj64b3d4)",
 	"Metadata" : {
-	  "AdditionalInformation":"The CodePipeline defined here requires three buildspec files in a subfolder to be checked in with the code.  See the link below for examples.",
+	  "AdditionalInformation":"The CodePipeline defined here requires two buildspec files in a subfolder to be checked in with the code.  See the link below for examples.",
 	  "ExampleLink":"https://github.com/aws-samples/aws-service-catalog-reference-architectures/tree/master/elasticbeanstalk"
 	},
     "AWSTemplateFormatVersion": "2010-09-09",
@@ -9,7 +9,7 @@
         "CodeCommitRepoName": {
             "Type":"String",
             "Description":"The project name, also the CodeCommit Repository name",
-            "Default":"ebapprepo"
+            "Default":"dotnetapp"
         },
 		"ElasitcBeanstalkApplicationName":{
 		   "Type":"String",
@@ -166,7 +166,6 @@
                               ],
                               "Resource":[
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjBuildApplication"}} ]},
-                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjValidateApplication"}} ]},
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"ProjDeployApplication"}} ]}
                              ]                              
                             },{
@@ -188,16 +187,16 @@
         "ProjDeployApplication" : {
             "Type": "AWS::CodeBuild::Project",
             "Properties": {
-              "Name": {"Fn::Sub":"DeployToBeanstalk-${ElasitcBeanstalkApplicationName}"},			  
+              "Name": {"Fn::Sub":"DeployToBeanstalk-${ElasitcBeanstalkApplicationName}"},
               "Description": "Update the application in beanstalk.",
               "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
               "Artifacts": {
                 "Type": "CODEPIPELINE"
               },
               "Environment": {
-                "Type": "LINUX_CONTAINER",
-                "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/standard:2.0",
+                "Type": "WINDOWS_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_MEDIUM",
+                "Image": "mcr.microsoft.com/dotnet/framework/sdk:4.8",
                 "EnvironmentVariables":[
                       {
                         "Name": "AWS_DEFAULT_REGION",
@@ -218,8 +217,7 @@
                         "Value": {"Ref":"PipelineArtifacts"},
                         "Type": "PLAINTEXT"
                       }
-                ],
-                "PrivilegedMode": true
+                ]
               },
               "Source": {
                 "Type": "CODEPIPELINE",
@@ -238,9 +236,9 @@
                 "Type": "CODEPIPELINE"
               },
               "Environment": {
-                "Type": "LINUX_CONTAINER",
-                "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/standard:2.0",
+                "Type": "WINDOWS_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_MEDIUM",
+                "Image": "mcr.microsoft.com/dotnet/framework/sdk:4.8",
                 "EnvironmentVariables":[
                       {
                         "Name": "AWS_DEFAULT_REGION",
@@ -261,38 +259,6 @@
               "TimeoutInMinutes": 10
             }            
         },
-        "ProjValidateApplication" : {
-            "Type": "AWS::CodeBuild::Project",
-            "Properties": {
-              "Name": {"Fn::Sub":"Validate-${ElasitcBeanstalkApplicationName}"},
-              "Description": "run validations on the code",
-              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
-              "Artifacts": {
-                "Type": "CODEPIPELINE"
-              },
-              "Environment": {
-                "Type": "LINUX_CONTAINER",
-                "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/python:3.6.5",
-                "EnvironmentVariables":[
-                    {
-                      "Name":  "PROJECTNAME",
-                      "Value": {"Ref":"CodeCommitRepoName"},
-                      "Type": "PLAINTEXT"
-                    },{
-                      "Name": "ARTIFACT_BUCKET",
-                      "Value": {"Ref":"PipelineArtifacts"},
-                      "Type": "PLAINTEXT"
-                    }
-                ]
-              },
-              "Source": {
-                "Type": "CODEPIPELINE",
-                "BuildSpec":"codepipeline/buildspec-validate.yml"
-              },
-              "TimeoutInMinutes": 10
-            }            
-        },      
         "ProductPipeline" :{
           "Type" : "AWS::CodePipeline::Pipeline",          
           "Properties" : {
@@ -346,21 +312,6 @@
                                 "ProjectName":{"Ref":"ProjBuildApplication"}
                             },
                             "RunOrder": 1
-                        },{
-                            "InputArtifacts": [
-                                { "Name": "BuildArtifacts" }
-                            ],
-                            "Name": "CodeValidation",
-                            "ActionTypeId": {
-                                "Category": "Build",
-                                "Owner": "AWS",
-                                "Version": "1",
-                                "Provider": "CodeBuild"
-                            },
-                            "Configuration": {
-                                "ProjectName":{"Ref":"ProjValidateApplication"}
-                            },
-                            "RunOrder": 2
                         }
                      ]
                 },{

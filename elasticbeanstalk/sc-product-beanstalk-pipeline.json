@@ -34,11 +34,18 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "CodePipeline project for Elastic Beanstalk",
+                        "Description": "CodePipeline project for Linux Elastic Beanstalk",
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/beanstalk-codepipeline-ra.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "Linux v1.0"
+                    },
+					{
+                        "Description": "CodePipeline project for Windows Elastic Beanstalk",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/beanstalk-codepipeline-dotnet.json"}
+                        },
+                        "Name": "Windows v1.0"
                     }
                 ]
             }
