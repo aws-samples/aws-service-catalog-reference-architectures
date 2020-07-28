@@ -43,8 +43,8 @@
 		},
 		"InstanceType": {
             "Type": "String",
-            "Default":"t3.micro",
-            "AllowedValues": ["t2.micro","t2.medium","t3.micro","t3.medium","t3.large" 	]
+            "Default":"t2.micro",
+            "AllowedValues": ["t2.micro","t2.medium"]
         },
 		"HibernateMinutes" :{
 			"Type": "Number",
