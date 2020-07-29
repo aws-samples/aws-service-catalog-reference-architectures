@@ -194,9 +194,9 @@
                 "Type": "CODEPIPELINE"
               },
               "Environment": {
-                "Type": "WINDOWS_CONTAINER",
-                "ComputeType": "BUILD_GENERAL1_MEDIUM",
-                "Image": "mcr.microsoft.com/dotnet/framework/sdk:4.8",
+                "Type": "LINUX_CONTAINER",
+                "ComputeType": "BUILD_GENERAL1_SMALL",
+                "Image": "aws/codebuild/standard:2.0",
                 "EnvironmentVariables":[
                       {
                         "Name": "AWS_DEFAULT_REGION",
@@ -221,7 +221,7 @@
               },
               "Source": {
                 "Type": "CODEPIPELINE",
-                "BuildSpec":"codepipeline/buildspec-deploy.yml"
+                "BuildSpec":"codepipeline/buildspec-deploy-dotnet.yml"
               },
               "TimeoutInMinutes": 10
             }            
@@ -236,11 +236,15 @@
                 "Type": "CODEPIPELINE"
               },
               "Environment": {
-                "Type": "WINDOWS_CONTAINER",
+                "Type": "WINDOWS_SERVER_2019_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_MEDIUM",
                 "Image": "mcr.microsoft.com/dotnet/framework/sdk:4.8",
                 "EnvironmentVariables":[
                       {
+                        "Name": "EB_APPLICATION_NAME",
+                        "Value": {"Ref":"ElasitcBeanstalkApplicationName"},
+                        "Type": "PLAINTEXT"
+                      },{
                         "Name": "AWS_DEFAULT_REGION",
                         "Value": {"Fn::Sub":"${AWS::Region}" },
                         "Type": "PLAINTEXT"
@@ -254,7 +258,7 @@
               },
               "Source": {
                 "Type": "CODEPIPELINE",
-                "BuildSpec":"codepipeline/buildspec-build.yml"
+                "BuildSpec":"codepipeline/buildspec-build-dotnet.yml"
               },
               "TimeoutInMinutes": 10
             }            
