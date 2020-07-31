@@ -2,8 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Bulk monitor Step Functions state machine.
 Parameters:
     lambdaInvokeRoleARN:
-        Type: String
-        Default: arn:aws:iam::067155963943:role/service-role/StepFunctions-BulkWorkflow-role-0871f73b
+        Type: String        
 Resources:
   MyStateMachine:
     Type: AWS::StepFunctions::StateMachine
