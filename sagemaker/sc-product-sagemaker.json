@@ -33,7 +33,7 @@
                     {
                         "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/emr-backed-notebook-instance.yaml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/emr-backed-notebook-instance.yml"}
                         },
                         "Name": "v1.1"
                     }
@@ -45,16 +45,6 @@
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"scemrnnstanceproduct"}
-          }
-        },
-        "constraintemrnnstance":{
-          "Type" : "AWS::ServiceCatalog::LaunchRoleConstraint",
-          "DependsOn" : "Associateemrnnstance",
-          "Properties" : {
-            "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"scemrnbinstanceproduct"},
-            "RoleArn" : {"Ref":"LaunchConstraintARN"},
-            "Description": {"Ref":"LaunchConstraintARN"}
           }
         }
     }

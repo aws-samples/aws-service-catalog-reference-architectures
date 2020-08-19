@@ -19,6 +19,7 @@ Metadata:
           - CoreNodeCount
           - ReleaseLabel
           - CreateLogBucket
+          - BucketName
       - Label:
           default: SageMaker notebook instance Configuration
         Parameters:
@@ -56,7 +57,9 @@ Parameters:
     MaxLength: '63'
     MinLength: '1'
     Type: String
-    Default: 'sc-ra-sm'
+  BucketName:
+    Description: Specify a unique S3 bucket name.
+    Type: String
   NotebookInstanceType:
     AllowedValues:
       - ml.t2.medium
@@ -139,17 +142,14 @@ Parameters:
   VPCID:
     Description: Select target VPC for EMR Cluster.
     Type: 'AWS::EC2::VPC::Id'
-    Default: 'vpc-0481bcbed5bc48933'
   SubnetId:
     Description: Select target subnet for EMR Cluster.
     Type: 'AWS::EC2::Subnet::Id'
-    Default: 'subnet-0ea2bca033a0b8339'
   RemoteAccessCIDR:
     Description: Remote access IP address range to access the EMR cluster.
     Type: String
     AllowedPattern: '(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})'
     ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: '52.95.4.24/32'
   KeyPair:
     Description: Name of an existing EC2 KeyPair to enable SSH access.
     Type: 'AWS::EC2::KeyPair::KeyName'
@@ -157,7 +157,6 @@ Parameters:
   SageMakerRole:
     Description: Name of an Amazon sageMaker IAM role to be associated with notebook instance.
     Type: 'String'
-    Default: 'arn:aws:iam::609791560948:role/emrandsm-SageMakerRole-1EKADB6GRDCMS'
 Resources:
   SageMakerNotebookInstance:
     Type: 'AWS::SageMaker::NotebookInstance'
@@ -217,7 +216,7 @@ Resources:
     Type: 'AWS::S3::Bucket'
     DeletionPolicy: Delete
     Properties:
-      BucketName: !Sub '${AWS::StackName}-sc-emr-logs'
+      BucketName: !Ref BucketName
       LoggingConfiguration:
         LogFilePrefix: !Sub 's3://${AWS::StackName}-sc-emr-logs/'
       AccessControl: LogDeliveryWrite

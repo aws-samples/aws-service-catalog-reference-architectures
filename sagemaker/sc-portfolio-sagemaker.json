@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Glue Portfolio for Service Catalog. (fdp-1p4dlgglue)",
+    "Description": "Amazon SageMaker Portfolio for Service Catalog. (fdp-sm-portfolio)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -79,7 +79,7 @@
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
     },
     "Resources": {
-        "SCGLUEportfolio": {
+        "SCsmportfolio": {
           "Type" : "AWS::ServiceCatalog::Portfolio",
           "Properties" : {
             "ProviderName": {"Ref":"PortfolioProvider"},
@@ -92,7 +92,7 @@
           "Condition":"CondLinkRole1",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole1}"},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCsmportfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -101,7 +101,7 @@
           "Condition":"CondLinkRole2",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCsmportfolio"},
             "PrincipalType" : "IAM"
           }
         },        
@@ -122,7 +122,7 @@
                     {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
                 ]},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCsmportfolio"},
             "PrincipalType" : "IAM"
           }
         },
@@ -135,7 +135,7 @@
                     {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
                 ]},
-            "PortfolioId" : {"Ref":"SCGLUEportfolio"},
+            "PortfolioId" : {"Ref":"SCsmportfolio"},
             "PrincipalType" : "IAM"
           }
         },   
@@ -144,10 +144,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "PortfolioId":{"Ref":"SCGLUEportfolio"},
+                "PortfolioId":{"Ref":"SCsmportfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}glue/sc-product-sagemaker.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}sagemaker/sc-product-sagemaker.json"},
             "TimeoutInMinutes" : 5
           }
         }
