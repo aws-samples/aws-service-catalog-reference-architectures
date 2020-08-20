@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'Service Catalog: This reference architecture setsup an EMR cluster, an Amazon SageMaker notebook instance and connects the two.(fdp-1oc5f3ulf) As part of configuration, it also downloads https://raw.githubusercontent.com/jupyter-incubator/sparkmagic/master/sparkmagic/example_config.json . Please see https://github.com/jupyter-incubator/sparkmagic/blob/master/LICENSE.md and other files from the github repository for licensing of the sparkmagic.'
+Description: 'Service Catalog: This reference architecture setsup an EMR cluster, an Amazon SageMaker notebook instance and connects the two.(fdp-1oc5f3ulf) As part of configuration, it also downloads https://raw.githubusercontent.com/jupyter-incubator/sparkmagic/master/sparkmagic/example_config.json . Please see https://github.com/jupyter-incubator/sparkmagic/blob/master/LICENSE.md and other files from the github repository for licensing of the sparkmagic. (fdp-1qj64b3eo)'
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:

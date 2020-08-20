@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "SageMaker product. (fdp-1qj64b3dn)",
+    "Description": "Glue Service Catalog product. (fdp-1qj64b3f1)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -18,11 +18,11 @@
         
       },
     "Resources": {
-        "scsmproduct": {
+        "scemrnnstanceproduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "SageMaker notebook instance",
-                "Description": "This product creates a Amazon SageMaker notebook instance.",
+                "Name": "EMR backed Amazon SageMaker notebook instance",
+                "Description": "This product creates an EMR cluster backed Amazon SageMaker notebook instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -31,11 +31,11 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "baseline notebook",
+                        "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/sc-sagemaker.yml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/emr-backed-notebook-instance.yml"}
                         },
-                        "Name": "v1.0"
+                        "Name": "v1.1"
                     }
                 ]
             }
@@ -44,7 +44,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"scsmproduct"}
+            "ProductId" :   {"Ref":"scemrnnstanceproduct"}
           }
         }
     }

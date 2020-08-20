@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Amazon SageMaker Portfolio for Service Catalog. (fdp-sm-portfolio)",
+    "Description": "Amazon SageMaker Portfolio for Service Catalog. (fdp-1qj64b3e4)",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -140,6 +140,18 @@
           }
         },   
         "emrnnstanceproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "PortfolioId":{"Ref":"SCsmportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}sagemaker/sc-product-EMR-sagemaker.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		"sagemakerproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         

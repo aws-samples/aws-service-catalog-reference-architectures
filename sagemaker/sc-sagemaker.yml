@@ -3,7 +3,7 @@ Metadata:
   License: Apache-2.0
 Description: 'AWS CloudFormation Sample Template SageMaker NotebookInstance: This template demonstrates
   the creation of a SageMaker NotebookInstance with encryption. You will be billed for the AWS resources used if you create a stack from
-  this template.'
+  this template. (fdp-1qj64b3fd)'
 Parameters:
   NotebookInstanceName:
     AllowedPattern: '[A-Za-z0-9-]{1,63}'
