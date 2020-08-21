@@ -3,6 +3,8 @@
 This reference architecture creates an AWS Service Catalog Portfolio called "Service Catalog Containers Reference Architecture"  
 The Portfolio provides 3 products which will create a full DevOps deployment pipeline from code to container deployment in Fargate.  
 
+![SC-Devops-ECS.png](SC-Devops-ECS.png)
+
 1. Create the portfolio using the Launchstack: 
 [![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/#/stacks/new?stackName=SC-RA-ECS-Portfolio&templateURL=https://aws-service-catalog-reference-architectures.s3.amazonaws.com/ecs/sc-portfolio-ecs.json)  
 2. Provision the cluster and codepipeline products from Service Catalog.  
