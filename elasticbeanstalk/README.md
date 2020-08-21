@@ -10,6 +10,8 @@ https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supporte
 Get a list of Solution Stacks from the AWS CLI with this command:  
 ```aws elasticbeanstalk list-available-solution-stacks```
 
+![SC-Devops-EB-github.png](SC-Devops-EB-github.png)
+
 
 ### Install  
 Launch the Elastic Beanstalk portfolio stack:  
