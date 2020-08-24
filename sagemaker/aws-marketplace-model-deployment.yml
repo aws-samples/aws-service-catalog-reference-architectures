@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This sample cloudformation template to creates an endpoint for an ML model from AWS Marketplace(fdp-aws-marketplace-ml-model)'
+Parameters:
+  IAMRole:
+    Type: String
+    Description: The SageMaker ExecutionRoleArn.
+  InstanceType:
+    Type: String
+    Default: "ml.m5.large"
+    Description: The deployment instance type.
+    AllowedValues:
+    - "ml.m5.large"
+    - "ml.m5.xlarge"
+    - "ml.c5.xlarge"
+    - "ml.c5.4xlarge"  
+  KmsKeyId:
+    Description: KMS Key ARN for encrypting volume attached to the instance hosting the endpoint.
+    Type: 'String'
+  SubnetId1:
+    Description: Select target subnet for deploying ML model.
+    Type: 'AWS::EC2::Subnet::Id'
+  SubnetId2:
+    Description: Select alternate subnet for deploying ML model (must have a different AZ from SubnetId1).
+    Type: 'AWS::EC2::Subnet::Id'
+  SecurityGroupId:
+    Description: Select target security group to be associated with ML model.
+    Type: 'AWS::EC2::SecurityGroup::Id'
+  InstanceCount:
+    Type: Number
+    Default: "1"
+    Description: Initial instance count for the endpoint.
+  EndPointName:
+    Type: String
+    Description: Specify  suitable name to host the model endpoint. This is a mandatory field.  
+Mappings:
+  ModelAddressPrefix:
+    us-west-1:
+      base: "arn:aws:sagemaker:us-west-1:382657785993:model-package"
+    us-west-2:
+      base: "arn:aws:sagemaker:us-west-2:594846645681:model-package"
+    us-east-1:
+      base: "arn:aws:sagemaker:us-east-1:865070037744:model-package"
+    us-east-2:
+      base: "arn:aws:sagemaker:us-east-2:057799348421:model-package"
+    ap-northeast-1:
+      base: "arn:aws:sagemaker:ap-northeast-1:977537786026:model-package"
+    ap-northeast-2:
+      base: "arn:aws:sagemaker:ap-northeast-2:745090734665:model-package"
+    ap-southeast-1:
+      base: "arn:aws:sagemaker:ap-southeast-1:192199979996:model-package"
+    ap-southeast-2:
+      base: "arn:aws:sagemaker:ap-southeast-2:666831318237:model-package"
+    ca-central-1:
+      base: "arn:aws:sagemaker:ca-central-1:470592106596:model-package"
+    eu-central-1:
+      base: "arn:aws:sagemaker:eu-central-1:446921602837:model-package"
+    eu-north-1:
+      base: "arn:aws:sagemaker:eu-north-1:136758871317:model-package"
+    eu-west-1:
+      base: "arn:aws:sagemaker:eu-west-1:985815980388:model-package"
+    eu-west-2:
+      base: "arn:aws:sagemaker:eu-west-2:856760150666:model-package"
+    eu-west-3:
+      base: "arn:aws:sagemaker:eu-west-3:843114510376:model-package"
+    sa-east-1:
+      base: "arn:aws:sagemaker:sa-east-1:270155090741:model-package"
+    ap-south-1:
+      base: "arn:aws:sagemaker:ap-south-1:077584701553:model-package"
+Resources:
+  Model:
+    Type: "AWS::SageMaker::Model"
+    Properties:
+      EnableNetworkIsolation: True
+      ExecutionRoleArn: !Ref IAMRole
+      PrimaryContainer: 
+        ModelPackageName: !Sub 
+            - '${baseurl}/gluoncv-yolo3-darknet531547760-bdf604d6d9c12bf6194b6ae534a638b2'
+            - { baseurl: !FindInMap [ModelAddressPrefix, !Ref "AWS::Region", "base"] }
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+        Subnets:
+          - !Ref SubnetId1
+          - !Ref SubnetId2
+  EndPointConfig:
+    Type: "AWS::SageMaker::EndpointConfig"
+    Properties:
+      KmsKeyId: !Ref KmsKeyId
+      ProductionVariants: 
+      - ModelName: !GetAtt Model.ModelName
+        VariantName: AllTraffic
+        InitialInstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        InitialVariantWeight: 1
+  EndPoint:
+    Type: "AWS::SageMaker::Endpoint"
+    Properties:
+      EndpointName: !Ref EndPointName
+      EndpointConfigName: !GetAtt EndPointConfig.EndpointConfigName
+Outputs:
+  EndPointConfigName:
+    Description: Endpoint confirmation.
+    Value: !GetAtt 'EndPointConfig.EndpointConfigName'
+  EndpointName:
+    Description: Endpoint Name.
+    Value: !Ref EndPointName
+  EndPointURL:
+    Description: Please use the URL only after endpoint has been created. Endpoint creation can take time. Use Sagemaker console to check the status.
+    Value: !Sub 'https://runtime.sagemaker.${AWS::Region}.amazonaws.com/endpoints/${EndPointName}/invocations'

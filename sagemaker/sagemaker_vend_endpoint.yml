@@ -1,0 +1,80 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'This sample cloudformation template to creates an endpoint for a single ML model(fdp-sm-endpoint)'
+Parameters:
+  IAMRole:
+    Type: String
+    Description: The SageMaker ExecutionRoleArn.
+  InstanceType:
+    Type: String
+    Default: "ml.t2.xlarge"
+    Description: The deployment instance type.
+    AllowedValues:
+    - "ml.t2.large"
+    - "ml.t2.xlarge"
+    - "ml.m4.xlarge"
+    - "ml.m5.4xlarge"
+    - "ml.c4.xlarge"  
+  KmsKeyId:
+    Description: KMS Key for encrypting volume attached to the instance hosting the endpoint .
+    Type: 'String'
+  SubnetId1:
+    Description: Select target subnet for deploying ML model.
+    Type: 'AWS::EC2::Subnet::Id'
+  SubnetId2:
+    Description: Select alternate subnet for deploying ML model (must have a different AZ from SubnetId1).
+    Type: 'AWS::EC2::Subnet::Id'
+  SecurityGroupId:
+    Description: Select target security group to be associated with ML model.
+    Type: 'AWS::EC2::SecurityGroup::Id'
+  InstanceCount:
+    Type: Number
+    Default: "1"
+    Description: Initial instance count for the endpoint.
+  EndPointName:
+    Type: String
+    Description: Specify  suitable name to host the model endpoint. This is a mandatory field.
+Resources:
+  Model:
+    Type: "AWS::SageMaker::Model"
+    Properties:
+      ExecutionRoleArn: !Ref IAMRole
+      PrimaryContainer: 
+        Image: '<Docker Image path>'
+        ModelDataUrl: '<Model Artifact S3:// path>'
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+        Subnets:
+          - !Ref SubnetId1
+          - !Ref SubnetId2
+  EndPointConfig:
+    Type: "AWS::SageMaker::EndpointConfig"
+    Properties:
+      KmsKeyId: !Ref KmsKeyId
+      ProductionVariants: 
+      - ModelName: !GetAtt Model.ModelName
+        VariantName: AllTraffic
+        InitialInstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        InitialVariantWeight: 1
+  EndPoint:
+    Type: "AWS::SageMaker::Endpoint"
+    Properties:
+      EndpointName: !Ref EndPointName
+      EndpointConfigName: !GetAtt EndPointConfig.EndpointConfigName
+Outputs:
+  EndPointConfigName:
+    Description: Endpoint confirmation.
+    Value: !GetAtt 'EndPointConfig.EndpointConfigName'
+  EndpointName:
+    Description: Endpoint Name.
+    Value: !Ref EndPointName
+  EndPointURL:
+    Description: Please use the URL only after endpoint has been created. Endpoint creation can take time. Use Sagemaker console to check the status. 
+    Value: !Join 
+        - ''
+        - - 'https://runtime.sagemaker.'
+          - !Ref 'AWS::Region'
+          - '.amazonaws.com/endpoints/'
+          - !Ref EndPointName
+          - '/invocations'
