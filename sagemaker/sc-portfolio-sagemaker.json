@@ -162,7 +162,19 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}sagemaker/sc-product-sagemaker.json"},
             "TimeoutInMinutes" : 5
           }
-        }
+        },
+        "awsmarketplaceproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "PortfolioId":{"Ref":"SCsmportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}sagemaker/sc-product-model-aws-marketplace.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
 
     }  
 }

@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "EMR-backed Amazon SageMaker notebook instance Service Catalog product. (fdp-1qj64b3f1)",
+    "Description": "AWS Marketplace Model Package : AWS Service Catalog product. (fdp-marketplace-ml-model-prod)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -18,11 +18,11 @@
         
       },
     "Resources": {
-        "scemrnnstanceproduct": {
+        "mlawsmarketplaceproduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "EMR backed Amazon SageMaker notebook instance",
-                "Description": "This product creates an EMR cluster backed Amazon SageMaker notebook instance.",
+                "Name": "GluonCV YOLOv3 Object Detector Model Package",
+                "Description": "This product creates an endpoint for an AWS Marketplace ML model package.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -33,9 +33,9 @@
                     {
                         "Description": "baseline version",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/emr-backed-notebook-instance.yml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}sagemaker/aws-marketplace-model-deployment.yml"}
                         },
-                        "Name": "v1.1"
+                        "Name": "v1.0"
                     }
                 ]
             }
@@ -44,7 +44,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"scemrnnstanceproduct"}
+            "ProductId" :   {"Ref":"mlawsmarketplaceproduct"}
           }
         }
     }

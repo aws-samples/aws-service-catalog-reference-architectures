@@ -35,4 +35,9 @@ The IT administrator needs to do following steps to customize the template for a
 1. You can further specify template constraints for Subnet, security group, KMS key and the IAMExecution role to be associated with the ML model.
 1. Once you have customized the template for a specific model, you can upload it to Amazon S3 and create a product and add it to appropriate portfolio that allows application teams/data scientists to consume the ml model.
 
+### Share an AWS Marketplace ML model with your organization
+The aws-marketplace-model-deployment.yml product template allows you to deploy [GluonCV YOLOv3 Object Detector](https://aws.amazon.com/marketplace/pp/prodview-5jlvp43tsn3ny) via AWS Service Catalog. As an IT administrator, you can configure this template for other [ML Model packages from AWS Marketplace](https://aws.amazon.com/marketplace/search/results?page=1&filters=FulfillmentOptionType%2CSageMaker::ResourceType&FulfillmentOptionType=SageMaker&SageMaker::ResourceType=ModelPackage) by customizing `ModelAddressPrefix` mapping and `ModelPackageName` in line 77 of the template.
+
+
+
 Note: To use this template to share ml models across accounts, you  need to ensure that the artifact as well as the image are accessible in the destination account.
