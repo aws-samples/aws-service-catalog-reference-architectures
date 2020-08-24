@@ -174,7 +174,7 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}sagemaker/sc-product-model-aws-marketplace.json"},
             "TimeoutInMinutes" : 5
           }
-        },
+        }
 
     }  
 }
