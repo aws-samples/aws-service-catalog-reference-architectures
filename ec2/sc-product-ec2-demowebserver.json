@@ -7,9 +7,9 @@
             "Type":"String",
             "Description":"Provider Name"
         },
-        "LaunchConstraintARN": {
+        "LaunchConstraintRole": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for EC2 products."
+            "Description":"Launch constraint role for EC2 products."
         },
         "PortfolioId":{
             "Type":"String",
@@ -63,8 +63,8 @@
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"WebserverProduct"},
-            "RoleArn" : {"Ref":"LaunchConstraintARN"},
-            "Description": {"Ref":"LaunchConstraintARN"}
+            "LocalRoleName" : {"Ref":"LaunchConstraintRole"},
+            "Description": {"Ref":"LaunchConstraintRole"}
           }
         }
     },
