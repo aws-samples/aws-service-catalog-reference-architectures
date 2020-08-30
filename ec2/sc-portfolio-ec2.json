@@ -155,10 +155,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -173,10 +173,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -191,10 +191,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
