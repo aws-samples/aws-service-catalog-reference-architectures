@@ -47,7 +47,7 @@
        "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
-            "Default":"Service Catalog RDS Reference Arch"
+            "Default":"Service Catalog RDS Reference Architecture"
         },
         "PortfolioDescription": {
             "Type":"String",
