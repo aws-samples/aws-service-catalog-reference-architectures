@@ -72,7 +72,7 @@
             "Type":"String",
             "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
              "AllowedValues": ["Yes","No"],
-             "Default":"Yes" 
+             "Default":"No" 
         }
       },
       "Conditions":{
@@ -126,26 +126,18 @@
         },        
         "LinkEndusersRole":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
-                ]},
+          "Condition":"CondCreateEndUsers",
+		  "Properties" : {
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},                
             "PortfolioId" : {"Ref":"SCECSportfolio"},
             "PrincipalType" : "IAM"
           }
         },
         "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+		  "Condition":"CondCreateEndUsers",
           "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
-                ]},
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
             "PortfolioId" : {"Ref":"SCECSportfolio"},
             "PrincipalType" : "IAM"
           }

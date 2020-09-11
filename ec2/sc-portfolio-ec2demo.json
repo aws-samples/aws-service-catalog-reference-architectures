@@ -18,9 +18,9 @@
                         "default": "IAM Settings"
                     },
                     "Parameters": [
-                        "LaunchRoleName",
                         "LinkedRole1",
                         "LinkedRole2",
+                        "LaunchRoleName",
                         "CreateEndUsers"
                     ]
                 },{
@@ -53,7 +53,7 @@
         },
         "LaunchRoleName": {
             "Type":"String",
-            "Description":"Name of the launch constraint role for EC2 products. leave this blank to create the role."
+            "Description":"(Optional) Name of the launch constraint role for EC2 products. leave this blank to create the role."
         },
        "LinkedRole1": {
             "Type":"String",
@@ -70,9 +70,9 @@
         },
         "CreateEndUsers":{
             "Type":"String",
-            "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
+            "Description":"Select Yes to Create an example ServiceCatalogEndusers IAM group and role.",
              "AllowedValues": ["Yes","No"],
-             "Default":"Yes" 
+             "Default":"No" 
         }
       },
       "Conditions":{
@@ -136,26 +136,18 @@
         },        
         "LinkEndusersRole":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
-                ]},
+          "Condition":"CondCreateEndUsers",
+		  "Properties" : {
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
             "PrincipalType" : "IAM"
           }
         },
         "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
-                ]},
+          "Condition":"CondCreateEndUsers",
+		  "Properties" : {
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
             "PrincipalType" : "IAM"
           }

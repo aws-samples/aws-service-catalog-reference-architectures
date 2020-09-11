@@ -56,7 +56,7 @@
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
             "ProductId" :   {"Ref":"scec2linuxproduct"},
-            "LaunchConstraintRole" : {"Ref":"LaunchConstraintRole"},
+            "LocalRoleName" : {"Ref":"LaunchConstraintRole"},
             "Description": {"Ref":"LaunchConstraintRole"}
           }
         }
