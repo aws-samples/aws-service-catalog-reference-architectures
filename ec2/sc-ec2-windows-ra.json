@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Service Catalog: EC2 Reference Architecture(fdp-1oc5f3ula).",
+    "Description": "Service Catalog: EC2 Reference Architecture(fdp-1qj64b3g2).",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [

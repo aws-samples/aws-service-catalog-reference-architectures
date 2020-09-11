@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Best Practice EMR Cluster for Spark or S3 backed Hbase",
+  "Description": "Best Practice EMR Cluster for Spark or S3 backed Hbase (fdp-1p5s10378)",
   "Mappings" : {
     "InstanceMap": {
       "Small" : {
