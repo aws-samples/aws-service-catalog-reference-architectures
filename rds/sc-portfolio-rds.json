@@ -47,7 +47,7 @@
        "PortfolioName": {
             "Type":"String",
             "Description":"Portfolio Name",
-            "Default":"Service Catalog RDS Reference Architecture"
+            "Default":"Service Catalog RDS Reference Arch"
         },
         "PortfolioDescription": {
             "Type":"String",
@@ -221,7 +221,23 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}rds/sc-product-rds-postgresql.json"},
             "TimeoutInMinutes" : 5
           }
+        },
+        "rdsauroraproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCRDSportfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}aurora/sc-product-rds-aurora.json"},
+            "TimeoutInMinutes" : 5
+          }
         }
-
     }  
 }

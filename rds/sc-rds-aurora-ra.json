@@ -1,0 +1,375 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Service Catalog: Aurora Reference Architecture Template. This template builds an Amazon AWS Aurora master database instance.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Amazon Aurora Database Network Configuration"
+                    },
+                    "Parameters": [
+                        "DBVPC",
+                        "DBSecurityGroupName",
+                        "DBSubnets",
+                        "DBSubnetGroupName",
+                        "DBInputCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon RDS PostgreSQL Database Configuration"
+                    },
+                    "Parameters": [
+                        "DBName",
+                        "DBEngine",
+                        "DBEngineVersion",
+                        "DBInstanceClass",
+                        "DBAllocatedStorage",
+                        "DBBackupRetentionPeriod"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Amazon RDS PostgreSQL Database Access"
+                    },
+                    "Parameters": [
+                        "DBMasterUsername",
+                        "DBMasterUserPassword",
+                        "DBPortNumber"
+                    ]
+                }
+            ]
+        }
+    },
+    "Parameters": {
+        "DBVPC": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "Select the VPC where the RDS database will be created",
+            "ConstraintDescription": "must be an existing VPC"
+        },
+        "DBInputCIDR":{
+            "Default": "0.0.0.0/0",
+            "Description": "CIDR  to allow access to DB instances",
+            "Type": "String",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+        },
+        "DBSubnets": {
+            "Type": "List<AWS::EC2::Subnet::Id>",
+            "Description": "Select at least 2 subnets across 2 AZs to include in the database subnet group",
+            "ConstraintDescription": "must be an existing subnet"
+        },      
+        "DBSecurityGroupName": {
+            "Description": "The name of the security group to be created",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "255",
+            "ConstraintDescription": "Cannot start with sg-. Up to 255 characters in length."
+        },
+        "DBName": {
+            "Default": "aurora",
+            "Description": "The name of the database to create when the DB instance is created. If this parameter is not specified, the default \"aurora\" database is created in the DB instance.",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "63",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a letter and contain only alphanumeric characters."
+        },
+        "DBSubnetGroupName": {
+            "Description": "The name of the subnet group to be created for Aurora DB",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "256",
+            "AllowedPattern": "[a-zA-Z][a-zA-Z0-9]*",
+            "ConstraintDescription": "must begin with a character"
+        },
+        "DBPortNumber": {
+            "Description": "The port number on which the database accepts connections.",
+            "Type": "Number",
+            "Default": "3306",
+            "MinValue": "1150",
+            "MaxValue": "65535",
+            "ConstraintDescription": "Valid values range from 1150-65535"
+        },
+        "DBMasterUsername": {
+            "Description": "The database admin account username",
+            "Type": "String",
+            "MinLength": "5",
+            "MaxLength": "16",
+            "AllowedPattern": "^[\\w]+$",
+            "ConstraintDescription": "Minimum 5 characters must begin with a letter and contain only alphanumeric and underscore characters."
+        },
+        "DBMasterUserPassword": {
+            "Description": "The password for the master user. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".",
+            "NoEcho": true,
+            "Type": "String",
+            "MinLength": "12",
+            "MaxLength": "41",
+            "AllowedPattern": "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?\\d)(?=.*?(_|\\W))(?=.*?\\s)?.{8,}$",
+            "ConstraintDescription": "Minimum 12 characters, at least one of each of the following: uppercase, lowercase, number, and symbol character such as !#$%^&*()<>[]{}|_+-=."
+        },
+        "DBBackupRetentionPeriod": {
+            "Description": "The number of days for which automated backups are retained. Allowed values 0-10. Setting this parameter to a positive number enables backups. Setting this parameter to 0 disables automated backups.",
+            "Default": "1",
+            "Type": "Number",
+            "MinValue": "0",
+            "MaxValue": "10",
+            "ConstraintDescription": "must be a number between 0 and 10."
+        },
+        "DBAllocatedStorage": {
+            "Default": "20",
+            "Description": "General Purpose (SSD) storage (gp2). Must be an integer from 20 to 16384.",
+            "Type": "Number",
+            "MinValue": "20",
+            "MaxValue": "16384",
+            "ConstraintDescription": "Must be an integer from 20 to 16384."
+        },
+        "DBEngineVersion": {
+            "Description": "The database engine version",
+            "Type": "String",
+            "Default": "5.6.mysql_aurora.1.23.0",
+            "AllowedValues": [
+                "5.6.10a",
+                "5.6.10a",
+                "5.6.10a",
+                "5.6.10a",
+                "5.6.10a",
+                "5.6.mysql_aurora.1.17.9",
+                "5.6.mysql_aurora.1.19.0",
+                "5.6.mysql_aurora.1.19.0",
+                "5.6.mysql_aurora.1.19.1",
+                "5.6.mysql_aurora.1.19.2",
+                "5.6.mysql_aurora.1.19.2",
+                "5.6.mysql_aurora.1.19.5",
+                "5.6.mysql_aurora.1.19.5",
+                "5.6.mysql_aurora.1.19.6",
+                "5.6.mysql_aurora.1.19.6",
+                "5.6.mysql_aurora.1.20.0",
+                "5.6.mysql_aurora.1.20.1",
+                "5.6.mysql_aurora.1.20.1",
+                "5.6.mysql_aurora.1.21.0",
+                "5.6.mysql_aurora.1.22.0",
+                "5.6.mysql_aurora.1.22.1",
+                "5.6.mysql_aurora.1.22.1.3",
+                "5.6.mysql_aurora.1.22.2",
+                "5.6.mysql_aurora.1.22.2",
+                "5.6.mysql_aurora.1.23.0"
+            ]
+        },
+        "DBInstanceClass": {
+            "Description": "The database instance type",
+            "Type": "String",
+            "Default": "db.t2.small",
+            "AllowedValues": [
+                "db.t2.micro",
+                "db.t2.small",
+                "db.t2.medium",
+                "db.t2.large",
+                "db.t2.xlarge",
+                "db.t2.xlarge",
+                "db.m5.24xlarge",
+                "db.m5.12xlarge",
+                "db.m5.4xlarge",
+                "db.m5.2xlarge", 
+                "db.m5.xlarge", 
+                "db.m5.large", 	
+                "db.m4.large",
+                "db.m4.xlarge",
+                "db.m4.2xlarge",
+                "db.m4.4xlarge",
+                "db.m4.10xlarge",
+                "db.m4.16xlarge",
+                "db.m3.medium",
+                "db.m3.large",
+                "db.m3.xlarge",
+                "db.m3.2xlarge",
+                "db.r3.large",
+                "db.r3.xlarge",
+                "db.r3.2xlarge",
+                "db.r3.4xlarge",
+                "db.r3.8xlarge",
+                "db.r4.large",
+                "db.r4.xlarge",
+                "db.r4.2xlarge",
+                "db.r4.4xlarge",
+                "db.r4.8xlarge",
+                "db.r4.16xlarge"
+            ],
+            "ConstraintDescription": "must select a valid database instance type."
+        }
+    },
+    "Resources": {
+        "DBSubnetGroup": {
+            "Type": "AWS::RDS::DBSubnetGroup",
+            "Properties": {
+                "DBSubnetGroupName": {
+                    "Ref": "DBSubnetGroupName"
+                },
+                "DBSubnetGroupDescription": "Aurora Subnet Group",
+                "SubnetIds": { "Ref": "DBSubnets" }
+            }
+        },
+        "DBEC2SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupName": {
+                    "Ref": "DBSecurityGroupName"
+                },
+                "GroupDescription": "Open database for access",
+                "VpcId": {
+                    "Ref": "DBVPC"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": {
+                            "Ref": "DBPortNumber"
+                        },
+                        "ToPort": {
+                            "Ref": "DBPortNumber"
+                        },
+                        "CidrIp": {"Ref":"DBInputCIDR"}
+                    }
+                ]
+            }
+        },
+        "DBCluster": {
+            "Type" : "AWS::RDS::DBCluster",
+            "Properties" : {
+                "DatabaseName" : {
+                    "Ref": "DBName"
+                },
+                "DBSubnetGroupName" : {
+                    "Ref": "DBSubnetGroup"
+                },
+                "DBClusterParameterGroupName": {
+                    "Ref": "RDSDBClusterParameterGroup"
+                },
+                "Engine" : "aurora",
+                "EngineVersion" : {
+                    "Ref": "DBEngineVersion"
+                },
+                "MasterUsername": {
+                    "Ref": "DBMasterUsername"
+                },
+                "MasterUserPassword": {
+                    "Ref": "DBMasterUserPassword"
+                },
+                "Port": {
+                    "Ref": "DBPortNumber"
+                },
+                "VpcSecurityGroupIds" : [
+                    {
+                        "Fn::GetAtt": [
+                            "DBEC2SecurityGroup",
+                            "GroupId"
+                        ]
+                    }
+                ]
+            }
+        },
+        "RDSDBInstance1": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBSubnetGroupName": {
+                    "Ref": "DBSubnetGroup"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "RDSDBParameterGroup"
+                },                
+                "Engine": "aurora",
+                "DBClusterIdentifier": {
+                    "Ref": "DBCluster"
+                },
+                "PubliclyAccessible": "true",
+                "DBInstanceClass": {
+                    "Ref": "DBInstanceClass"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Aurora RDS Instance 1"
+                    }
+                ]
+            },
+            "DependsOn": "DBSubnetGroup"
+        },
+        "RDSDBInstance2": {
+            "Type": "AWS::RDS::DBInstance",
+            "Properties": {
+                "DBSubnetGroupName": {
+                    "Ref": "DBSubnetGroup"
+                },
+                "DBParameterGroupName": {
+                    "Ref": "RDSDBParameterGroup"
+                },                 
+                "Engine": "aurora",
+                "DBClusterIdentifier": {
+                    "Ref": "DBCluster"
+                },
+                "PubliclyAccessible": "true",
+                "DBInstanceClass": {
+                    "Ref": "DBInstanceClass"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Aurora RDS Instance 2"
+                    }
+                ]
+            },
+            "DependsOn": "DBSubnetGroup"
+        },
+        "RDSDBClusterParameterGroup": {
+            "Type": "AWS::RDS::DBClusterParameterGroup",
+            "Properties": {
+                "Description": "CloudFormation Sample Aurora Cluster Parameter Group",
+                "Family": "aurora5.6",
+                "Parameters": {
+                    "time_zone": "US/Eastern"
+                }
+            }
+        },
+        "RDSDBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": "CloudFormation Sample Aurora Parameter Group",
+                "Family": "aurora5.6",
+                "Parameters": {
+                    "sql_mode": "IGNORE_SPACE"
+                }
+            }
+        }               
+    },
+    "Outputs": {
+        "MasterJDBCConnectionString": {
+            "Description": "JDBC connection string for the master database",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "jdbc:mysql://",
+                        {
+                            "Fn::GetAtt": [
+                                "RDSDBInstance1",
+                                "Endpoint.Address"
+                            ]
+                        },
+                        ":",
+                        {
+                            "Fn::GetAtt": [
+                                "RDSDBInstance1",
+                                "Endpoint.Port"
+                            ]
+                        },
+                        "/",
+                        {
+                            "Ref": "DBName"
+                        }
+                    ]
+                ]
+            }
+        }
+    }
+}
