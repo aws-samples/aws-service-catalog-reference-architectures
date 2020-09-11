@@ -40,7 +40,7 @@
     "SolutionStackName":{
         "Type": "String",
         "Description": "Enter the name of the solution stack. A list of available Solution Stacks can be found here:https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html .",
-		"Default":"64bit Amazon Linux 2 v3.0.1 running Python 3.7"
+		"Default":""
     },
 	"ApplicationName":{
 		"Type": "String",
