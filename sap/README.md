@@ -14,6 +14,12 @@ This solution uses the following AWS services. Most of the resources are set up 
 
 ### Solution overview
 
+
+Inline-style: 
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
+
+
 The following diagram maps out the solution architecture. 
 ![alt text][https://s3.amazonaws.com/aws-service-catalog-reference-architectures/sap/sc_scp.png]
 
