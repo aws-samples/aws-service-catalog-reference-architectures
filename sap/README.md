@@ -12,7 +12,11 @@ This solution uses the following AWS services. Most of the resources are set up 
 - AWS Launch Wizard
 - AWS CloudFormation
 
-### Solution overview¬
+### Solution overview
 
 The following diagram maps out the solution architecture. 
-![alt text][sc_scp.png]
+![alt text][https://s3.amazonaws.com/aws-service-catalog-reference-architectures/sap/sc_scp.png]
+
+
+To get started now, just sign in to your AWS account and click the button to create a Service Catalog Portfolio with sample EC2 products in your AWS account:
+[![CreateStack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation#/stacks/new?stackName=SC-RA-EC2Portfolio&templateURL=https://s3.amazonaws.com/aws-service-catalog-reference-architectures/ec2/sc-portfolio-ec2demo.json)  
