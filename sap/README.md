@@ -16,7 +16,7 @@ This solution uses the following AWS services. Most of the resources are set up 
 
 
 Inline-style: 
-![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+![alt text](https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/sap/sc_sap.png "Logo Title Text 1")
 
 
 
