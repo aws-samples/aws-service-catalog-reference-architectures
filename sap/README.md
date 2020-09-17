@@ -12,3 +12,7 @@ This solution uses the following AWS services. Most of the resources are set up 
 - AWS Launch Wizard
 - AWS CloudFormation
 
+### Solution overview¬
+
+The following diagram maps out the solution architecture. 
+![alt text][sc_scp.png]
