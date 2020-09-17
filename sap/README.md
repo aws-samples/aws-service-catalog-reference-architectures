@@ -14,14 +14,9 @@ This solution uses the following AWS services. Most of the resources are set up 
 
 ### Solution overview
 
-
-Inline-style: 
-![alt text](https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/sap/sc_sap.png "Logo Title Text 1")
-
-
-
 The following diagram maps out the solution architecture. 
-![alt text][https://s3.amazonaws.com/aws-service-catalog-reference-architectures/sap/sc_scp.png]
+
+![alt text](https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/sap/sc_sap.png "Archicture")
 
 
 To get started now, just sign in to your AWS account and click the button to create a Service Catalog Portfolio with sample EC2 products in your AWS account:
