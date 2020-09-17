@@ -75,7 +75,7 @@
             "Type":"String",
             "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
              "AllowedValues": ["Yes","No"],
-             "Default":"Yes" 
+             "Default":"No" 
         }
       },
       "Conditions":{
@@ -121,26 +121,18 @@
         },        
         "LinkEndusersRole":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+		  "Condition":"CondCreateEndUsers",
           "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
-                ]},
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
             "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
         },
         "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+		  "Condition":"CondCreateEndUsers",
           "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
-                ]},
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
             "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
@@ -153,15 +145,15 @@
             "TimeoutInMinutes" : 5
           }
         },        
-        "beanstalkproduct": {
+        "pythonbeanstalkproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCElasticBeanstalkportfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -169,16 +161,16 @@
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/sc-product-elasticbeanstalk.json"},
             "TimeoutInMinutes" : 5
           }
-        },        
+        },
         "pipelineproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
                 ]},
                 "PortfolioId":{"Ref":"SCElasticBeanstalkportfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}

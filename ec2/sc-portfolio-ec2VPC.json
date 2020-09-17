@@ -169,7 +169,7 @@
           }
         },
         
-        "ec2webserverproduct": {
+        "ec2apachewebserverproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {
@@ -182,7 +182,25 @@
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-webserver.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-apache-webserver.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+		
+		"ec2nginxwebserverproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintARN": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
+                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-nginx-webserver.json"},
             "TimeoutInMinutes" : 5
           }
         },
@@ -232,8 +250,9 @@
           "Condition":"CreateLaunchConstraint",
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] }
         },
-        "ec2windowsproductId":{"Value": { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
-        "ec2webserverproductId":{"Value": { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
+        "ec2windowsproductId":{"Value": { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },		
+        "ec2nginxwebserverproductId":{"Value": { "Fn::GetAtt":["ec2nginxwebserverproduct","Outputs.ProductId"]} },
+		"ec2apachewebserverproductId":{"Value": { "Fn::GetAtt":["ec2apachewebserverproduct","Outputs.ProductId"]} },
         "ec2linuxproductId":{"Value": { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} },
         "vpcproductId":{"Value": { "Fn::GetAtt":["vpcproduct","Outputs.ProductId"]} }
     }

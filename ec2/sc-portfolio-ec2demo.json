@@ -170,7 +170,7 @@
           }
         },
         
-        "ec2webserverproduct": {
+        "ec2nginxwebserverproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {         
@@ -183,7 +183,24 @@
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-demowebserver.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-nginx-demowebserver.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        "ec2apachewebserverproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {         
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintRole": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Fn::Sub": "${LaunchRoleName}"}
+                 ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-apache-demowebserver.json"},
             "TimeoutInMinutes" : 5
           }
         },

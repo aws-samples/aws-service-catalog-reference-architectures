@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "Linux EC2 Webserver ServiceCatalog product. (fdp-1p4dlgcoi)",
+    "Description": "Linux EC2 Apache Webserver ServiceCatalog product. (fdp-1p4dlgcoi)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -24,28 +24,21 @@
         "WebserverProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Amazon Elastic Compute Cloud (EC2) Linux Webserver",
-                "Description": "This product builds one Amazon Linux EC2 webserver (Apache or NGINX) instance.",
+                "Name": "Amazon Elastic Compute Cloud (EC2) Linux Apache Webserver",
+                "Description": "This product builds one Amazon Linux EC2 Apache webserver instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
                 "SupportEmail": "support@yourcompany.com",
                 "AcceptLanguage": "en",
                 "SupportUrl": "http://helpdesk.yourcompany.com",
-                "ProvisioningArtifactParameters": [
-                    {
-                        "Description": "NGINX webserver",
-                        "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx.json"}
-                        },
-                        "Name": "NGINX v2.0"
-                    },
+                "ProvisioningArtifactParameters": [                    
                     {
                         "Description": "Apache webserver",
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-apache.json"}
                         },
-                        "Name": "Apache v2.0"
+                        "Name": "Apache v1.0"
                     }
                 ]
             }

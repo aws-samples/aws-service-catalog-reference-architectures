@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "CodePipeline Elastic Beanstalk project ServiceCatalog product. (fdp-1qj64b32f)",
+    "Description": "Linux EC2 Demo NGINX Webserver ServiceCatalog product. (fdp-1p4dlgcoi)",
     "Parameters":
       {
         "PortfolioProvider": {
@@ -9,7 +9,7 @@
         },
         "LaunchConstraintRole": {
             "Type":"String",
-            "Description":"ARN of the launch constraint role for ECS products."
+            "Description":"Launch constraint role for EC2 products."
         },
         "PortfolioId":{
             "Type":"String",
@@ -21,11 +21,11 @@
         }
       },
     "Resources": {
-        "beanstalkpipeline": {
+        "WebserverProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Elastic Beanstalk Codepipeline project",
-                "Description": "This product builds a codepipeline project for Elastic Beanstalk CI/CD.",
+                "Name": "Demo Linux Webserver",
+                "Description": "This product builds a NGINX webserver EC2 instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},
                 "SupportDescription": "Operations Team",
@@ -34,18 +34,11 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "CodePipeline project for Linux Elastic Beanstalk",
+                        "Description": "NGINX webserver",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/beanstalk-codepipeline-ra.json"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}ec2/sc-ec2-linux-nginx-nokey.json"}
                         },
-                        "Name": "Linux v1.0"
-                    },
-					{
-                        "Description": "CodePipeline project for Windows Elastic Beanstalk",
-                        "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}elasticbeanstalk/beanstalk-codepipeline-dotnet.json"}
-                        },
-                        "Name": "Windows v1.0"
+                        "Name": "NGINX v1.0"
                     }
                 ]
             }
@@ -54,7 +47,7 @@
           "Type" : "AWS::ServiceCatalog::PortfolioProductAssociation",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"beanstalkpipeline"}
+            "ProductId" :   {"Ref":"WebserverProduct"}
           }
         },
         "constraintnginxcf":{
@@ -62,13 +55,13 @@
           "DependsOn" : "Associatenginxcf",
           "Properties" : {
             "PortfolioId" : {"Ref":"PortfolioId"},
-            "ProductId" :   {"Ref":"beanstalkpipeline"},
+            "ProductId" :   {"Ref":"WebserverProduct"},
             "LocalRoleName" : {"Ref":"LaunchConstraintRole"},
             "Description": {"Ref":"LaunchConstraintRole"}
           }
         }
     },
     "Outputs": {
-        "ProductId":{"Value": { "Ref":"beanstalkpipeline" } }
+        "ProductId":{"Value": { "Ref":"WebserverProduct" } }
     }
 }
