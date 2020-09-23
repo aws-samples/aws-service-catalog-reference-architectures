@@ -24,7 +24,7 @@
         "WebserverProduct": {
             "Type": "AWS::ServiceCatalog::CloudFormationProduct",
             "Properties": {
-                "Name": "Demo Linux Webserver",
+                "Name": "Demo NGINX Webserver",
                 "Description": "This product builds a NGINX webserver EC2 instance.",
                 "Owner": {"Ref":"PortfolioProvider"},
                 "Distributor": {"Ref":"PortfolioProvider"},

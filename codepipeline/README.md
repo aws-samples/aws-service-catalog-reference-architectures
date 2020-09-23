@@ -94,7 +94,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
   ```
 
 2. Optionally add config files for [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
-  If you fill in the provided TaskCat parameter files with values from your account,
+  If you fill in the TaskCat config with values from your account,
   then you can have TaskCat validate the ServiceCatalog products in each account and region.
   
 3. Commit the changes to your CodeCommit Repo and push!  

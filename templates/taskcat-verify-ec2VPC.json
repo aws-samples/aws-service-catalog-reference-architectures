@@ -111,29 +111,6 @@
             "TimeoutInMinutes" : 5
           }
         },        
-        "IAMenduser": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
-            "TimeoutInMinutes" : 5
-          }
-        }, 
-        "LinkEndusers":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : {"Fn::GetAtt":["IAMenduser","Outputs.EndUserGroupArn"]},
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
-            "PrincipalType" : "IAM"
-          }
-        },
-        "LinkEndusers":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : {"Fn::GetAtt":["IAMenduser","Outputs.EndUserRoleArn"]},
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
-            "PrincipalType" : "IAM"
-          }
-        },
         "ec2linuxproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
@@ -152,23 +129,43 @@
           }
         },
         
-        "ec2webserverproduct": {
+        
+        "ec2apachewebserverproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
-            "Parameters" : {         
+            "Parameters" : {
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
             },
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-webserver.json"},
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-apache-webserver.json"},
             "TimeoutInMinutes" : 5
           }
         },
+        
+        "ec2nginxwebserverproduct": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Properties" : {
+            "Parameters" : {
+                "PortfolioProvider": {"Ref":"PortfolioProvider"},
+                "LaunchConstraintRole": {"Fn::If" : [
+                    "CreateLaunchConstraint",
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
+                ]},
+                "PortfolioId":{"Ref":"SCEC2portfolio"},
+                "RepoRootURL":{"Ref":"RepoRootURL"}
+            },
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}ec2/sc-product-ec2-nginx-webserver.json"},
+            "TimeoutInMinutes" : 5
+          }
+        },
+        
         
         "ec2windowsproduct": {
           "Type" : "AWS::CloudFormation::Stack",
@@ -216,8 +213,9 @@
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] } 
         },
         "ec2windowsproductId":{"Value":     { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
-        "ec2webserverproductId":{"Value":     { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
         "ec2linuxproductId":{"Value":         { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} },
+        "ec2nginxwebserverproductId":{"Value": { "Fn::GetAtt":["ec2nginxwebserverproduct","Outputs.ProductId"]} },
+        "ec2apachewebserverproductId":{"Value": { "Fn::GetAtt":["ec2apachewebserverproduct","Outputs.ProductId"]} },
         "vpcproductId":{"Value":         { "Fn::GetAtt":["vpcproduct","Outputs.ProductId"]} }
     }
 }

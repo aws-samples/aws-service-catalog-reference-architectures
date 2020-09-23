@@ -1,6 +1,6 @@
 #!/bin/bash
 shopt -s nullglob
-mkdir templates/
+mkdir -p templates/
 cp {ec2,vpc}/*.{json,yml} templates/
 cp codepipeline/*.json templates/
 for f in templates/*; do

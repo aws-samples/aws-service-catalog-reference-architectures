@@ -128,7 +128,7 @@
         "LinkEndusersRole":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
           "Condition":"CondCreateEndUsers",
-		  "Properties" : {
+          "Properties" : {
             "PrincipalARN" :{"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
             "PrincipalType" : "IAM"
@@ -136,7 +136,7 @@
         },
         "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-		  "Condition":"CondCreateEndUsers",
+          "Condition":"CondCreateEndUsers",
           "Properties" : {
             "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},                
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
@@ -178,8 +178,8 @@
             "TimeoutInMinutes" : 5
           }
         },
-		
-		"ec2nginxwebserverproduct": {
+        
+        "ec2nginxwebserverproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
             "Parameters" : {
@@ -244,7 +244,7 @@
         },
         "ec2windowsproductId":{"Value": { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },		
         "ec2nginxwebserverproductId":{"Value": { "Fn::GetAtt":["ec2nginxwebserverproduct","Outputs.ProductId"]} },
-		"ec2apachewebserverproductId":{"Value": { "Fn::GetAtt":["ec2apachewebserverproduct","Outputs.ProductId"]} },
+        "ec2apachewebserverproductId":{"Value": { "Fn::GetAtt":["ec2apachewebserverproduct","Outputs.ProductId"]} },
         "ec2linuxproductId":{"Value": { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} },
         "vpcproductId":{"Value": { "Fn::GetAtt":["vpcproduct","Outputs.ProductId"]} }
     }
