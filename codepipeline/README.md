@@ -79,8 +79,6 @@ First you must create the StackSets permissions and trusts between accounts (ste
   f. Deploy to any regions in which you want to use ServiceCatalog - this guide assumes us-east-1,us-east-2,us-west-1  
 
 ## Using The Automated CodePipeline  
-
-![ServiceCatalog-CICD-templates.png](ServiceCatalog-CICD-templates.png)
   
 1. Copy this Repo into your new CodeCommit Repo. Make sure you don't copy the .git folder.  
   You will need a codecommit user. You can use an existing user or create a new one with the supplied template. Pick either HTTPS or SSH for connecting.
@@ -95,7 +93,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
   cd SCPortfoliosRepo
   ```
 
-2. Optionally edit the supplied config files for CodePipeline and [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
+2. Optionally add config files for [TaskCat](https://aws-quickstart.github.io/auto-testing.html) validation  
   If you fill in the provided TaskCat parameter files with values from your account,
   then you can have TaskCat validate the ServiceCatalog products in each account and region.
   

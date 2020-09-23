@@ -127,26 +127,18 @@
         },        
         "LinkEndusersRole":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
-                ]},
+          "Condition":"CondCreateEndUsers",
+		  "Properties" : {
+            "PrincipalARN" :{"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
             "PrincipalType" : "IAM"
           }
         },
         "LinkEndusersGroup":{
           "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
+		  "Condition":"CondCreateEndUsers",
           "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
-                ]},
+            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},                
             "PortfolioId" : {"Ref":"SCEC2portfolio"},
             "PrincipalType" : "IAM"
           }
@@ -156,10 +148,10 @@
           "Properties" : {
             "Parameters" : {
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -174,10 +166,10 @@
           "Properties" : {
             "Parameters" : {
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -192,10 +184,10 @@
           "Properties" : {
             "Parameters" : {
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -210,10 +202,10 @@
           "Properties" : {
             "Parameters" : {         
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -228,10 +220,10 @@
           "Properties" : {
             "Parameters" : {
                 "PortfolioProvider": {"Ref":"PortfolioProvider"},
-                "LaunchConstraintARN": {"Fn::If" : [
+                "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
-                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LaunchRoleName}"}
+                    {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}

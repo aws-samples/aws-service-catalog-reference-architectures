@@ -314,8 +314,7 @@
                               ],
                               "Resource":[
                                 {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildDeployS3Project"}} ]},
-                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildCFNNAG"}} ]},
-                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildValidateTemplate"}} ]}
+                                {"Fn::Sub":["arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:project/${cbproj}", {"cbproj": {"Ref":"CodeBuildCFNNAG"}} ]}
                              ]                              
                             },{
                               "Effect":"Allow",
@@ -346,7 +345,7 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/ubuntu-base:14.04",
+                "Image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0",
                 "EnvironmentVariables":[
                     {
                       "Name": "DEPLOY_BUCKET",
@@ -365,39 +364,7 @@
               },
               "TimeoutInMinutes": 10
             }            
-        },
-        "CodeBuildValidateTemplate" : {
-            "Type": "AWS::CodeBuild::Project",
-            "Properties": {
-              "Name": "Validate_Template",
-              "Description": "run taskcat on template to validate in accounts and regions",
-              "ServiceRole": {"Fn::GetAtt": ["CodeBuildRole","Arn"]},
-              "Artifacts": {
-                "Type": "CODEPIPELINE"
-              },
-              "Environment": {
-                "Type": "LINUX_CONTAINER",
-                "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/python:3.6.5",
-                "EnvironmentVariables":[
-                    {
-                      "Name":  "PROJECTNAME",
-                      "Value": {"Ref":"CodeCommitRepoName"},
-                      "Type": "PLAINTEXT"
-                    },{
-                      "Name": "ARTIFACT_BUCKET",
-                      "Value": {"Ref":"PipelineArtifacts"},
-                      "Type": "PLAINTEXT"
-                    }
-                ]
-              },
-              "Source": {
-                "Type": "CODEPIPELINE",
-                "BuildSpec":"ci/buildspec-validate.yml"
-              },
-              "TimeoutInMinutes": 10
-            }            
-        },
+        },        
         "CodeBuildCFNNAG" : {
             "Type": "AWS::CodeBuild::Project",
             "Properties": {
@@ -410,7 +377,7 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/ruby:2.5.3"
+                "Image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0"
               },
               "Source": {
                 "Type": "CODEPIPELINE",
@@ -453,7 +420,7 @@
                         }
                     ]
                 },{
-                    "Name": "PreCreateTests",
+                    "Name": "TemplateValidation",
                     "Actions": [
                         {
                             "InputArtifacts": [
@@ -470,21 +437,6 @@
                                 "ProjectName":{"Ref":"CodeBuildCFNNAG"}
                             },
                             "RunOrder": 1
-                        },{
-                            "InputArtifacts": [ 
-                              {"Name": "SourceArtifacts"}
-                            ],
-                            "Name": "Validate_Template",
-                            "ActionTypeId": {
-                                "Category": "Build",
-                                "Owner": "AWS",
-                                "Version": "1",
-                                "Provider": "CodeBuild"
-                            },
-                            "Configuration": {
-                                "ProjectName":{"Ref":"CodeBuildValidateTemplate"}
-                            },
-                            "RunOrder": 2
                         }
                      ]
                 },{

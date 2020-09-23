@@ -160,7 +160,7 @@
                 "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
-                    {"Fn::Sub": "${LaunchRoleName}"}
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -178,7 +178,7 @@
                 "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
-                    {"Fn::Sub": "${LaunchRoleName}"}
+                    {"Ref": "LaunchRoleName"}
                  ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -195,7 +195,7 @@
                 "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
-                    {"Fn::Sub": "${LaunchRoleName}"}
+                    {"Ref": "LaunchRoleName"}
                  ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -213,7 +213,7 @@
                 "LaunchConstraintRole": {"Fn::If" : [
                     "CreateLaunchConstraint",
                     {"Fn::GetAtt":["LaunchConstraintRole","Outputs.LaunchRoleName"]},
-                    {"Fn::Sub": "${LaunchRoleName}"}
+                    {"Ref": "LaunchRoleName"}
                 ]},
                 "PortfolioId":{"Ref":"SCEC2portfolio"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -257,7 +257,8 @@
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleName"] } 
         },
         "ec2windowsproductId":{"Value":     { "Fn::GetAtt":["ec2windowsproduct","Outputs.ProductId"]} },
-        "ec2webserverproductId":{"Value":     { "Fn::GetAtt":["ec2webserverproduct","Outputs.ProductId"]} },
+        "ec2nginxwebserverproductId":{"Value":     { "Fn::GetAtt":["ec2nginxwebserverproduct","Outputs.ProductId"]} },
+        "ec2apachewebserverproductId":{"Value":     { "Fn::GetAtt":["ec2apachewebserverproduct","Outputs.ProductId"]} },
         "ec2linuxproductId":{"Value":         { "Fn::GetAtt":["ec2linuxproduct","Outputs.ProductId"]} }
     }
 }
