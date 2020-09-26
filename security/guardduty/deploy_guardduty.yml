@@ -76,6 +76,7 @@ Resources:
               - "organizations:DescribeOrganization"
               - "organizations:ListDelegatedAdministrators"
               - "organizations:ListAWSServiceAccessForOrganization"
+              - "organizations:ListAccounts"
               - "cloudtrail:DescribeTrails"
               - "guardduty:DisableOrganizationAdminAccount"
               - "guardduty:EnableOrganizationAdminAccount"
