@@ -465,7 +465,7 @@ def create_s3_destination(sts_session):
     # see documentation under S3.Client.create_bucket API
     allowed_regions = [
         'eu-west-1',
-        'us-east-2'
+        'us-east-2',
         'us-west-1',
         'us-west-2',
         'ap-south-1',
