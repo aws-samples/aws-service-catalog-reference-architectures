@@ -465,6 +465,7 @@ def create_s3_destination(sts_session):
     # see documentation under S3.Client.create_bucket API
     allowed_regions = [
         'eu-west-1',
+        'us-east-2'
         'us-west-1',
         'us-west-2',
         'ap-south-1',
@@ -481,25 +482,25 @@ def create_s3_destination(sts_session):
     kms_key_arn = ''
     try:
         if bucket_region in allowed_regions:
+            kms_key_arn = create_kms_key(sts_session, bucket_region)
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
                     'LocationConstraint': bucket_region
                 }
             )
-            kms_key_arn = create_kms_key(sts_session, bucket_region)
         elif bucket_region.startswith('eu'):
+            kms_key_arn = create_kms_key(sts_session, bucket_region)
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
                     'LocationConstraint': 'EU'
                 }
             )
-            kms_key_arn = create_kms_key(sts_session, bucket_region)
         else:
             # Bucket will be created in us-east-1
-            s3_client.create_bucket(Bucket=bucket_name)
             kms_key_arn = create_kms_key(sts_session, 'us-east-1')
+            s3_client.create_bucket(Bucket=bucket_name)
     except Exception as e:
         logger.info(f'Bucket {bucket_name} already created.')
         logger.error(f'Skipping creating bucket {bucket_name}', exc_info=True)
