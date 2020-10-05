@@ -62,7 +62,7 @@ Resources:
               - 'logs:CreateLogStream'
               - 'logs:PutLogEvents'
             Resource: 
-              -  !Sub 'arn:aws:logs:us-east-1:${AWS::AccountId}:log-group:/aws/lambda/*'
+              -  !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
           - Effect: Allow
             Action:
               - 'sts:AssumeRole'
@@ -74,8 +74,10 @@ Resources:
             Action:
               - "organizations:RegisterDelegatedAdministrator"
               - "organizations:DescribeOrganization"
+              - "organizations:EnableAWSServiceAccess"
               - "organizations:ListDelegatedAdministrators"
               - "organizations:ListAWSServiceAccessForOrganization"
+              - "organizations:ListAccounts"
               - "cloudtrail:DescribeTrails"
               - "guardduty:DisableOrganizationAdminAccount"
               - "guardduty:EnableOrganizationAdminAccount"

@@ -38,6 +38,7 @@ role_to_assume = os.environ['role_to_assume']
 session = boto3.Session()
 failed_regions = []
 failed_members = {}
+failed_s3_members = {}
 http = urllib3.PoolManager()
 
 
@@ -50,12 +51,26 @@ def handler(event, context):
         gdmaster_account_number,
         role_to_assume
     )
-    bucket_arn = create_s3_destination(gdmaster_account_session)
+    destination = create_s3_destination(gdmaster_account_session)
+    accounts = get_all_accounts()
+
+    # handle Custom Resource Call
+    if 'RequestType' in event and (
+            event['RequestType'] == "Delete" or
+            event['RequestType'] == "Create" or
+            event['RequestType'] == "Update"):
+        action = event['RequestType']
+    else:
+        action = "Update"
 
     for region in guardduty_regions:
         try:
-            enable_gd_master(region)
-            enable_gd_member(gdmaster_account_session, region, bucket_arn)
+            if action == "Create" or action == "Update":
+                enable_gd_master(region)
+                enable_gd_member(
+                    gdmaster_account_session, region, destination, accounts)
+            elif action == "Delete":
+                disable_gd_master(region)
         except Exception as e:
             logger.error(
                 f'Error to enable master or member in region {region}',
@@ -75,6 +90,9 @@ def handler(event, context):
     if bool(failed_members):
         logger.info('Failed to enable GuardDuty members: ')
         logger.info(json.dumps(failed_members, indent=2))
+    if bool(failed_s3_members):
+        logger.info('Failed to enable GuardDuty for S3: ')
+        logger.info(json.dumps(failed_s3_members, indent=2))
 
 
 def cfnresponse(
@@ -188,7 +206,7 @@ def disable_gd_master(region):
         )
 
 
-def enable_gd_member(session, region, properties):
+def enable_gd_member(session, region, properties, accounts):
     """
     Enable the delegated admin account from the AWS Organization root
     account for testing purpose only
@@ -213,31 +231,65 @@ def enable_gd_member(session, region, properties):
         DestinationProperties=properties,
         ClientToken=detector_id
     )
-    accounts = session.client('organizations').list_accounts()
+
     details = []
     failed_accounts = []
+    s3_failed_accounts = []
+    all_account_ids = []
 
-    for account in accounts['Accounts']:
+    for account in accounts:
         if (account['Id'] != gdmaster_account_number):
             details.append(
-                {
-                    'AccountId': account['Id'],
-                    'Email': account['Email']
-                }
+              {
+                'AccountId': account['Id'],
+                'Email': account['Email']
+              }
             )
+            all_account_ids.append(account['Id'])
+
+    details_batch = chunks(details, 50)
+    ids_batch = chunks(all_account_ids, 50)
 
     try:
-        unprocessed_accounts = delegated_admin_client.create_members(
-            DetectorId=detector_id,
-            AccountDetails=details
-        )['UnprocessedAccounts']
-        if (len(unprocessed_accounts) > 0):
-            failed_accounts.append(unprocessed_accounts)
+        for b in details_batch:
+            unprocessed_accounts = delegated_admin_client.create_members(
+                DetectorId=detector_id,
+                AccountDetails=details
+            )['UnprocessedAccounts']
+            if (len(unprocessed_accounts) > 0):
+                failed_accounts.append(unprocessed_accounts)
 
         delegated_admin_client.update_organization_configuration(
             DetectorId=detector_id,
-            AutoEnable=True
+            AutoEnable=True,
+            DataSources={
+                'S3Logs': {
+                    'AutoEnable': True
+                }
+            }
         )
+
+        # Enable S3Log in all accounts, not including admin account
+        try:
+            for i in ids_batch:
+                s3_unprocessed_accounts = delegated_admin_client.update_member_detectors(
+                    DetectorId=detector_id,
+                    AccountIds=i,
+                    DataSources={
+                        'S3Logs': {
+                            'Enable': True
+                        }
+                    }
+                )['UnprocessedAccounts']  
+                
+                if (len(s3_unprocessed_accounts)>0):
+                    s3_failed_accounts.extend( s3_unprocessed_accounts )
+        except ClientError as s3_excpetion:
+            logger.inf(f'Error enabling S3Log in Account : {account}')
+            s3_failed_accounts.append({
+                account: repr(s3_excpetion)
+            })
+
     except ClientError as e:
         logger.debug(f'Error Processing Account {account}')
         failed_accounts.append({account: repr(e)})
@@ -246,7 +298,32 @@ def enable_gd_member(session, region, properties):
 
     if bool(failed_accounts):
         failed_members.update(region=failed_accounts)
+    if bool(s3_failed_accounts):
+        failed_s3_members.update(region=failed_accounts)
 
+def chunks(l,n):
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
+
+def get_all_accounts():
+    """
+    Get all member accounts of the organization.
+    """
+
+    accounts=[]
+    token_tracker = {}
+    while True:
+        members = session.client('organizations').list_accounts(
+            **token_tracker
+        )
+        accounts.extend(members['Accounts'])
+        
+        if 'NextToken' in members:
+            token_tracker['NextToken'] = members['NextToken']
+        else:
+            break
+
+    return accounts
 
 def create_kms_key(session, region):
     """
@@ -388,6 +465,7 @@ def create_s3_destination(sts_session):
     # see documentation under S3.Client.create_bucket API
     allowed_regions = [
         'eu-west-1',
+        'us-east-2',
         'us-west-1',
         'us-west-2',
         'ap-south-1',
@@ -404,25 +482,25 @@ def create_s3_destination(sts_session):
     kms_key_arn = ''
     try:
         if bucket_region in allowed_regions:
+            kms_key_arn = create_kms_key(sts_session, bucket_region)
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
                     'LocationConstraint': bucket_region
                 }
             )
-            kms_key_arn = create_kms_key(sts_session, bucket_region)
         elif bucket_region.startswith('eu'):
+            kms_key_arn = create_kms_key(sts_session, bucket_region)
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
                     'LocationConstraint': 'EU'
                 }
             )
-            kms_key_arn = create_kms_key(sts_session, bucket_region)
         else:
             # Bucket will be created in us-east-1
-            s3_client.create_bucket(Bucket=bucket_name)
             kms_key_arn = create_kms_key(sts_session, 'us-east-1')
+            s3_client.create_bucket(Bucket=bucket_name)
     except Exception as e:
         logger.info(f'Bucket {bucket_name} already created.')
         logger.error(f'Skipping creating bucket {bucket_name}', exc_info=True)
