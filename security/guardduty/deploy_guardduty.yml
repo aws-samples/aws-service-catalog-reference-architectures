@@ -74,6 +74,7 @@ Resources:
             Action:
               - "organizations:RegisterDelegatedAdministrator"
               - "organizations:DescribeOrganization"
+              - "organizations:EnableAWSServiceAccess"
               - "organizations:ListDelegatedAdministrators"
               - "organizations:ListAWSServiceAccessForOrganization"
               - "organizations:ListAccounts"
