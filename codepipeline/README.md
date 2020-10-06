@@ -81,7 +81,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
 ## Using The Automated CodePipeline  
   
 1. Copy this Repo into your new CodeCommit Repo. Make sure you don't copy the .git folder.  
-  You will need a codecommit user. You can use an existing user or create a new one with the supplied template. Pick either HTTPS or SSH for connecting.
+  You will need a codecommit user. or you may use the supplied Cloud9 product in the Service Catalog demo portfolio. For git credentials, you can use an existing user or create a new one with the supplied template. Pick either HTTPS or SSH for connecting.
     -Sample CodeCommit user template: [iam/sc-codecommit-iamuser.yml](../iam/sc-codecommit-iamuser.yml)  
 	-[Setting up HTTPS](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html)
     -[Setting up ssh](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html)  
@@ -89,7 +89,7 @@ First you must create the StackSets permissions and trusts between accounts (ste
   ```
   git clone github.com:aws-samples/aws-service-catalog-reference-architectures.git
   git clone https://YOUR-USERNAME@YOUR-REPO-NAME
-  rsync -av --exclude=.git aws-service-catalog-reference-architectures/ SCPortfoliosRepo/
+  rsync -av --exclude=.git --exclude=labs aws-service-catalog-reference-architectures/ SCPortfoliosRepo/
   cd SCPortfoliosRepo
   ```
 

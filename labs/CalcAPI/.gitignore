@@ -1,0 +1,16 @@
+*.pyc
+bin/
+obj/
+.Python
+[Bb]in
+[Ii]nclude
+[Ll]ib
+[Ll]ib64
+[Ll]ocal
+[Ss]cripts
+share
+pyvenv.cfg
+.venv
+pip-selfcheck.json
+calctest
+flaskapp/

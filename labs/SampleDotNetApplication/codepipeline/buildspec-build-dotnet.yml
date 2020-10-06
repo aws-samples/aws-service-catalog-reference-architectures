@@ -1,0 +1,14 @@
+version: 0.2
+env:
+  variables:
+    DOTNET_FRAMEWORK: 4.6.1
+phases:
+  build:
+    commands:
+      - nuget restore
+      - msbuild /p:TargetFrameworkVersion=v$env:DOTNET_FRAMEWORK /p:Configuration=Release /p:DeployIisAppPath="Default Web Site" /t:Package
+      - dir obj\Release\Package
+artifacts:
+  files:
+    - 'obj/**/*'
+    - 'codepipeline/*'

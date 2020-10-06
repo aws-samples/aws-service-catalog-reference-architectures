@@ -1,0 +1,16 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+      - ls      
+  build:
+    commands:
+      - echo Build started on `date`
+      - make prod
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+  # move all files to the output
+    - '**/*'

@@ -1,0 +1,7 @@
+version: 0.2
+phases:
+    install: 
+        commands:             
+          - ./calctest
+          - chmod +x pytest.py
+          - ./pytest.py    
