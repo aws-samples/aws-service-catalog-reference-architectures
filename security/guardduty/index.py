@@ -69,6 +69,8 @@ def handler(event, context):
                 enable_gd_master(region)
                 enable_gd_member(
                     gdmaster_account_session, region, destination, accounts)
+                logger.info(f'properties is {destination}')
+                logger.info(f'region is {region}')
             elif action == "Delete":
                 disable_gd_master(region)
         except Exception as e:
@@ -225,12 +227,26 @@ def enable_gd_member(session, region, properties, accounts):
 
     detector_id = detector_ids['DetectorIds'][0]
     logger.debug(f'detector id is {detector_id}')
-    delegated_admin_client.create_publishing_destination(
-        DetectorId=detector_id,
-        DestinationType='S3',
-        DestinationProperties=properties,
-        ClientToken=detector_id
+    
+    publishing_destinations = delegated_admin_client.list_publishing_destinations(
+        DetectorId=detector_id 
     )
+    
+    if not publishing_destinations['Destinations']:
+        delegated_admin_client.create_publishing_destination(
+            DetectorId=detector_id,
+            DestinationType='S3',
+            DestinationProperties=properties,
+            ClientToken=detector_id
+        )
+        logger.info(f'creating destination')
+    else:
+        delegated_admin_client.update_publishing_destination(
+            DetectorId=detector_id,
+            DestinationId=publishing_destinations['Destinations'][0]['DestinationId'],
+            DestinationProperties=properties
+        )
+        logger.info(f'updating destination')
 
     details = []
     failed_accounts = []
