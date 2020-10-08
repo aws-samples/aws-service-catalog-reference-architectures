@@ -69,6 +69,8 @@ def handler(event, context):
                 enable_gd_master(region)
                 enable_gd_member(
                     gdmaster_account_session, region, destination, accounts)
+                logger.info(f'properties is {destination}')
+                logger.info(f'region is {region}')
             elif action == "Delete":
                 disable_gd_master(region)
         except Exception as e:
@@ -225,12 +227,26 @@ def enable_gd_member(session, region, properties, accounts):
 
     detector_id = detector_ids['DetectorIds'][0]
     logger.debug(f'detector id is {detector_id}')
-    delegated_admin_client.create_publishing_destination(
-        DetectorId=detector_id,
-        DestinationType='S3',
-        DestinationProperties=properties,
-        ClientToken=detector_id
+    
+    publishing_destinations = delegated_admin_client.list_publishing_destinations(
+        DetectorId=detector_id 
     )
+    
+    if not publishing_destinations['Destinations']:
+        delegated_admin_client.create_publishing_destination(
+            DetectorId=detector_id,
+            DestinationType='S3',
+            DestinationProperties=properties,
+            ClientToken=detector_id
+        )
+        logger.info(f'creating destination')
+    else:
+        delegated_admin_client.update_publishing_destination(
+            DetectorId=detector_id,
+            DestinationId=publishing_destinations['Destinations'][0]['DestinationId'],
+            DestinationProperties=properties
+        )
+        logger.info(f'updating destination')
 
     details = []
     failed_accounts = []
@@ -464,18 +480,31 @@ def create_s3_destination(sts_session):
     # Only these regions are allowed in LocationConstraint
     # see documentation under S3.Client.create_bucket API
     allowed_regions = [
-        'eu-west-1',
-        'us-east-2',
-        'us-west-1',
-        'us-west-2',
+        'af-south-1',
+        'ap-east-1',
+        'ap-northeast-1',
+        'ap-northeast-2',
+        'ap-northeast-3',
         'ap-south-1',
         'ap-southeast-1',
         'ap-southeast-2',
-        'ap-northeast-1',
-        'sa-east-1',
+        'ca-central-1',
         'cn-north-1',
-        'eu-central-1'
-        ]
+        'cn-northwest-1',
+        'eu-central-1',
+        'eu-north-1',
+        'eu-south-1',
+        'eu-west-1',
+        'eu-west-2',
+        'eu-west-3',
+        'me-south-1',
+        'sa-east-1',
+        'us-east-2',
+        'us-gov-east-1',
+        'us-gov-west-1',
+        'us-west-1',
+        'us-west-2'
+    ]
 
     # KMS key must be in the same region as the s3 bucket,
     # so we create bucket and key together.
