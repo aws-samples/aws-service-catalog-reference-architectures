@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description:  Best Practice for extending Control Tower to non-supported regions (FTP-CCP-0005)
+Description:  Best Practice for extending Control Tower to non-supported regions (fdp-1r7kea6dk)
 Outputs:
   ConformancePackDeployed:
     Description: Conformance Pack
