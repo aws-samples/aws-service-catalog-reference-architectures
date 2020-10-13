@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Best practice for IAM (FTP-CCP-0003)
+Description: Best practice for IAM (fdp-1r7kea6g8)
 Outputs:
   ConformancePackDeployed:
     Description: Conformance Pack
