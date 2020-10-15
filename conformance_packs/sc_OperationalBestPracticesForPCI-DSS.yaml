@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Best practice for PCI - DSS (FTP-CCP-0004)
+Description: Best practice for PCI - DSS (fdp-1r7kea6h0)
 Outputs:
   ConformancePackDeployed:
     Description: Conformance Pack

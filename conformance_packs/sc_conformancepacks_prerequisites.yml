@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS Config Conformance Packs - prerequisite (FTP-CCP-0001)
+Description: AWS Config Conformance Packs - prerequisite (fdp-1r7kea6hd)
 Resources:
 
   ###################################################

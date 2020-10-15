@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Best practice for Amaon DynamoDB (FTP-CCP-0002)
+Description: Best practice for Amaon DynamoDB (fdp-1r7kea6gi)
 Outputs:
   ConformancePackDeployed:
     Description: Conformance Pack
