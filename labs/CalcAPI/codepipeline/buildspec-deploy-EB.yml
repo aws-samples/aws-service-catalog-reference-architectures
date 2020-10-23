@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:          
+      - echo application deploy started on `date`      
+      - aws s3 cp ./$EB_APPLICATION_NAME.zip s3://$ARTIFACT_BUCKET/$EB_APPLICATION_NAME-$CODEBUILD_BUILD_NUMBER.zip
+  build:
+    commands:
+      - echo Pushing package to Elastic Beanstalk...      
+      - aws elasticbeanstalk create-application-version --application-name $EB_APPLICATION_NAME --version-label v$CODEBUILD_BUILD_NUMBER --description "Auto deployed from CodeCommit build $CODEBUILD_BUILD_NUMBER" --source-bundle S3Bucket="$ARTIFACT_BUCKET",S3Key="$EB_APPLICATION_NAME-$CODEBUILD_BUILD_NUMBER.zip"
+      - aws elasticbeanstalk update-environment --environment-name "EB-ENV-$EB_APPLICATION_NAME" --version-label v$CODEBUILD_BUILD_NUMBER

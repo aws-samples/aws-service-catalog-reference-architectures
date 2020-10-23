@@ -12,6 +12,9 @@ Get a list of Solution Stacks from the AWS CLI with this command:
 
 ![SC-Devops-EB-github.png](SC-Devops-EB-github.png)
 
+See the blog about this solution:
+https://aws.amazon.com/blogs/devops/standardizing-cicd-pipelines-net-web-applications-aws-service-catalog/
+
 
 ### Install  
 Launch the Elastic Beanstalk portfolio stack:  

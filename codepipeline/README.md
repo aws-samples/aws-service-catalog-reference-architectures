@@ -21,9 +21,20 @@ This reference architecture creates an AWS CodeCommit Repo, CodePipeline, and Co
   remove the last 2 commands lines which start with "aws cloudformation update-stack-set ..."  
   add line ```- /bin/bash codepipeline/run-cloudformationupdate.sh```  
 
-
  
 ## Multi-Account Setup
+The best practice to share portfolios with other accounts is to use the 
+built in sharing feature of Service Catalog: [Portfolio Sharing](https://docs.aws.amazon.com/servicecatalog/latest/adminguide/catalogs_portfolios_sharing.html)
+
+
+Read the following blog to learn about sharing with a delegated master for an OU
+[Simplify sharing your AWS Service Catalog portfolios...](https://aws.amazon.com/blogs/mt/simplify-sharing-your-aws-service-catalog-portfolios-in-an-aws-organizations-setup/)
+
+
+Watch this video for a quick run-through on how to share portfolios across an organization
+[![HowToVideo](https://img.youtube.com/vi/BVSohYOppjk/0.jpg)](https://www.youtube.com/watch?v=BVSohYOppjk&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP)
+
+
 For a multi-account multi-region setup you must choose a hub account and central region.
  The IAM roles will be launched once in the central region in each account while the Portfolio templates will be launched
  in each region within each account. CloudFormation StackSets will be used to distribute stacks across accounts and regions. You may deploy Stacks using StackSets to specific accounts
@@ -33,6 +44,8 @@ The hub account id is needed to create the trust relationship in each spoke acco
  If ServiceCatalog will be deployed to the hub account, then you must also create the execution role in the hub account with the hub account id.
  Your Account ID from the AWS cli it is the Account variable from the following command:  
  ```aws sts get-caller-identity```
+
+
 
 ### Express Setup using bash script
 1. Launch the StackSet Execution roles in each spoke account with the hub account's ID (Optional, for multi-account only)  

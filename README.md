@@ -6,7 +6,7 @@ This guide will help you deploy and manage your AWS ServiceCatalog using Infrast
 Read the [documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-reference-servicecatalog.html)
 for more information on ServiceCatalog and CloudFormation.  
  
- [![HowToVideo](https://img.youtube.com/vi/LzvhTcqqyog/0.jpg)](https://www.youtube.com/watch?v=LzvhTcqqyog&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP&index=39&t=0s)
+ [![HowToVideo](https://img.youtube.com/vi/LzvhTcqqyog/0.jpg)](https://www.youtube.com/watch?v=LzvhTcqqyog&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP)
 
 
 The portfolio templates in each section will create a ServiceCatalog Portfolio with various products,
