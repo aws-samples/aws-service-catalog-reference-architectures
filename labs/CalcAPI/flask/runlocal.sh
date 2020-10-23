@@ -1,24 +1,24 @@
 #!/bin/bash
 
-cd ../
 make cleanall
 ./calctest
+chmod +x pytest.py
 ./pytest.py
 
-cd flask/
-mkdir ~/flaskapp
-cp requirements.txt ~/flaskapp
-cp rungunicorn.sh ~/flaskapp
-cp application.py ~/flaskapp
-cp gu.local ~/flaskapp/gu.conf
+mkdir ./flaskapp
+cp ./flask/requirements.txt ./flaskapp
+cp ./flask/rungunicorn.sh ./flaskapp
+cp ./flask/application.py ./flaskapp
+cp ./flask/gu.local ./flaskapp/gu.py
 
-virtualenv ~/flaskapp
-cp -R ../pycalc/ ~/flaskapp/lib/python2.7/site-packages/
-cp ../bin/* ~/flaskapp/bin/
+python3 -m venv ./flaskapp
+cp -R ./pycalc/ ./flaskapp/lib/python3.6/site-packages/
+cp ./bin/* ./flaskapp/bin/
 
-cd ~/flaskapp
+cd flaskapp
 source bin/activate
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 deactivate
 
+chmod +x rungunicorn.sh
 ./rungunicorn.sh
