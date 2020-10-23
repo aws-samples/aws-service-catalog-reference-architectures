@@ -3,7 +3,7 @@ phases:
   pre_build:
     commands:          
       - echo application deploy started on `date`      
-      - aws s3 cp ./$EB_APPLICATION_NAME.zip s3://$ARTIFACT_BUCKET/$EB_APPLICATION_NAME-$CODEBUILD_BUILD_NUMBER.zip
+      - aws s3 cp ./build.zip s3://$ARTIFACT_BUCKET/$EB_APPLICATION_NAME-$CODEBUILD_BUILD_NUMBER.zip
   build:
     commands:
       - echo Pushing package to Elastic Beanstalk...      

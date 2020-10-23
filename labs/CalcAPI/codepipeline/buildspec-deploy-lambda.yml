@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:          
+      - echo application deploy started on `date`      
+      - aws s3 cp ./build.zip s3://$ARTIFACT_BUCKET/$FUNCTION_NAME-$CODEBUILD_BUILD_NUMBER.zip
+  build:
+    commands:
+      - echo Pushing package to Lambda...      
+      - aws lambda update-function-code --function-name $FUNCTION_NAME --publish --s3-bucket $ARTIFACT_BUCKET --s3-key $FUNCTION_NAME-$CODEBUILD_BUILD_NUMBER.zip
+      - echo "Deploy complete"

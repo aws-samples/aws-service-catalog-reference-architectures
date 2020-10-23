@@ -12,8 +12,8 @@ cp ./flask/application.py ./flaskapp
 cp ./flask/gu.local ./flaskapp/gu.py
 
 python3 -m venv ./flaskapp
-cp -R ./pycalc/ ./flaskapp/lib/python3.6/site-packages/
-cp ./bin/* ./flaskapp/bin/
+cp -r ./pycalc ./flaskapp/lib/python3.6/site-packages/
+cp -r ./bin ./flaskapp
 
 cd flaskapp
 source bin/activate

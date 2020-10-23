@@ -49,10 +49,10 @@ lambda: clean
 	mkdir -p flaskapp
 	cp flask/requirements.txt ./flaskapp
 	cp flask/application.py ./flaskapp	
-	cp -R ./pycalc/ ./flaskapp
+	cp -r ./pycalc/ ./flaskapp
 	
 	python3 -m venv ./flaskapp
-	cp ./bin/* ./flaskapp/bin/
+	cp -r bin flaskapp
 	
 	cd ./flaskapp; . bin/activate; \
 	pip install -r requirements.txt; \
@@ -63,5 +63,6 @@ local: .copyfiles
 	cp flask/gu.local ./flaskapp/gu.py
 	cd ./flaskapp; ./rungunicorn.sh
 	
-prod: .copyfiles
-	cd flaskapp; zip -9qr ../ebdotprodcalc.zip *
+eb: .copyfiles
+	cp flask/gu.conf ./flaskapp/gu.py	
+	cd flaskapp; zip -9qr ../build.zip *

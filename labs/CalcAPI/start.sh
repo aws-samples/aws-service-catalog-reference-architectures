@@ -1,2 +1,2 @@
 #!/bin/bash
-exec gunicorn -c gu.py application:app
+exec gunicorn -c gu.py application
