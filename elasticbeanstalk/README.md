@@ -13,7 +13,7 @@ Get a list of Solution Stacks from the AWS CLI with this command:
 ![SC-Devops-EB-github.png](SC-Devops-EB-github.png)
 
 
-![HowToVideo](https://img.youtube.com/vi/7y_vsmbjE_A/0.jpg)](https://www.youtube.com/watch?v=7y_vsmbjE_A&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP)
+[![HowToVideo](https://img.youtube.com/vi/7y_vsmbjE_A/0.jpg)](https://www.youtube.com/watch?v=7y_vsmbjE_A&list=PLhr1KZpdzukcaA06WloeNmGlnM_f1LrdP)
 
 See the blog about this solution:
 [Standardizing CI/CD pipelines for .NET web applications with AWS Service Catalog](https://aws.amazon.com/blogs/devops/standardizing-cicd-pipelines-net-web-applications-aws-service-catalog/)
