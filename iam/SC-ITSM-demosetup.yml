@@ -22,20 +22,18 @@ Resources:
     Properties:
       UserName: SCSyncUser
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/ServiceCatalogAdminReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSServiceCatalogAdminReadOnlyAccess
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess 
+        - arn:aws:iam::aws:policy/AWSConfigUserAccess 
       Policies:
-        - PolicyName: SCSSMActionPolicy
+        - PolicyName: viewBudget
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - Sid: SNOWSSMActionPolicySID
+              - Sid: viewBudgetPolicySID
                 Effect: Allow
                 Action:
-                  - "servicecatalog:DeleteProduct"
-                  - "servicecatalog:DeleteConstraint"
-                  - "servicecatalog:DeleteProvisionedProductPlan"
-                  - "servicecatalog:DeleteProvisioningArtifact"
-                  - "servicecatalog:DisassociateProductFromPortfolio"                  
+                  - "budgets:ViewBudget"
                 Resource: '*'
       
   SCSyncUserAccessKeys:
