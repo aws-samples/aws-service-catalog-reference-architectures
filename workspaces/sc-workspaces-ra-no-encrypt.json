@@ -1,0 +1,56 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Virtual Desktop, Create Workspaces  (fdp-1pktpqi6d)",
+  "Parameters": {
+    "DirectoryId": {
+      "Description": "DirectoryId ",
+      "Type": "String" 
+    },
+    "UserName": {
+      "Description": "Workspaces AD user",
+      "Type": "String" 
+    },
+    "BundleId": {
+      "Description": "BundleId  ",
+      "Type": "String" 
+       
+    }
+  },
+  "Resources": {
+    "MyWorkSpace": {
+      "Type": "AWS::WorkSpaces::Workspace",
+      "Properties": {
+        "BundleId": {
+          "Ref": "BundleId"
+        },
+        "DirectoryId": {
+          "Ref": "DirectoryId"
+        },
+        "UserName": {
+          "Ref": "UserName"
+        },
+        "RootVolumeEncryptionEnabled": false,
+        "UserVolumeEncryptionEnabled": false,
+        
+      }
+    }
+  },
+  "Outputs": {
+    "WorkSpaceID": {
+      "Description": "ID of the newly created WorkSpace",
+      "Value": {
+        "Ref": "MyWorkSpace"
+      }
+    },
+    "UserName": {
+      "Description": "The username for WorkSpace",
+      "Value": {
+        "Ref": "UserName"
+      }
+    },
+    "LogonURL": {
+      "Description": "Use this URL to download client software used to connect to your cloud desktop",
+      "Value": "https://clients.amazonworkspaces.com/"
+    }
+  }
+}
