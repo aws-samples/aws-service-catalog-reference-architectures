@@ -1,0 +1,188 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: "AWS Backup template to back up all resources tagged with backup key with following values (daily - each day at 5AM UTC, weekly - each Sunday at 5AM UTC, and monthly - 1st day of each month at 5AM UTC). Backup retention can be modified as required (by default: daily - 14 days, weekly - 56 days, and monthly - 365 days). Service Catalog Tag Option key-value pairs are provisioned for integration with Portfolios and Products. (fdp-1r4squ5n0)"
+
+Resources:
+  KMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: "Encryption key for backups"
+      EnableKeyRotation: True
+      Enabled: True
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            "AWS": { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+          Action:
+          - kms:*
+          Resource: "*"
+          
+  BackupVaultWithDailyBackups:
+    Type: "AWS::Backup::BackupVault"
+    Properties:
+      BackupVaultName: "BackupVaultWithDailyBackups"
+      EncryptionKeyArn: !GetAtt KMSKey.Arn
+
+  BackupVaultWithWeeklyBackups:
+    Type: "AWS::Backup::BackupVault"
+    Properties:
+      BackupVaultName: "BackupVaultWithWeeklyBackups"
+      EncryptionKeyArn: !GetAtt KMSKey.Arn
+
+  BackupVaultWithMonthlyBackups:
+    Type: "AWS::Backup::BackupVault"
+    Properties:
+      BackupVaultName: "BackupVaultWithMonthlyBackups"
+      EncryptionKeyArn: !GetAtt KMSKey.Arn
+
+  BackupPlanWithDailyBackups:
+    Type: "AWS::Backup::BackupPlan"
+    Properties:
+      BackupPlan:
+        BackupPlanName: "BackupPlanWithDailyBackups"
+        BackupPlanRule:
+          -
+            RuleName: "RuleWithDailyBackups"
+            TargetBackupVault: !Ref BackupVaultWithDailyBackups
+            ScheduleExpression: "cron(15 5 ? * * *)"
+            Lifecycle:
+                DeleteAfterDays: 14
+                                      
+    DependsOn: BackupVaultWithDailyBackups
+
+  BackupPlanWithWeeklyBackups:
+    Type: "AWS::Backup::BackupPlan"
+    Properties:
+      BackupPlan:
+        BackupPlanName: "BackupPlanWithWeeklyBackups"
+        BackupPlanRule:
+          -
+            RuleName: "RuleWithWeeklyBackups"
+            TargetBackupVault: !Ref BackupVaultWithWeeklyBackups
+            ScheduleExpression: "cron(15 5 ? * 1 *)"
+            Lifecycle:
+                DeleteAfterDays: 56
+                          
+    DependsOn: BackupVaultWithWeeklyBackups
+
+  BackupPlanWithMonthlyBackups:
+    Type: "AWS::Backup::BackupPlan"
+    Properties:
+      BackupPlan:
+        BackupPlanName: "BackupPlanWithMonthlyBackups"
+        BackupPlanRule:
+          -
+            RuleName: "RuleWithMonthlyBackups"
+            TargetBackupVault: !Ref BackupVaultWithMonthlyBackups
+            ScheduleExpression: "cron(15 5 1 * ? *)"
+            Lifecycle:
+                DeleteAfterDays: 365
+                          
+    DependsOn: BackupVaultWithMonthlyBackups
+
+  BackupRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+     AssumeRolePolicyDocument:
+       Version: "2012-10-17"
+       Statement:
+         -
+          Effect: "Allow"
+          Principal:
+            Service:
+              - "backup.amazonaws.com"
+          Action:
+            - "sts:AssumeRole"
+     ManagedPolicyArns:
+       -
+        "arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup"
+
+  TagBasedBackupSelectionDaily:
+    Type: "AWS::Backup::BackupSelection"
+    Properties:
+      BackupSelection:
+        SelectionName: "TagBasedBackupSelectionDaily"
+        IamRoleArn: !GetAtt BackupRole.Arn
+        ListOfTags:
+         -
+           ConditionType: "STRINGEQUALS"
+           ConditionKey: "backup"
+           ConditionValue: "daily"
+      BackupPlanId: !Ref BackupPlanWithDailyBackups
+    DependsOn: BackupPlanWithDailyBackups
+
+  TagBasedBackupSelectionWeekly:
+    Type: "AWS::Backup::BackupSelection"
+    Properties:
+      BackupSelection:
+        SelectionName: "TagBasedBackupSelectionWeekly"
+        IamRoleArn: !GetAtt BackupRole.Arn
+        ListOfTags:
+         -
+           ConditionType: "STRINGEQUALS"
+           ConditionKey: "backup"
+           ConditionValue: "weekly"
+      BackupPlanId: !Ref BackupPlanWithWeeklyBackups
+    DependsOn: BackupPlanWithWeeklyBackups
+
+  TagBasedBackupSelectionMonthly:
+    Type: "AWS::Backup::BackupSelection"
+    Properties:
+      BackupSelection:
+        SelectionName: "TagBasedBackupSelectionMonthly"
+        IamRoleArn: !GetAtt BackupRole.Arn
+        ListOfTags:
+         -
+           ConditionType: "STRINGEQUALS"
+           ConditionKey: "backup"
+           ConditionValue: "monthly"
+      BackupPlanId: !Ref BackupPlanWithMonthlyBackups
+    DependsOn: BackupPlanWithMonthlyBackups
+
+  TagOptiondailybackup:
+    Type: 'AWS::ServiceCatalog::TagOption'
+    Properties:
+      Active: true
+      Value: daily
+      Key: backup
+
+  TagOptionweeklybackup:
+    Type: 'AWS::ServiceCatalog::TagOption'
+    Properties:
+      Active: true
+      Value: weekly
+      Key: backup
+  
+  TagOptionmonthlybackup:
+    Type: 'AWS::ServiceCatalog::TagOption'
+    Properties:
+      Active: true
+      Value: monthly
+      Key: backup
+
+Outputs:
+  KMSKeyForBackup:
+    Description: The KMS Key used for Encryption of backups
+    Value: !GetAtt KMSKey.Arn
+  
+  BackupRoleArn:
+    Description: IAM Service Role for AWS Backup service
+    Value: !GetAtt BackupRole.Arn
+  
+  DailyBackupVault:
+    Description: Vault for daily backups
+    Value: !GetAtt BackupVaultWithDailyBackups.BackupVaultName
+
+  WeeklyBackupVault:
+    Description: Vault for weekly backups
+    Value: !GetAtt BackupVaultWithWeeklyBackups.BackupVaultName
+
+  MonthlyBackupVault:
+    Description: Vault for monthly backups
+    Value: !GetAtt BackupVaultWithMonthlyBackups.BackupVaultName
+    
+  ServiceCatalogTagOptions:
+    Description: Key value pairs required for backups. Associate these Tag Options with Service Catalog portfolios and products to enable tag based backups.
+    Value: backup:daily, backup:weekly, backup:monthly
