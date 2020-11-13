@@ -51,7 +51,7 @@ def handler(event, context):
         gdmaster_account_number,
         role_to_assume
     )
-    destination = create_s3_destination(gdmaster_account_session)
+    # destination = create_s3_destination(gdmaster_account_session)
     accounts = get_all_accounts()
 
     # handle Custom Resource Call
@@ -62,6 +62,9 @@ def handler(event, context):
         action = event['RequestType']
     else:
         action = "Update"
+        
+    if action == "Create" or action == "Update":
+        destination = create_s3_destination(gdmaster_account_session)
 
     for region in guardduty_regions:
         try:
