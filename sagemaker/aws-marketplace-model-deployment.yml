@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'This sample cloudformation template to creates an endpoint for an ML model from AWS Marketplace(fdp-aws-marketplace-ml-model)'
+Description: 'This sample cloudformation template to creates an endpoint for an ML model from AWS Marketplace(fdp-1rb86hj0k)'
 Parameters:
   IAMRole:
     Type: String
