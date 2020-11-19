@@ -83,6 +83,9 @@ Resources:
               - "guardduty:EnableOrganizationAdminAccount"
               - "guardduty:ListDetectors"
               - "guardduty:CreatePublishingDestination"
+              - "guardduty:CreateDetector"
+              - "guardduty:ListOrganizationAdminAccounts"
+              - "iam:CreateServiceLinkedRole"
             Resource: '*'
 
   EnableGDDelegatedAdminLambda: 

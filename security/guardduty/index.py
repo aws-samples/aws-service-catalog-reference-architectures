@@ -29,9 +29,8 @@ import botocore
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-logging.getLogger('boto3').setLevel(logging.CRITICAL)
-logging.getLogger('botocore').setLevel(logging.CRITICAL)
+log_level = os.getenv('LOG_LEVEL', 'INFO')
+logger.setLevel(logging.getLevelName(log_level))
 
 gdmaster_account_number = os.environ['gd_master_account']
 role_to_assume = os.environ['role_to_assume']
@@ -51,7 +50,7 @@ def handler(event, context):
         gdmaster_account_number,
         role_to_assume
     )
-    destination = create_s3_destination(gdmaster_account_session)
+
     accounts = get_all_accounts()
 
     # handle Custom Resource Call
@@ -63,19 +62,26 @@ def handler(event, context):
     else:
         action = "Update"
 
+    if action == "Create" or action == "Update":
+        destination = create_s3_destination(gdmaster_account_session)
+
+    skipregion = False
     for region in guardduty_regions:
         try:
             if action == "Create" or action == "Update":
-                enable_gd_master(region)
-                enable_gd_member(
-                    gdmaster_account_session, region, destination, accounts)
-                logger.info(f'properties is {destination}')
                 logger.info(f'region is {region}')
+                skipregion = enable_gd_master(region)
+                if skipregion:
+                    continue
+                else:
+                    enable_gd_member(
+                        gdmaster_account_session, region, destination, accounts)
+                    logger.debug(f'properties is {destination}')
             elif action == "Delete":
                 disable_gd_master(region)
         except Exception as e:
             logger.error(
-                f'Error to enable master or member in region {region}',
+                f'Error enabling master or member in region {region}: {e}',
                 exc_info=True
             )
             continue
@@ -171,21 +177,40 @@ def enable_gd_master(region):
     account
     :param region: the region where GuardDuty master to be enabled
     """
-    logger.info(f'Enabling gd master for region {region}')
+    logger.info(f'Enabling GuardDuty in Management account for region {region}')
     master = session.client('guardduty', region_name=region)
+    skipregion = False
     try:
-        master.enable_organization_admin_account(
-            AdminAccountId=gdmaster_account_number
-        )
+        detectors = master.list_detectors()
+        delegatedadmin = master.list_organization_admin_accounts()
+        if len(detectors['DetectorIds']) > 0:
+            logger.info(f'GuardDuty already enabled in Management Account in region: {region}. Skipping.')
+            logger.debug('Detectors: {}'.format(detectors['DetectorIds']))
+        else:
+            # detector not found, creating detector to force enable of GuardDuty
+            logger.info(f'Creating detector in Management Account in {region}')
+            newdetector = master.create_detector(Enable=True)
+            logger.info('Created detector in Management Account in {0}: {1}'.format(region, newdetector['DetectorId']))
     except Exception as e:
-        logger.info(
-            f'Skipping Account {gdmaster_account_number} '
-            f'in region {region}. Already enabled'
+        if str(e).find("security token included in the request is invalid") > 0:
+            skipregion = True
+            logger.warning(f'Region {region} is likely not enabled. Skipping {region}.  Error: {e}')
+        else:
+            logging.error(f'Error connecting to GuardDuty service in management account in region {region}. Error: {e}')
+
+    try:
+        if skipregion:
+            return skipregion
+        elif delegatedadmin['AdminAccounts'] and delegatedadmin['AdminAccounts'][0]['AdminAccountId'] == gdmaster_account_number:
+            logger.info(f'{gdmaster_account_number} is GuardDuty delegated admin.')
+        else:
+            logger.info(f'Delegating GuardDuty admin to account: {gdmaster_account_number}')
+            newdelegateadmin = master.enable_organization_admin_account(            
+              AdminAccountId=gdmaster_account_number
         )
-        logger.info(
-            f'Error to enable GD master in region {region}',
-            exc_info=True
-        )
+        return skipregion    
+    except Exception as e:
+        logger.error(e)
 
 
 def disable_gd_master(region):
@@ -221,7 +246,7 @@ def enable_gd_member(session, region, properties, accounts):
     try:
         detector_ids = delegated_admin_client.list_detectors()
     except Exception as ex:
-        logger.info(f'      Unable to list detectors in region {region}')
+        logger.debug(f'Unable to list detectors in region {region}')
         return
     logger.debug(f'detector ids is {detector_ids}')
 
@@ -231,23 +256,28 @@ def enable_gd_member(session, region, properties, accounts):
     publishing_destinations = delegated_admin_client.list_publishing_destinations(
         DetectorId=detector_id 
     )
-    
-    if not publishing_destinations['Destinations']:
-        delegated_admin_client.create_publishing_destination(
-            DetectorId=detector_id,
-            DestinationType='S3',
-            DestinationProperties=properties,
-            ClientToken=detector_id
-        )
-        logger.info(f'creating destination')
-    else:
-        delegated_admin_client.update_publishing_destination(
-            DetectorId=detector_id,
-            DestinationId=publishing_destinations['Destinations'][0]['DestinationId'],
-            DestinationProperties=properties
-        )
-        logger.info(f'updating destination')
+    logger.debug(f'publishing destinations response: {publishing_destinations}')
 
+
+    try:
+      if not publishing_destinations['Destinations']:
+          delegated_admin_client.create_publishing_destination(
+              DetectorId=detector_id,
+              DestinationType='S3',
+              DestinationProperties=properties,
+              ClientToken=detector_id
+          )
+          logger.info(f'Set GuardDuty GuardDuty destination for region {region}.')
+      else:
+          delegated_admin_client.update_publishing_destination(
+              DetectorId=detector_id,
+              DestinationId=publishing_destinations['Destinations'][0]['DestinationId'],
+              DestinationProperties=properties
+          )
+          logger.info(f'Updated GuardDuty GuardDuty destination for region {region}.')
+    except Exception as e:
+        logger.error(f'Error creating or updating destination: {e}')
+  
     details = []
     failed_accounts = []
     s3_failed_accounts = []
@@ -284,6 +314,7 @@ def enable_gd_member(session, region, properties, accounts):
                 }
             }
         )
+        logger.info(f'Enabled AutoEnable S3 in region {region}')
 
         # Enable S3Log in all accounts, not including admin account
         try:
@@ -296,12 +327,12 @@ def enable_gd_member(session, region, properties, accounts):
                             'Enable': True
                         }
                     }
-                )['UnprocessedAccounts']  
-                
+                )['UnprocessedAccounts']
+                logger.info(f'enabled S3Logging for {i} in {region}')
                 if (len(s3_unprocessed_accounts)>0):
                     s3_failed_accounts.extend( s3_unprocessed_accounts )
         except ClientError as s3_excpetion:
-            logger.inf(f'Error enabling S3Log in Account : {account}')
+            logger.error(f'Error enabling S3Log in Account : {account} Region: {region}')
             s3_failed_accounts.append({
                 account: repr(s3_excpetion)
             })
@@ -452,7 +483,7 @@ def create_s3_destination(sts_session):
     :param sts_session: STS sesion of the GuardDuty master account
     :return: properties for the GuardDuty publishing destination
     """
-    cloud_trail_client = session.client('cloudtrail')
+    cloud_trail_client = sts_session.client('cloudtrail')
     cloud_trail_response = cloud_trail_client.describe_trails(
         trailNameList=[
             'aws-controltower-BaselineCloudTrail',
@@ -512,6 +543,7 @@ def create_s3_destination(sts_session):
     try:
         if bucket_region in allowed_regions:
             kms_key_arn = create_kms_key(sts_session, bucket_region)
+            logger.info('Creating Destination S3 Bucket if none exists')
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
@@ -520,6 +552,7 @@ def create_s3_destination(sts_session):
             )
         elif bucket_region.startswith('eu'):
             kms_key_arn = create_kms_key(sts_session, bucket_region)
+            logger.info('Creating Destination S3 Bucket if none exists')
             s3_client.create_bucket(
                 Bucket=bucket_name,
                 CreateBucketConfiguration={
@@ -529,6 +562,7 @@ def create_s3_destination(sts_session):
         else:
             # Bucket will be created in us-east-1
             kms_key_arn = create_kms_key(sts_session, 'us-east-1')
+            logger.info('Creating Destination S3 Bucket if none exists')
             s3_client.create_bucket(Bucket=bucket_name)
     except Exception as e:
         logger.info(f'Bucket {bucket_name} already created.')
