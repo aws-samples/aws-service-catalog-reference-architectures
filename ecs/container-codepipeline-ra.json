@@ -230,7 +230,7 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/standard:2.0",
+                "Image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0",
                 "EnvironmentVariables":[
                       {
                         "Name": "AWS_DEFAULT_REGION",
@@ -274,7 +274,7 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/standard:2.0",
+                "Image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0",
                 "EnvironmentVariables":[
                       {
                         "Name": "AWS_DEFAULT_REGION",
@@ -307,7 +307,7 @@
               "Environment": {
                 "Type": "LINUX_CONTAINER",
                 "ComputeType": "BUILD_GENERAL1_SMALL",
-                "Image": "aws/codebuild/python:3.6.5",
+                "Image": "aws/codebuild/amazonlinux2-x86_64-standard:3.0",
                 "EnvironmentVariables":[
                     {
                       "Name":  "PROJECTNAME",
