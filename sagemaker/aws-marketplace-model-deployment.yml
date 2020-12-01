@@ -87,11 +87,11 @@ Resources:
     Properties:
       KmsKeyId: !Ref KmsKeyId
       ProductionVariants: 
-      - ModelName: !GetAtt Model.ModelName
-        VariantName: AllTraffic
-        InitialInstanceCount: !Ref InstanceCount
-        InstanceType: !Ref InstanceType
-        InitialVariantWeight: 1
+        - ModelName: !GetAtt Model.ModelName
+          VariantName: AllTraffic
+          InitialInstanceCount: !Ref InstanceCount
+          InstanceType: !Ref InstanceType
+          InitialVariantWeight: 1
   EndPoint:
     Type: "AWS::SageMaker::Endpoint"
     Properties:
