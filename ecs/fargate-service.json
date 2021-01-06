@@ -5,9 +5,9 @@
 	},
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "ECRImageURI": {
+        "PipelineProductname": {
             "Type": "String",
-            "Description" : "URI for the container from Amazon Elastic Container Registry."
+            "Description" : "Name of the provisioned product which created the code pipeline project and containr registry."
         },
         "TaskDefinitionName": {
             "Type": "String",
@@ -79,7 +79,7 @@
                                 "Value": {"Ref":"AWS::Region"}
                             }
                       ],
-                      "Image": {"Ref":"ECRImageURI"},
+                      "Image": {"Fn::Sub":"[[servicecatalog:provisionedproduct:${PipelineProductname}:ContainerImageURI]]"},
                       "Name": {"Ref":"TaskDefinitionName"}
                     }
                 ]
