@@ -430,6 +430,11 @@
 		"CloneUrlHttp": {		
           "Value": { "Fn::GetAtt": ["ETLTasksRepo","CloneUrlHttp"] },
           "Description": "URL for https cloning the Product Repo"
-        }
+        },
+		"ContainerImageURI":{
+		  "Value": { "Fn::Sub":"${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECRRepoName}:latest" },
+		  "Description": "URI for the published image in ECR"
+		}
+		
     }  
 }
