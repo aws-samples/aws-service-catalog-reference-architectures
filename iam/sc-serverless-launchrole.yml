@@ -37,6 +37,8 @@ Resources:
                   - "cloudformation:UpdateStack"
                   - "cloudformation:UpdateTerminationProtection"
                   - "cloudformation:ValidateTemplate"
+                  - "cloudformation:DescribeChangeSet"
+                  - "cloudformation:ExecuteChangeSet"
                   - "dynamodb:CreateTable"
                   - "dynamodb:DeleteTable"
                   - "dynamodb:DescribeTable"

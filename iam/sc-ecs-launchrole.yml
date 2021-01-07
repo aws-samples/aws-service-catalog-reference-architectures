@@ -63,7 +63,10 @@ Resources:
                   - "cloudformation:GetTemplateSummary"
                   - "cloudformation:SetStackPolicy"
                   - "cloudformation:ValidateTemplate"
-                  - "cloudformation:UpdateStack"               
+                  - "cloudformation:UpdateStack"
+                  - "cloudformation:CreateChangeSet"
+                  - "cloudformation:DescribeChangeSet"
+                  - "cloudformation:ExecuteChangeSet"
                 Resource: '*'
 Outputs:
     LaunchRoleArn:
