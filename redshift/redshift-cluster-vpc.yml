@@ -1,0 +1,352 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Service Catalog: Amazon Redshift Reference Architecture Template.  This template builds an AWS VPC with public and private subnets and builds an Amazon Redshift Cluster which is launched in the public VPC. (fdp-1rkp2a7a2)"
+Parameters:
+  ClusterIdentifier:
+    Description: The name of the Redshift Cluster
+    Type: String
+    AllowedPattern: "([a-z]|[0-9]|-)+"
+  DatabaseName:
+    Description: The name of the first database to be created when the cluster is
+      created
+    Type: String
+    Default: dev
+    AllowedPattern: "([a-z]|[0-9])+"
+  NumOfNodes:
+    Description: How many compute nodes in your Redshift cluster
+    Type: Number
+    Default: '4'
+  NodeType:
+    Description: The type of node to be provisioned
+    Type: String
+    Default: dc2.large
+    AllowedValues:
+    - ds2.xlarge
+    - ds2.8xlarge
+    - dc2.large
+    - dc2.8xlarge
+    - ra3.4xlarge
+    - ra3.16xlarge
+  MasterUsername:
+    Description: The user name that is associated with the master user account for the cluster that is being created
+    Type: String
+    Default: awsuser
+    AllowedPattern: "([a-z])([a-z]|[0-9])*"
+  MasterUserPassword:
+    Description: The password that is associated with the master user account for the cluster that is being created. Must have a length of 8-64 characters, contain one uppercase letter, one lowercase letter, and one number. Also only contain printable ASCII characters except for '/', '@', '"', ' ', '\' and '\'.
+    Type: String
+    NoEcho: true
+  InboundTraffic:
+    Description: The IP address CIDR range (x.x.x.x/x) to connect from your local machine.  FYI, get your address using http://www.whatismyip.com or provide a IP Address range provided by your network administrator.
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 255.255.255.255/32
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: Must be a valid CIDR range of the form x.x.x.x/x.
+  PortNumber:
+    Description: The port number on which the cluster accepts incoming connections.
+    Type: Number
+    Default: '5439'
+Resources:
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+  VirtualPrivateCloud:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: '10.0.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      InstanceTenancy: default
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Redshift VPC security group'
+      SecurityGroupIngress:
+        - CidrIp: '10.0.0.0/16'
+          IpProtocol: '-1'
+      SecurityGroupEgress:
+        - CidrIp: '0.0.0.0/0'
+          IpProtocol: '-1'
+      VpcId:
+        Ref: VirtualPrivateCloud
+  SecurityGroupSelfIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: SecurityGroup
+    Properties:
+      FromPort: -1
+      IpProtocol: -1
+      GroupId: !GetAtt [SecurityGroup, GroupId]
+      SourceSecurityGroupId: !GetAtt [SecurityGroup, GroupId]
+      ToPort: -1
+  VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+      InternetGatewayId:
+        Ref: InternetGateway
+  SubnetAPublic:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: '10.0.0.0/20'
+      MapPublicIpOnLaunch: true
+      VpcId:
+        Ref: VirtualPrivateCloud
+  SubnetAPrivate:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 0
+          - Fn::GetAZs: ""
+      CidrBlock: '10.0.16.0/20'
+      VpcId:
+        Ref: VirtualPrivateCloud
+  SubnetBPublic:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: '10.0.32.0/20'
+      MapPublicIpOnLaunch: true
+      VpcId:
+        Ref: VirtualPrivateCloud
+  SubnetBPrivate:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+          - 1
+          - Fn::GetAZs: ""
+      CidrBlock: '10.0.48.0/20'
+      VpcId:
+        Ref: VirtualPrivateCloud
+  RouteTablePublic:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  RouteTablePrivate:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  RouteTableBPublic:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  RouteTableBPrivate:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  RouteTableAssociationAPublic:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetAPublic
+      RouteTableId:
+        Ref: RouteTablePublic
+  RouteTableAssociationAPrivate:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetAPrivate
+      RouteTableId:
+        Ref: RouteTablePrivate
+  RouteTableAssociationBPublic:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetBPublic
+      RouteTableId:
+        Ref: RouteTableBPublic
+  RouteTableAssociationBPrivate:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetBPrivate
+      RouteTableId:
+        Ref: RouteTableBPrivate
+  RouteTablePublicInternetRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePublic
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        Ref: InternetGateway
+  RouteTablePublicBInternetRoute:
+    Type: 'AWS::EC2::Route'
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId:
+        Ref: RouteTableBPublic
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        Ref: InternetGateway
+  NetworkAclPublic:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  NetworkAclPrivate:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId:
+        Ref: VirtualPrivateCloud
+  SubnetNetworkAclAssociationAPublic:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetAPublic
+      NetworkAclId:
+        Ref: NetworkAclPublic
+  SubnetNetworkAclAssociationAPrivate:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetAPrivate
+      NetworkAclId:
+        Ref: NetworkAclPrivate
+  SubnetNetworkAclAssociationBPublic:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetBPublic
+      NetworkAclId:
+        Ref: NetworkAclPublic
+  SubnetNetworkAclAssociationBPrivate:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      SubnetId:
+        Ref: SubnetBPrivate
+      NetworkAclId:
+        Ref: NetworkAclPrivate
+  NetworkAclEntryInPublicAllowAll:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId:
+        Ref: NetworkAclPublic
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: false
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryOutPublicAllowAll:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId:
+        Ref: NetworkAclPublic
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: true
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryInPrivateAllowVPC:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId:
+        Ref: NetworkAclPrivate
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: false
+      CidrBlock: '0.0.0.0/0'
+  NetworkAclEntryOutPrivateAllowVPC:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      NetworkAclId:
+        Ref: NetworkAclPrivate
+      RuleNumber: 99
+      Protocol: -1
+      RuleAction: allow
+      Egress: true
+      CidrBlock: '0.0.0.0/0'
+  RedshiftClusterSubnetGroup:
+    Properties:
+      Description: "Redshift cluster subnet group"
+      SubnetIds:
+        - Ref: SubnetAPublic
+        - Ref: SubnetBPublic
+    Type: AWS::Redshift::ClusterSubnetGroup
+  RedshiftClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: redshift.amazonaws.com
+        Version: '2012-10-17'
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess
+  RedshiftCluster:
+    Type: AWS::Redshift::Cluster
+    DependsOn:
+      - VPCGatewayAttachment
+    Properties:
+      ClusterIdentifier:
+        Ref: ClusterIdentifier
+      ClusterSubnetGroupName:
+        Ref: RedshiftClusterSubnetGroup
+      ClusterType: "multi-node"
+      DBName:
+        Ref: DatabaseName
+      MasterUserPassword:
+        Ref: MasterUserPassword
+      MasterUsername:
+        Ref: MasterUsername
+      NodeType:
+        Ref: NodeType
+      NumberOfNodes:
+        Ref: NumOfNodes
+      VpcSecurityGroupIds:
+        - Ref: SecurityGroup
+      PubliclyAccessible: true
+      ClusterParameterGroupName: default.redshift-1.0
+      Encrypted: true
+      IamRoles:
+        - Fn::GetAtt:
+          - RedshiftClusterRole
+          - Arn
+Outputs:
+  RedshiftClusterIdentifier:
+    Description: "The identifier of the Amazon Redshift cluster, like: examplecluster"
+    Value:
+      Ref: RedshiftCluster
+  RedshiftClusterEndpoint:
+    Description: "The connection endpoint for the Amazon Redshift cluster, like: examplecluster.cg034hpkmmjt.us-east-1.redshift.amazonaws.com"
+    Value:
+      Fn::GetAtt:
+        - RedshiftCluster
+        - Endpoint.Address
+  RedshiftClusterPort:
+    Description: "The port number on which the Amazon Redshift cluster accepts connections, like: 5439"
+    Value:
+      Fn::GetAtt:
+        - RedshiftCluster
+        - Endpoint.Port
+  RedshiftClusterUser:
+    Description: "The user name for Redshift cluster."
+    Value:
+      Ref: MasterUsername
+  RedshiftClusterDatabase:
+    Description: "Redshift cluster database name"
+    Value:
+      Fn::Sub: "dev"
+  RedshiftClusterRoleArn:
+    Description: "Returns the Amazon Resource Name (ARN) for the role associated with the Redshift cluster"
+    Value:
+      Fn::GetAtt:
+        - RedshiftClusterRole
+        - Arn
