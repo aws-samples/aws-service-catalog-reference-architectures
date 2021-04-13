@@ -31,7 +31,7 @@ Metadata:
 
 Parameters:
   TableName:
-    Description: "A name for the table. If you don't specify a name, AWS CloudFormation generates a unique physical ID and uses that ID for the table name"
+    Description: "REQUIRED: A name for the table"
     Type: String
     MinLength: 3
     MaxLength: 255
@@ -121,7 +121,6 @@ Mappings:
       Binary: B
 
 Conditions:
-  TableNameProvided: !Not [!Equals [!Ref TableName, ""]]
   EnableStream: !Not [!Equals [!Ref StreamViewType, "DISABLED"]]
   EnableDataPlaneLogging: !Equals [!Ref EnableDataPlaneLogging, "true"]
   KMSMasterKeyIdProvided: !Not [!Equals [!Ref KMSMasterKeyId, ""]]
@@ -145,7 +144,7 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: !Ref ReadCapacityUnits
         WriteCapacityUnits: !Ref WriteCapacityUnits
-      TableName: !If [TableNameProvided, !Ref TableName, !Ref "AWS::NoValue"]
+      TableName: !Ref TableName
       SSESpecification:
         KMSMasterKeyId:
           !If [
