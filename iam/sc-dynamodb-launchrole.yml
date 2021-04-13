@@ -1,0 +1,94 @@
+Description: "ServiceCatalog DynamoDB Launch Role"
+
+Resources:
+  SCDynamoDBLaunchRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: SCDynamoDBLaunchRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: /
+      Policies:
+        - PolicyName: SCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: CloudTrailAccess
+                Effect: Allow
+                Action:
+                  - cloudtrail:CreateTrail
+                  - cloudtrail:StartLogging
+                  - cloudtrail:DeleteTrail
+                  - cloudtrail:PutEventSelectors
+                  - cloudtrail:UpdateTrail
+                Resource: "*"
+              - Sid: KMSKeyAccess
+                Effect: Allow
+                Action:
+                  - kms:Encrypt
+                  - kms:Decrypt
+                  - kms:ReEncrypt*
+                  - kms:GenerateDataKey*
+                  - kms:DescribeKey
+                  - kms:CreateGrant
+                Resource: "*"
+              - Sid: ServiceCatalogAccess
+                Effect: Allow
+                Action:
+                  - "servicecatalog:ListServiceActionsForProvisioningArtifact"
+                  - "servicecatalog:ExecuteprovisionedProductServiceAction"
+                Resource: "*"
+              - Sid: IamAccess
+                Effect: Allow
+                Action:
+                  - "iam:AddRoleToInstanceProfile"
+                  - "iam:ListRolePolicies"
+                  - "iam:ListPolicies"
+                  - "iam:DeleteRole"
+                  - "iam:GetRole"
+                  - "iam:CreateInstanceProfile"
+                  - "iam:PassRole"
+                  - "iam:DeleteInstanceProfile"
+                  - "iam:ListRoles"
+                  - "iam:RemoveRoleFromInstanceProfile"
+                  - "iam:CreateRole"
+                  - "iam:DetachRolePolicy"
+                  - "iam:AttachRolePolicy"
+                Resource: "*"
+              - Sid: CloudformationAccess
+                Effect: Allow
+                Action:
+                  - "cloudformation:DescribeStackResource"
+                  - "cloudformation:DescribeStackResources"
+                  - "cloudformation:GetTemplate"
+                  - "cloudformation:List*"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:CreateStack"
+                  - "cloudformation:DeleteStack"
+                  - "cloudformation:DescribeStackEvents"
+                  - "cloudformation:DescribeStacks"
+                  - "cloudformation:GetTemplateSummary"
+                  - "cloudformation:SetStackPolicy"
+                  - "cloudformation:ValidateTemplate"
+                  - "cloudformation:UpdateStack"
+                Resource: "*"
+              - Sid: S3GetAccess
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                Resource: "*"
+Outputs:
+  LaunchRoleArn:
+    Value: !GetAtt SCDynamoDBLaunchRole.Arn
+  LaunchRoleName:
+    Value: !Ref SCDynamoDBLaunchRole

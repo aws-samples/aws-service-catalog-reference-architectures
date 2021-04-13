@@ -1,0 +1,190 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "Service Catalog: DynamoDB Table Reference Architecture Template. This template builds an AWS DynamoDB table."
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Primary Key
+        Parameters:
+          - PartitionKey
+          - PartitionKeyType
+          - SortKey
+          - SortKeyType
+      - Label:
+          default: DynamoDB Table Configuration
+        Parameters:
+          - TableName
+          - ReadCapacityUnits
+          - WriteCapacityUnits
+          - KMSMasterKeyId
+          - PointInTimeRecoveryEnabled
+          - StreamViewType
+      - Label:
+          default: Logging Configuration
+        Parameters:
+          - EnableDataPlaneLogging
+          - TrailS3BucketName
+          - TrailS3KeyPrefix
+          - TrailEventsType
+
+Parameters:
+  TableName:
+    Description: "A name for the table. If you don't specify a name, AWS CloudFormation generates a unique physical ID and uses that ID for the table name"
+    Type: String
+    MinLength: 3
+    MaxLength: 255
+    AllowedPattern: "[a-zA-Z0-9_.-]+"
+  ReadCapacityUnits:
+    Description: "The desired minimum number of consistent reads"
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+  WriteCapacityUnits:
+    Description: "The desired minimum number of consistent writes"
+    Type: Number
+    Default: 5
+    MinValue: 5
+    MaxValue: 10000
+    ConstraintDescription: must be between 5 and 10000
+  PartitionKey:
+    Description: "REQUIRED: The name of the partition key for the table"
+    Type: String
+  PartitionKeyType:
+    Description: "The data type of the partition key"
+    Type: String
+    AllowedValues:
+      - String
+      - Number
+      - Binary
+  SortKey:
+    Description: "OPTIONAL: The name of the sort key for the table"
+    Type: String
+  SortKeyType:
+    Description: "The data type of the sort key"
+    Type: String
+    AllowedValues:
+      - String
+      - Number
+      - Binary
+  KMSMasterKeyId:
+    Description: "The AWS KMS customer master key (CMK) that should be used for the AWS KMS encryption. To specify a CMK, use its key ID, Amazon Resource Name (ARN), alias name, or alias ARN. Note that you should only provide this parameter if the key is different from the default DynamoDB customer master key alias/aws/dynamodb"
+    Type: String
+  StreamViewType:
+    Description: "When an item in the table is modified, StreamViewType determines what information is written to the stream for this table"
+    Type: String
+    Default: DISABLED
+    AllowedValues:
+      - DISABLED
+      - KEYS_ONLY
+      - NEW_IMAGE
+      - OLD_IMAGE
+      - NEW_AND_OLD_IMAGES
+  PointInTimeRecoveryEnabled:
+    Description: "Should the point in time recovery be enabled (true) or disabled (false) on the table?"
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  EnableDataPlaneLogging:
+    Description: "Should the CloudTrail logs for data-plane operations be captured?"
+    Type: String
+    Default: false
+    AllowedValues:
+      - true
+      - false
+  TrailS3BucketName:
+    Description: "The name of the Amazon S3 bucket designated for publishing log files"
+    Type: String
+    ConstraintDescription: "must be an existing Amazon S3 bucket"
+  TrailS3KeyPrefix:
+    Description: "The Amazon S3 key prefix that comes after the name of the bucket designated for log file delivery"
+    Type: String
+  TrailEventsType:
+    Description: "Specify if you want your trail to log read-only events, write-only events, or all"
+    Type: String
+    AllowedValues:
+      - All
+      - ReadOnly
+      - WriteOnly
+    Default: All
+
+Mappings:
+  AttributeTypeMap:
+    DataType:
+      String: S
+      Number: N
+      Binary: B
+
+Conditions:
+  TableNameProvided: !Not [!Equals [!Ref TableName, ""]]
+  EnableStream: !Not [!Equals [!Ref StreamViewType, "DISABLED"]]
+  EnableDataPlaneLogging: !Equals [!Ref EnableDataPlaneLogging, "true"]
+  KMSMasterKeyIdProvided: !Not [!Equals [!Ref KMSMasterKeyId, ""]]
+
+Resources:
+  StandardDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: !Ref PartitionKey
+          AttributeType:
+            !FindInMap [AttributeTypeMap, DataType, !Ref PartitionKeyType]
+        - AttributeName: !Ref SortKey
+          AttributeType:
+            !FindInMap [AttributeTypeMap, DataType, !Ref SortKeyType]
+      KeySchema:
+        - AttributeName: !Ref PartitionKey
+          KeyType: HASH
+        - AttributeName: !Ref SortKey
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: !Ref ReadCapacityUnits
+        WriteCapacityUnits: !Ref WriteCapacityUnits
+      TableName: !If [TableNameProvided, !Ref TableName, !Ref "AWS::NoValue"]
+      SSESpecification:
+        KMSMasterKeyId:
+          !If [
+            KMSMasterKeyIdProvided,
+            !Ref KMSMasterKeyId,
+            "alias/aws/dynamodb",
+          ]
+        SSEEnabled: true
+        SSEType: KMS
+      StreamSpecification:
+        !If [
+          EnableStream,
+          StreamViewType: !Ref StreamViewType,
+          !Ref "AWS::NoValue",
+        ]
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !Ref PointInTimeRecoveryEnabled
+
+  StandardDynamoDBCloudTrail:
+    Type: AWS::CloudTrail::Trail
+    Condition: EnableDataPlaneLogging
+    Properties:
+      IsLogging: true
+      S3BucketName: !Ref TrailS3BucketName
+      S3KeyPrefix: !Ref TrailS3KeyPrefix
+      EventSelectors:
+        - IncludeManagementEvents: false
+          DataResources:
+            - Type: AWS::DynamoDB::Table
+              Values:
+                - !GetAtt StandardDynamoDBTable.Arn
+          ReadWriteType: !Ref TrailEventsType
+
+Outputs:
+  DynamoDB:
+    Value: !Ref StandardDynamoDBTable
+    Export:
+      Name: !Sub ${AWS::StackName}-DynamoDB
+  DynamoDBArn:
+    Value: !GetAtt StandardDynamoDBTable.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-DynamoDBArn
