@@ -1,4 +1,4 @@
-Using AWS Control Tower, AWS Service Catalog, and AWS Marketplace to deploy AWS Marketplace license subscriptions.
+## Using AWS Control Tower, AWS Service Catalog, and AWS Marketplace to deploy AWS Marketplace license subscriptions.
 
 Enterprise customers with multiple AWS accounts want to subscribe once to an AWS Marketplace product and have all accounts in the organization deploy AWS Marketplace solutions to support their business use cases without the need to have each account subscribe first.
 
