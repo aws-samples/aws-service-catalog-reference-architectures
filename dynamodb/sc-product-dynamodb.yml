@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Service Catalog DynamoDB Product
+Description: Service Catalog DynamoDB Product (fdp-1qj64b3i0)
 
 Parameters:
   PortfolioProvider:
@@ -31,7 +31,7 @@ Resources:
       ProvisioningArtifactParameters:
         - Description: baseline version
           Info:
-            LoadTemplateFromURL: !Sub ${RepoRootURL}dynamodb/sc-product-dynamodb-ra.yml
+            LoadTemplateFromURL: !Sub ${RepoRootURL}dynamodb/sc-dynamodb-ra.yml
           Name: v1.0
 
   AssociateDynamoDB:

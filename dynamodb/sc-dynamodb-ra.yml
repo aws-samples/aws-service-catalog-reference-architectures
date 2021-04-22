@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: "Service Catalog: DynamoDB Table Reference Architecture Template. This template builds an AWS DynamoDB table."
+Description: "Service Catalog: DynamoDB Table Reference Architecture Template. This template builds an AWS DynamoDB table. (fdp-1qj64b3i8)"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -51,21 +51,23 @@ Parameters:
     MaxValue: 10000
     ConstraintDescription: must be between 5 and 10000
   PartitionKey:
-    Description: "REQUIRED: The name of the partition key for the table"
+    Description: "The name of the partition key for the table"
     Type: String
   PartitionKeyType:
     Description: "The data type of the partition key"
     Type: String
+    Default: String
     AllowedValues:
       - String
       - Number
       - Binary
   SortKey:
-    Description: "OPTIONAL: The name of the sort key for the table"
+    Description: "The name of the sort key for the table"
     Type: String
   SortKeyType:
     Description: "The data type of the sort key"
     Type: String
+    Default: String
     AllowedValues:
       - String
       - Number

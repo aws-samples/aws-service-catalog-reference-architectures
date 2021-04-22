@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: DynamoDB Portfolio for Service Catalog.
+Description: DynamoDB Portfolio for Service Catalog. (fdp-1qj64b3hb)
 
 Parameters:
   PortfolioProvider:
@@ -31,7 +31,7 @@ Parameters:
     AllowedValues:
       - Yes
       - No
-    Default: Yes
+    Default: No
 
 Conditions:
   CreateLaunchConstraint: !Equals [!Ref LaunchRoleName, ""]
@@ -66,21 +66,17 @@ Resources:
 
   LinkEndusersRole:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: CondCreateEndUsersGroup
     Properties:
-      PrincipalARN: !If
-        - CondCreateEndUsersGroup
-        - !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserRoleArn"]
-        - !Sub arn:aws:iam::${AWS::AccountId}:role/SCEndUserRole
+      PrincipalARN: !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserRoleArn"]
       PortfolioId: !Ref SCDynamoDBportfolio
       PrincipalType: IAM
 
   LinkEndusersGroup:
     Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Condition: CondCreateEndUsersGroup
     Properties:
-      PrincipalARN: !If
-        - CondCreateEndUsersGroup
-        - !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserGroupArn"]
-        - !Sub arn:aws:iam::${AWS::AccountId}:group/SCEndUserGroup
+      PrincipalARN: !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserGroupArn"]
       PortfolioId: !Ref SCDynamoDBportfolio
       PrincipalType: "IAM"
 
