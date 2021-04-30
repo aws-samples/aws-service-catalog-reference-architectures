@@ -1,0 +1,475 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description":"Blogkmsaction,SCProduct,v1.0,KMS SC Action update KMS policy  fdp-1r56d8aub",
+    "Outputs": {
+        "KMSQueueProduct": {
+            "Description": "Service Catalog KMSQueueProduct",
+            "Value": {
+                "Fn::Sub": "https://${AWS::Region}.console.aws.amazon.com/servicecatalog/home?isSceuc=false&region=${AWS::Region}#products/${SCproductKMSQueue}"
+            }
+        }
+    },
+    "Parameters": {
+        "HoldingBucket": {
+            "Default": "<yourbucket>",
+            "Description": "This is the bucket with the code, use default or download content and create your own bucket",
+            "Type": "String"
+        },
+        "ServiceCatalogEndUser": {
+            "Default": "user/<yourenduser>",
+            "Description": "Who will access this SC portfolio? user/<username> or role/<rolename>",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "CopyZipsBucket": {
+            "Properties": {
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "CopyZipsBucketPolicy": {
+            "Properties": {
+                "Bucket": {
+                    "Ref": "CopyZipsBucket"
+                },
+                "PolicyDocument": {
+                    "Id": "ExamplePolicy",
+                    "Statement": [
+                        {
+                            "Action": "s3:*",
+                            "Condition": {
+                                "Bool": {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}/*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}"
+                                }
+                            ],
+                            "Sid": "AllowSSLRequestsOnly"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "CopyZipsFunction": {
+            "Properties": {
+                "Code": {
+                    "ZipFile": "import json\nimport logging\nimport threading\nimport boto3\nimport cfnresponse\n\n\n\ndef copy_objects(source_bucket, dest_bucket, prefix, objects):\n    s3 = boto3.client('s3')\n    for o in objects:\n        key = prefix + o\n        copy_source = {\n            'Bucket': source_bucket,\n            'Key': key\n        }\n        print('copy_source: %s' % copy_source)\n        print('dest_bucket = %s'%dest_bucket)\n        print('key = %s' %key)\n        s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,\n              Key=key)\n\n    \ndef timeout(event, context):\n    logging.error('Execution is about to time out, sending failure response to CloudFormation')\n    cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)\n\ndef romanscorch(bucket):\n  \n    s3_client = boto3.client('s3')\n    object_response_paginator = s3_client.get_paginator('list_object_versions')\n    \n    delete_marker_list = []\n    version_list = []\n    \n    for object_response_itr in object_response_paginator.paginate(Bucket=bucket):\n        if 'DeleteMarkers' in object_response_itr:\n            for delete_marker in object_response_itr['DeleteMarkers']:\n                delete_marker_list.append({'Key': delete_marker['Key'], 'VersionId': delete_marker['VersionId']})\n    \n        if 'Versions' in object_response_itr:\n            for version in object_response_itr['Versions']:\n                version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})\n    \n    for i in range(0, len(delete_marker_list), 1000):\n        response = s3_client.delete_objects(\n            Bucket=bucket,\n            Delete={\n                'Objects': delete_marker_list[i:i+1000],\n                'Quiet': True\n            }\n        )\n        print(response)\n    \n    for i in range(0, len(version_list), 1000):\n        response = s3_client.delete_objects(\n            Bucket=bucket,\n            Delete={\n                'Objects': version_list[i:i+1000],\n                'Quiet': True\n            }\n        )\n        print(response)\n        \n\ndef handler(event, context):\n    print(json.dumps(event))\n    _ret = {}\n    timer = threading.Timer((context.get_remaining_time_in_millis()\n              / 1000.00) - 0.5, timeout, args=[event, context])\n    timer.start()\n    status = cfnresponse.SUCCESS\n\n    \n    try:\n        source_bucket = event['ResourceProperties']['SourceBucket']\n        dest_bucket = event['ResourceProperties']['DestBucket']\n        prefix = event['ResourceProperties']['Prefix']\n        objects = event['ResourceProperties']['Objects']\n        if event['RequestType'] == 'Delete':\n\n            romanscorch(event['ResourceProperties']['DestBucket'])\n        else:\n            copy_objects(source_bucket, dest_bucket, prefix, objects)\n    except Exception as e:\n        logging.error('Exception: %s' % e, exc_info=True)\n        status = cfnresponse.FAILED\n    finally:\n        timer.cancel()\n        cfnresponse.send(event, context, status, {}, None)\n        return _ret"
+                },
+                "Description": "Copies objects from a source S3 bucket to a destination",
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "CopyZipsRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CopyZipsRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:GetObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${HoldingBucket}/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "copy-s3-s3"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CopyZipsRun": {
+            "Properties": {
+                "DestBucket": {
+                    "Ref": "CopyZipsBucket"
+                },
+                "Objects": [
+                    "l_manage_serviceaction.zip",
+                    "SC_KMS_MGT.json",
+                    "sc_kms_service_action_sc_product.json"
+                ],
+                "Prefix": "content/blogkmsaction/",
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "CopyZipsFunction",
+                        "Arn"
+                    ]
+                },
+                "SourceBucket": {
+                    "Fn::Sub": "${HoldingBucket}"
+                }
+            },
+            "Type": "Custom::CopyZipsRun"
+        },
+        "PortfolioPrincipal": {
+            "DependsOn": [
+                "ProdAssociateSCproductKMSQueue"
+            ],
+            "Properties": {
+                "AcceptLanguage": "en",
+                "PortfolioId": {
+                    "Ref": "SCPortfolio"
+                },
+                "PrincipalARN": {
+                    "Fn::Sub": "arn:aws:iam::${AWS::AccountId}:${ServiceCatalogEndUser}"
+                },
+                "PrincipalType": "IAM"
+            },
+            "Type": "AWS::ServiceCatalog::PortfolioPrincipalAssociation"
+        },
+        "ProdAssociateSCproductKMSQueue": {
+            "DependsOn": [
+                "SCPortfolio",
+                "SCproductKMSQueue"
+            ],
+            "Properties": {
+                "AcceptLanguage": "en",
+                "PortfolioId": {
+                    "Ref": "SCPortfolio"
+                },
+                "ProductId": {
+                    "Ref": "SCproductKMSQueue"
+                }
+            },
+            "Type": "AWS::ServiceCatalog::PortfolioProductAssociation"
+        },
+        "Rolescssmlaunch": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "servicecatalog.amazonaws.com",
+                                    "ssm.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
+                ],
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "kms:PutKeyPolicy",
+                                        "kms:GetKeyPolicy",
+                                        "kms:DescribeKey",
+                                        "kms:ListKeyPolicies",
+                                        "kms:ListKeys"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "kms_mgt"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": {
+                                "Action": [
+                                    "servicecatalog:AcceptPortfolioShare",
+                                    "servicecatalog:AssociatePrincipalWithPortfolio",
+                                    "servicecatalog:AssociateProductWithPortfolio",
+                                    "servicecatalog:DescribePortfolio",
+                                    "servicecatalog:DescribeProductView",
+                                    "servicecatalog:DescribeProvisionedProduct",
+                                    "servicecatalog:DescribeProvisionedProductPlan",
+                                    "servicecatalog:DescribeProvisioningArtifact",
+                                    "servicecatalog:DescribeProvisioningParameters",
+                                    "servicecatalog:DescribeProduct",
+                                    "servicecatalog:DescribeProductAsAdmin",
+                                    "servicecatalog:DescribeProvisionedProduct",
+                                    "servicecatalog:DescribeProvisioningArtifact",
+                                    "servicecatalog:DisassociateProductFromPortfolio",
+                                    "servicecatalog:SearchProducts",
+                                    "servicecatalog:SearchProductsAsAdmin",
+                                    "servicecatalog:SearchProvisionedProducts",
+                                    "servicecatalog:TerminateProvisionedProduct",
+                                    "servicecatalog:CreateProvisioningArtifact"
+                                ],
+                                "Effect": "Allow",
+                                "Resource": {
+                                    "Fn::Sub": "arn:aws:servicecatalog:${AWS::Region}:${AWS::AccountId}:*/*"
+                                }
+                            },
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "servicecatalog_mgt"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "SCKMSAction": {
+            "DependsOn": [
+                "CopyZipsRun"
+            ],
+            "Properties": {
+                "HoldingBucket": {
+                    "Ref": "CopyZipsBucket"
+                },
+                "PortfolioId": {
+                    "Ref": "SCPortfolio"
+                },
+                "ProductArtifactId": {
+                    "Fn::GetAtt": [
+                        "SCproductKMSQueue",
+                        "ProvisioningArtifactIds"
+                    ]
+                },
+                "ProductId": {
+                    "Ref": "SCproductKMSQueue"
+                },
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "SCKMSaddFunction",
+                        "Arn"
+                    ]
+                },
+                "TargetType": "/AWS::KMS::Key",
+                "svc_action_bucket": {
+                    "Ref": "CopyZipsBucket"
+                },
+                "svc_action_key": "SC_KMS_MGT.json",
+                "svc_action_prefix": "content/blogkmsaction/",
+                "svc_action_role": {
+                    "Fn::GetAtt": [
+                        "Rolescssmlaunch",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::SCKMSAction"
+        },
+        "SCKMSaddFunction": {
+            "DependsOn": [
+                "CopyZipsRun"
+            ],
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "CopyZipsBucket"
+                    },
+                    "S3Key": {
+                        "Fn::Sub": "content/blogkmsaction/l_manage_serviceaction.zip"
+                    }
+                },
+                "Description": "Add KMS",
+                "Handler": "lambda_function.lambda_handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "SCKMSaddFunctionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.6",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "SCKMSaddFunctionRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+                    "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+                ],
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ssm:CreateDocument",
+                                        "ssm:PutParameter",
+                                        "ssm:GetParameter",
+                                        "ssm:DeleteDocument",
+                                        "ssm:DeleteParameter"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:document/sc_svc_action_name*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "iam:PassRole"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "Rolescssmlaunch",
+                                                "Arn"
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${CopyZipsBucket}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "lambdsd"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "SCPortfolio": {
+            "Properties": {
+                "AcceptLanguage": "en",
+                "Description": "AWS MP Sample KMS Management portfolio",
+                "DisplayName": "SC KMS Management",
+                "ProviderName": "AWS MP"
+            },
+            "Type": "AWS::ServiceCatalog::Portfolio"
+        },
+        "SCproductKMSQueue": {
+            "DependsOn": "CopyZipsRun",
+            "Properties": {
+                "AcceptLanguage": "en",
+                "Description": "SCKMSQueuProduct",
+                "Distributor": "AWS MP Team",
+                "Name": "SCproductKMSQueue",
+                "Owner": "MP Team",
+                "ProvisioningArtifactParameters": [
+                    {
+                        "Description": "v1.0",
+                        "Info": {
+                            "LoadTemplateFromURL": {
+                                "Fn::Sub": "https://${CopyZipsBucket}.s3.amazonaws.com/content/blogkmsaction/sc_kms_service_action_sc_product.json"
+                            }
+                        },
+                        "Name": "v1.0"
+                    }
+                ],
+                "SupportDescription": "Support Description",
+                "SupportEmail": "awsmp@example.com",
+                "SupportUrl": "https://support.com"
+            },
+            "Type": "AWS::ServiceCatalog::CloudFormationProduct"
+        }
+    }
+}
