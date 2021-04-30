@@ -1,0 +1,406 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+ 
+    "QueueName": {
+      "Type": "String",
+      "Default": "myque23",
+      "Description": "The name of the Queue to create. This name is used to generate other related resources"
+    },
+    "QueueType": {
+      "Type": "String",
+      "Default": "read",
+      "Description": "The type of the Queue ('read' or 'write') to create from the 3rd party perspective",
+      "AllowedValues": [
+        "read",
+        "write"
+      ]
+    }
+  },
+  "Conditions": {
+    "3rdPartyReads": {
+      "Fn::Equals": [
+        {
+          "Ref": "QueueType"
+        },
+        "read"
+      ]
+    },
+    "3rdPartyWrites": {
+      "Fn::Equals": [
+        {
+          "Ref": "QueueType"
+        },
+        "write"
+      ]
+    }
+  },
+  "Resources": {
+   
+    "SQSThirdPartyQueue": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": {
+          "Fn::Join": [
+            "",
+            [
+              "SQSThirdParty-",
+              {
+                "Ref": "QueueName"
+              },
+              "-Queue"
+            ]
+          ]
+        },
+        "KmsDataKeyReusePeriodSeconds": 86400,
+        "KmsMasterKeyId": {
+          "Fn::Join": [
+            "",
+            [
+              "alias/SQSThirdParty_KMS_",
+              {
+                "Ref": "QueueName"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "SQSThirdPartyKMS": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Id": {
+            "Fn::Join": [
+              "",
+              [
+                "SQSThirdParty-",
+                {
+                  "Ref": "QueueName"
+                },
+                "-CMK"
+              ]
+            ]
+          },
+          "Statement": [
+            {
+              "Sid": "Key Management",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            }
+          ]
+        },
+        "EnableKeyRotation": true
+      }
+    },
+    "SQSThirdPartyKMSAlias": {
+      "Type": "AWS::KMS::Alias",
+      "Properties": {
+        "AliasName": {
+          "Fn::Join": [
+            "",
+            [
+              "alias/SQSThirdParty_KMS_",
+              {
+                "Ref": "QueueName"
+              }
+            ]
+          ]
+        },
+        "TargetKeyId": {
+          "Ref": "SQSThirdPartyKMS"
+        }
+      }
+    },
+    "SQSThirdPartyReaderRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "3rdPartyReads",
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              "SQSThirdPartyRole-",
+              {
+                "Ref": "QueueName"
+              },
+              "-",
+              {
+                "Ref": "AWS::Region"
+              },
+              "-Reader"
+            ]
+          ]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {}
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "",
+                [
+                  "SQSThirdPartyPolicy-",
+                  {
+                    "Ref": "QueueName"
+                  },
+                  "-",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "-Reader"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "sqs:ReceiveMessage",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "SQSThirdPartyQueue",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "kms:Decrypt",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "SQSThirdPartyKMS",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "SQSThirdPartyWriterRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "3rdPartyWrites",
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": [
+            "",
+            [
+              "SQSThirdPartyRole-",
+              {
+                "Ref": "QueueName"
+              },
+              "-",
+              {
+                "Ref": "AWS::Region"
+              },
+              "-Writer"
+            ]
+          ]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":root"
+                    ]
+                  ]
+                }
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {}
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "",
+                [
+                  "SQSThirdPartyPolicy-",
+                  {
+                    "Ref": "QueueName"
+                  },
+                  "-",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "-Writer"
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "sqs:SendMessage",
+                    "sqs:SendMessageBatch"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "SQSThirdPartyQueue",
+                      "Arn"
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "kms:Encrypt",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "SQSThirdPartyKMS",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "ParSQSThirdPartyQueue": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Type": "String",
+        "Description": "SQSThirdPartyQueue",
+        "Value": {
+          "Fn::Sub": "${SQSThirdPartyQueue}"
+        },
+        "Name": {
+          "Fn::Sub": "/scqueue-${SQSThirdPartyKMS}"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "SQSThirdPartyQueueName": {
+      "Description": "SQSThirdPartyQueue Name",
+      "Value": {
+        "Ref": "SQSThirdPartyQueue"
+      }
+    },
+    "SQSThirdPartyQueueARN": {
+      "Description": "ARN of new Amazon SQS Queue",
+      "Value": {
+        "Fn::GetAtt": [
+          "SQSThirdPartyQueue",
+          "Arn"
+        ]
+      }
+    },
+    "SQSThirdPartyKMSARN": {
+      "Description": "ARN of new AWS KMS Key",
+      "Value": {
+        "Fn::GetAtt": [
+          "SQSThirdPartyKMS",
+          "Arn"
+        ]
+      }
+    },
+    "SQSThirdPartyKMSAlias": {
+      "Description": "Alias of new AWS KMS Key",
+      "Value": {
+        "Ref": "SQSThirdPartyKMSAlias"
+      }
+    },
+    "SQSThirdPartyQueueType": {
+      "Description": "Queue Type - Used to determine the Role to assign the user to",
+      "Value": {
+        "Ref": "QueueType"
+      }
+    },
+    "SQSThirdPartyReaderRoleName": {
+      "Description": "Generated name of the Reader IAM Role",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "SQSThirdPartyRole-",
+            {
+              "Ref": "QueueName"
+            },
+            "-",
+            {
+              "Ref": "AWS::Region"
+            },
+            "-Reader"
+          ]
+        ]
+      }
+    },
+    "SQSThirdPartyWriterRoleName": {
+      "Description": "Generated name of the Writer IAM Role",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "SQSThirdPartyRole-",
+            {
+              "Ref": "QueueName"
+            },
+            "-",
+            {
+              "Ref": "AWS::Region"
+            },
+            "-Writer"
+          ]
+        ]
+      }
+    }
+  }
+}
