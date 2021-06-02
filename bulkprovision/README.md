@@ -4,6 +4,7 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ## Bulk Deployment for Amazon WorkSpaces
 
+
 <img src=images/wait.jpeg width=90>
 
 ### Prerequisites
