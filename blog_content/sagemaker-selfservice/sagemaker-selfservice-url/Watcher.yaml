@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Deploys automation infrastructure for SageMaker, including the role for SageMaker Notebook'
+Parameters:
+  ProductARN:
+    Type: String
+    Description: The ARN of the product to watch launches.
+    Default: 'arn:aws:catalog:ca-central-1:000:product/prod-7b2ppy72j6aaa'
+  ProlicyName:
+    Type: String
+    Default: 'DeveloperPassRoleToSageMakerNotebookManagedPolicy'
+    Description: 'This Managed policy will be attached to whatever the user is.'
+    AllowedValues: 
+    - 'SageMakerNotebookUsagePolicy'
+    - 'DeveloperPassRoleToSageMakerNotebookManagedPolicy'
+Resources:
+
+#  SageMakerNotebookEndpointConfig:
+#    Type: AWS::SageMaker::EndpointConfig
+#    Properties: 
+#      EndpointConfigName: String
+#      KmsKeyId: String
+#      ProductionVariants: 
+#        - ProductionVariant
+
+#  SageMakerNotebookEndPoint:
+#    Type: AWS::SageMaker::Endpoint
+#    Properties: 
+#      EndpointConfigName: String
+#      EndpointName: String
+#      ExcludeRetainedVariantProperties: 
+#        - VariantProperty
+#      RetainAllVariantProperties: Boolean
+
+
+  LambdaRoleExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: 'CloudWatch-lambda-SageMaker-Watcher'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - cloudwatch.amazonaws.com
+              - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: ModIAMRoles
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: 
+              - iam:AttachRolePolicy
+              - iam:Describe*
+              - iam:getRolePolicy
+              - iam:PutRolePolicy
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource: "*"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+        - "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+        - "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+
+  CreateWatcherFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: 'Triggering on stackset creations, determining whether the creation is of a specific SC product, and, if so, determining whether the role is attached to a policy, attaching it if it is not'
+      Handler: index.lambda_handler
+      Runtime: python3.6
+      Environment:
+        Variables:
+          PRODUCT: !Ref 'ProductARN'
+          POLICY: !Ref 'ProlicyName'
+      Timeout: 601
+      Role: !GetAtt 'LambdaRoleExecution.Arn'
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import sys
+          import os
+          def lambda_handler(event, context):
+              print(event)
+              stackId = event['detail']['responseElements']['stackId']
+              Id = (stackId.split('/'))[-1]
+              UserArn = event['detail']['userIdentity']['arn']
+              UserAID = (UserArn.split('/'))[-1]
+              roleArn = event['detail']['requestParameters']['tags'][2]['value']
+              print(roleArn)
+              #convert to: arn:aws:iam::127827214783:role/Developer
+              roleArn = (roleArn.split('/'))[-2]
+              roleArn = "arn:aws:iam::"+event['account']+":role/"+roleArn
+              print("The role ARN was converted to: "+roleArn)
+              roleUserName = event['detail']['userIdentity']['sessionContext']['sessionIssuer']['userName']
+              print("Current User/Role making the invocation is:")
+              print("Comparing what to use: "+roleArn+" - "+roleUserName)
+              if roleArn != roleUserName:
+                roleUserName = roleArn
+              print("SC SageMaker Product?")
+              productArn = event['detail']['requestParameters']['tags'][1]['value']
+              print(productArn)
+              ## TODO change this to a parameter
+              if productArn == os.environ['PRODUCT']:
+                  print("Good this is service catalog product")
+              else:
+                  print("This was a not a service catalog product"+os.environ['PRODUCT'])
+                  return { 'statusCode': 200, 'body': 'Nothing to do' }
+              aimclient = boto3.client('iam')
+              try:
+                  policyarn = "arn:aws:iam::"+event['account']+":policy/"+os.environ['POLICY']
+                  print(policyarn)
+                  response = aimclient.list_entities_for_policy(PolicyArn=policyarn)  
+                  username = event['detail']['userIdentity']['sessionContext']['sessionIssuer']['userName']
+                  roleUserNameSplit = (roleUserName.split('/'))[-1]
+                  if username != roleUserNameSplit:
+                    username = roleUserNameSplit
+                  print(response)
+                  for role in response['PolicyRoles']:
+                      print(role)
+                      if role['RoleName'] == username:
+                          print("Nothing todo")
+                          return { 'statusCode': 200, 'body': 'Nothing to do' }
+                      else:
+                          print(role['RoleName'])
+                  #If role not found
+                  print("After role iterations, The role was not found in the Policy's roles, proceed to attach...")
+                  policyARN = "arn:aws:iam::"+event['account']+":policy/"+os.environ['POLICY']
+                  try:
+                      print("Trying to attach_role_policy  in list_entities_for_policy")
+                      AttachResponse = aimclient.attach_role_policy(RoleName=roleUserNameSplit,PolicyArn=policyARN)
+                      print("AttachResponse is")
+                      print(AttachResponse)
+                      return { 'statusCode': 200, 'body': 'Policy has been attached' }
+                  except Exception as inst:
+                      print("Something went wrong")
+                      print("RoleName:"+roleUserNameSplit)
+                      print("PolicyArn:"+policyARN)
+                      print(inst)
+                      return { 'statusCode': 500, 'body': inst }
+              except aimclient.exceptions.NoSuchEntityException as ne:
+                  print(ne)
+                  print("Opps aimclient.list_entities_for_policy failed")
+                  #User does not has the AIM POLICY that is requiered, attaching and moving on
+                  policyARN = "arn:aws:iam::"+event['account']+":policy/"+os.environ['POLICY']
+                  try:
+                      print("Trying to list_entities_for_policy in the NoSuchEntityException")
+                      AttachResponse = aimclient.attach_role_policy(RoleName=roleUserNameSplit,PolicyArn=policyARN)
+                      print(AttachResponse)
+                      return { 'statusCode': 200, 'body': 'Policy has been attached' }
+                  except Exception as inst:
+                      print("Again, Something went wrong when attaching the policy")
+                      print("RoleName:"+roleUserNameSplit)
+                      print("PolicyArn:"+policyARN)
+                      print(inst)
+                      return { 'statusCode': 500, 'body': inst }
+              except Exception as inst:
+                  print("ERROR")
+                  print(inst)
+                  return { 'statusCode': 500, 'body': inst }
+              return {
+                  'statusCode': 200,
+                  'body': 'Generic OK, if you see this investigate'
+              }
+  
+  CloudWatchEventRule:
+    Type: AWS::Events::Rule
+    DependsOn: CreateWatcherFunction
+    Properties: 
+      Description: This will trigger the lambda whenever a StackSet is createad, lookig for Service Catalog products. Double check this on the lambda.
+      EventPattern: '{"source": ["aws.cloudformation"],"detail-type": ["AWS API Call via CloudTrail"],"detail": {"eventSource": ["cloudformation.amazonaws.com"],"eventName": ["CreateStack"]}}'
+      Targets: 
+        - 
+          Arn: !GetAtt 'CreateWatcherFunction.Arn'
+          Id: "TargetFunctionV1"
+
+
+  WatcherFunctionPermissionEvent:
+    Type: AWS::Lambda::Permission
+    Properties: 
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt 'CreateWatcherFunction.Arn'
+      Principal: 'events.amazonaws.com'
+      SourceArn: !GetAtt 'CloudWatchEventRule.Arn'
+
+Outputs:
+  FunctionARN:
+    Description: Watcher Function ARN
+    Value: !GetAtt 'CreateWatcherFunction.Arn'

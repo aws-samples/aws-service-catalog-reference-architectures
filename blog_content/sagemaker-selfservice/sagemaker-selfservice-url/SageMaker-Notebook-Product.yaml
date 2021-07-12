@@ -1,0 +1,705 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Custom resource to create a SageMaker notebook. License: (MIT-0: https://github.com/aws/mit-0) (qs-1o9abmj8n)'
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Required SageMaker Parameters
+        Parameters:
+          - NotebookInstanceName
+          - NotebookInstanceType
+      - Label:
+          default: Optional SageMaker Parameters
+        Parameters:
+          - DirectInternetAccess
+#          - LifecycleConfigName
+
+    ParameterLabels:
+      DirectInternetAccess:
+        default: Default Internet Access
+#      LifecycleConfigName:
+#        default: Lifecycle Config Name
+      NotebookInstanceName:
+        default: Notebook Instance Name
+      NotebookInstanceType:
+        default: Notebook Instance Type
+Parameters:
+  NotebookInstanceName:
+    AllowedPattern: '[a-z0-9-]{1,63}'
+    ConstraintDescription: Maximum of 63 alphanumeric characters. Can include hyphens
+      (-), but not spaces. Must be unique within your account in an AWS Region.
+    Description: SageMaker Notebook instance name
+    MaxLength: '63'
+    MinLength: '1'
+    Type: String
+  NotebookInstanceType:
+    AllowedValues:
+      - ml.t2.medium
+      - ml.m4.xlarge
+      - ml.p2.xlarge
+    ConstraintDescription: Must select a valid notebook instance type.
+    Default: ml.t2.medium
+    Description: Select Instance type for the SageMaker Notebook
+    Type: String
+#  LifecycleConfigName:
+#    Description: Not yet available to custom resource. Notebook lifecycle configuration to associate with the notebook instance
+#    Type: String
+#    Default: ''
+  DirectInternetAccess:
+    Description: Sets whether SageMaker notebook instance has internet access. If you set this to Disabled this notebook instance will be able to access resources only in your VPC, internet must be provided by the VPC. This is used only if SubnetId is not empty. And Internet is mandatory for some operations.
+    Type: String
+    AllowedValues:
+      - Enabled
+      - Disabled
+    ConstraintDescription: Must select a valid notebook instance type.
+    Default: Disabled
+
+
+Resources:
+#This is attached to the Role that is used to Execute the Notebook instance
+  SageMakerExecutionPolicy1:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Roles: 
+        - !Ref SageMakerExecutionRole
+      ManagedPolicyName: !Sub 'SageMakerNoteBookRestricted-1-${NotebookInstanceName}'
+      Path: '/'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - sagemaker:*
+          NotResource:
+          - arn:aws:sagemaker:*:*:domain/*
+          - arn:aws:sagemaker:*:*:user-profile/*
+          - arn:aws:sagemaker:*:*:app/*
+          - arn:aws:sagemaker:*:*:flow-definition/*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - sagemaker:ListNotebook*
+          - sagemaker:End*
+          - sagemaker:ListDomains
+          - sagemaker:ListTags
+          Resource: "*"
+        - Effect: Allow
+          Action:
+          - sagemaker:CreatePresignedDomainUrl
+          - sagemaker:Describe*
+          - sagemaker:ListUserProfiles
+          - sagemaker:*App
+          - sagemaker:ListApps
+          Resource: "*"
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action: sagemaker:*
+          Resource:
+          - arn:aws:sagemaker:*:*:flow-definition/*
+          Condition:
+            StringEqualsIfExists:
+              sagemaker:WorkteamType:
+              - private-crowd
+              - vendor-crowd
+        - Effect: Allow
+          Action:
+          - application-autoscaling:DeleteScalingPolicy
+          - application-autoscaling:DeleteScheduledAction
+          - application-autoscaling:DeregisterScalableTarget
+          - application-autoscaling:DescribeScalableTargets
+          - application-autoscaling:DescribeScalingActivities
+          - application-autoscaling:DescribeScalingPolicies
+          - application-autoscaling:DescribeScheduledActions
+          - application-autoscaling:PutScalingPolicy
+          - application-autoscaling:PutScheduledAction
+          - application-autoscaling:RegisterScalableTarget
+          - aws-marketplace:ViewSubscriptions
+          - cloudwatch:DeleteAlarms
+          - cloudwatch:DescribeAlarms
+          - cloudwatch:GetMetricData
+          - cloudwatch:GetMetricStatistics
+          - cloudwatch:ListMetrics
+          - cloudwatch:PutMetricAlarm
+          - cloudwatch:PutMetricData
+          - codecommit:BatchGetRepositories
+          - codecommit:CreateRepository
+          - codecommit:GetRepository
+          - codecommit:List*
+          - cognito-idp:AdminAddUserToGroup
+          - cognito-idp:AdminCreateUser
+          - cognito-idp:AdminDeleteUser
+          - cognito-idp:AdminDisableUser
+          - cognito-idp:AdminEnableUser
+          - cognito-idp:AdminRemoveUserFromGroup
+          - cognito-idp:CreateGroup
+          - cognito-idp:CreateUserPool
+          - cognito-idp:CreateUserPoolClient
+          - cognito-idp:CreateUserPoolDomain
+          - cognito-idp:DescribeUserPool
+          - cognito-idp:DescribeUserPoolClient
+          - cognito-idp:List*
+          - cognito-idp:UpdateUserPool
+          - cognito-idp:UpdateUserPoolClient
+          - ec2:CreateNetworkInterface
+          - ec2:CreateNetworkInterfacePermission
+          - ec2:CreateVpcEndpoint
+          - ec2:DeleteNetworkInterface
+          - ec2:DeleteNetworkInterfacePermission
+          - ec2:DescribeDhcpOptions
+          - ec2:DescribeNetworkInterfaces
+          - ec2:DescribeRouteTables
+          - ec2:DescribeSecurityGroups
+          - ec2:DescribeSubnets
+          - ec2:DescribeVpcEndpoints
+          - ec2:DescribeVpcs
+          - ecr:BatchCheckLayerAvailability
+          - ecr:BatchGetImage
+          - ecr:CreateRepository
+          - ecr:Describe*
+          - ecr:GetAuthorizationToken
+          - ecr:GetDownloadUrlForLayer
+          - elastic-inference:Connect
+          - elasticfilesystem:DescribeFileSystems
+          - elasticfilesystem:DescribeMountTargets
+          - fsx:DescribeFileSystems
+          - glue:CreateJob
+          - glue:DeleteJob
+          - glue:GetJob
+          - glue:GetJobRun
+          - glue:GetJobRuns
+          - glue:GetJobs
+          - glue:ResetJobBookmark
+          - glue:StartJobRun
+          - glue:UpdateJob
+          - groundtruthlabeling:*
+          - iam:ListRoles
+          - kms:DescribeKey
+          - kms:ListAliases
+          - lambda:ListFunctions
+          - logs:CreateLogDelivery
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:DeleteLogDelivery
+          - logs:Describe*
+          - logs:GetLogDelivery
+          - logs:GetLogEvents
+          - logs:ListLogDeliveries
+          - logs:PutLogEvents
+          - logs:PutResourcePolicy
+          - logs:UpdateLogDelivery
+          - robomaker:CreateSimulationApplication
+          - robomaker:DescribeSimulationApplication
+          - robomaker:DeleteSimulationApplication
+          - robomaker:CreateSimulationJob
+          - robomaker:DescribeSimulationJob
+          - robomaker:CancelSimulationJob
+          - secretsmanager:ListSecrets
+          - sns:ListTopics
+          Resource: "*"
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]
+
+#This is attached to the Role that is used to Execute the Notebook instance
+  SageMakerExecutionPolicy2:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub 'SageMakerNoteBookRestricted-2-${NotebookInstanceName}'
+      Roles: 
+        - !Ref SageMakerExecutionRole
+      Path: '/'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - ecr:SetRepositoryPolicy
+          - ecr:CompleteLayerUpload
+          - ecr:BatchDeleteImage
+          - ecr:UploadLayerPart
+          - ecr:DeleteRepositoryPolicy
+          - ecr:InitiateLayerUpload
+          - ecr:DeleteRepository
+          - ecr:PutImage
+          Resource: arn:aws:ecr:*:*:repository/*sagemaker*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - codecommit:GitPull
+          - codecommit:GitPush
+          Resource:
+          - arn:aws:codecommit:*:*:*sagemaker*
+          - arn:aws:codecommit:*:*:*SageMaker*
+          - arn:aws:codecommit:*:*:*Sagemaker*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - secretsmanager:DescribeSecret
+          - secretsmanager:GetSecretValue
+          - secretsmanager:CreateSecret
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+          Resource:
+          - arn:aws:secretsmanager:*:*:secret:AmazonSageMaker-*
+        - Effect: Allow
+          Action:
+          - secretsmanager:DescribeSecret
+          - secretsmanager:GetSecretValue
+          Resource: "*"
+          Condition:
+            StringEquals:
+              secretsmanager:ResourceTag/SageMaker: 'true'
+        - Effect: Allow
+          Action:
+          - s3:GetObject
+          - s3:PutObject
+          - s3:DeleteObject
+          - s3:AbortMultipartUpload
+          Resource:
+          - arn:aws:s3:::*SageMaker*
+          - arn:aws:s3:::*Sagemaker*
+          - arn:aws:s3:::*sagemaker*
+          - arn:aws:s3:::*aws-glue*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - s3:GetObject
+          Resource: "*"
+          Condition:
+            StringEqualsIgnoreCase:
+              s3:ExistingObjectTag/SageMaker: 'true'
+        - Effect: Allow
+          Action:
+          - s3:CreateBucket
+          - s3:GetBucketLocation
+          - s3:ListBucket
+          - s3:ListAllMyBuckets
+          - s3:GetBucketCors
+          - s3:PutBucketCors
+          Resource: "*"
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - lambda:InvokeFunction
+          Resource:
+          - arn:aws:lambda:*:*:function:*SageMaker*
+          - arn:aws:lambda:*:*:function:*sagemaker*
+          - arn:aws:lambda:*:*:function:*Sagemaker*
+          - arn:aws:lambda:*:*:function:*LabelingFunction*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Action: iam:CreateServiceLinkedRole
+          Effect: Allow
+          Resource: arn:aws:iam::*:role/aws-service-role/sagemaker.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_SageMakerEndpoint
+          Condition:
+            StringLike:
+              iam:AWSServiceName: sagemaker.application-autoscaling.amazonaws.com
+        - Effect: Allow
+          Action: iam:CreateServiceLinkedRole
+          Resource: "*"
+          Condition:
+            StringEquals:
+              iam:AWSServiceName: robomaker.amazonaws.com
+        - Effect: Allow
+          Action:
+          - sns:Subscribe
+          - sns:CreateTopic
+          Resource:
+          - arn:aws:sns:*:*:*SageMaker*
+          - arn:aws:sns:*:*:*Sagemaker*
+          - arn:aws:sns:*:*:*sagemaker*
+          Condition:
+            IpAddress:
+              aws:SourceIp: !Split [",",!ImportValue Network-PrivateSubnet1ACIDR]  
+        - Effect: Allow
+          Action:
+          - iam:PassRole
+          Resource: arn:aws:iam::*:role/*
+          Condition:
+            StringEquals:
+              iam:PassedToService:
+              - sagemaker.amazonaws.com
+              - glue.amazonaws.com
+              - robomaker.amazonaws.com
+              - states.amazonaws.com
+
+
+
+  SageMakerExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub 'SageMakerNotebookExecutionRole-${NotebookInstanceName}'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/service-role/"
+      Policies:
+        - PolicyName: !Sub 'SageMakerS3BucketAccess-${AWS::StackName}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:
+                  - !Sub 'arn:aws:s3:::${SageMakerS3Bucket}'
+                  - !Sub 'arn:aws:s3:::${SageMakerS3Bucket}/*'        
+      ManagedPolicyArns:
+        - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/SageNotebookExecRole-Policy'
+
+
+  NotebookCloudWatchLogGroup:
+    Type: AWS::Logs::LogGroup
+
+  CreateNotebookFunctionExecuteRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'CreateNotebookFunctionRole-${AWS::StackName}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: !Sub 'CreateNotebookFunctionPolicy-${AWS::StackName}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - kms:DescribeKey
+                  - kms:CreateGrant
+                Resource: 
+                  !Join
+                    - ''
+                    -  - 'arn:aws:kms:'
+                       - !Sub ${AWS::Region}
+                       - ':'
+                       - !Sub '${AWS::AccountId}'
+                       - ':key/'
+                       - !ImportValue 'CMK-KeyId'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+              - Effect: Allow
+                Action:
+                  - sagemaker:*
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: !GetAtt 'SageMakerExecutionRole.Arn'
+              - Effect: Allow
+                Action:
+                  - ec2:*
+                Resource: '*'
+        - PolicyName: !Sub 'SageMakerNoteBookExecutionRole-${AWS::StackName}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: elasticfilesystem:CreateFileSystem
+                Resource: "*"
+                Condition:
+                  StringLike:
+                    aws:RequestTag/ManagedByAmazonSageMakerResource: "*"
+              - Effect: Allow
+                Action:
+                - elasticfilesystem:CreateMountTarget
+                - elasticfilesystem:DeleteFileSystem
+                - elasticfilesystem:DeleteMountTarget
+                Resource: "*"
+                Condition:
+                  StringLike:
+                    aws:ResourceTag/ManagedByAmazonSageMakerResource: "*"
+              - Effect: Allow
+                Action:
+                - elasticfilesystem:DescribeFileSystems
+                - elasticfilesystem:DescribeMountTargets
+                Resource: "*"
+              - Effect: Allow
+                Action: ec2:CreateTags
+                Resource:
+                - arn:aws:ec2:*:*:network-interface/*
+                - arn:aws:ec2:*:*:security-group/*
+              - Effect: Allow
+                Action:
+                - ec2:CreateNetworkInterface
+                - ec2:CreateSecurityGroup
+                - ec2:DeleteNetworkInterface
+                - ec2:DescribeNetworkInterfaces
+                - ec2:DescribeSecurityGroups
+                - ec2:DescribeSubnets
+                - ec2:ModifyNetworkInterfaceAttribute
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - ec2:AuthorizeSecurityGroupEgress
+                - ec2:AuthorizeSecurityGroupIngress
+                - ec2:CreateNetworkInterfacePermission
+                - ec2:DeleteSecurityGroup
+                - ec2:RevokeSecurityGroupEgress
+                - ec2:RevokeSecurityGroupIngress
+                Resource: "*"
+                Condition:
+                  StringLike:
+                    ec2:ResourceTag/ManagedByAmazonSageMakerResource: "*"
+              - Effect: Allow
+                Action:
+                - sso:CreateManagedApplicationInstance
+                - sso:DeleteManagedApplicationInstance
+                - sso:GetManagedApplicationInstance
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - sagemaker:CreateUserProfile
+                - sagemaker:DescribeUserProfile
+                Resource: "*"
+
+
+  CreateNotebookFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Create a SageMaker Notebook instance and return the ARN.
+      Handler: index.lambda_handler
+      Runtime: python3.6
+      Timeout: 300
+      Role: !GetAtt 'CreateNotebookFunctionExecuteRole.Arn'
+      Code:
+        ZipFile: |
+          import json
+          import cfnresponse
+          import boto3
+          client = boto3.client('sagemaker')
+          def lambda_handler(event, context):
+            if event['RequestType'] == 'Delete':
+              try:
+                print('Received delete event')
+                print(str(event))
+                delete_response = client.stop_notebook_instance(
+                  NotebookInstanceName=event['ResourceProperties']['NotebookInstanceName']
+                )
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, {})
+              except Exception as inst:
+                print(inst)
+                cfnresponse.send(event, context, cfnresponse.FAILED, {})
+            else:
+              try:
+                print(str(event))
+                region = event['ResourceProperties']['Region']
+                subnetId = event['ResourceProperties']['SubnetId']
+                sgId = event['ResourceProperties']['SecurityGroupId']
+                kmsKeyId = event['ResourceProperties']['KMSKeyId']
+                #lcConfig = event['ResourceProperties']['LifecycleConfigName']
+                internetAccess = event['ResourceProperties']['DirectInternetAccess']
+                input_dict = {}
+                input_dict['NotebookInstanceName'] = event['ResourceProperties']['NotebookInstanceName']
+                input_dict['InstanceType'] = event['ResourceProperties']['NotebookInstanceType']
+                input_dict['RoleArn'] = event['ResourceProperties']['SageMakerRoleArn']
+                #Not yet available to custom resource
+                input_dict['DirectInternetAccess'] = internetAccess
+                #if not subnetId:
+                #  input_dict['DirectInternetAccess'] = 'Enabled'
+                #if lcConfig:
+                #  input_dict['LifecycleConfigName'] = lcConfig
+                if subnetId:
+                  input_dict['SubnetId'] = subnetId
+                if sgId:
+                  input_dict['SecurityGroupIds'] = [sgId]
+                if kmsKeyId:
+                  input_dict['KmsKeyId'] = kmsKeyId
+                input_dict['RootAccess'] = 'Enabled'
+                #Start filling tags to the notebook instance from the CFN
+                instance = client.create_notebook_instance(**input_dict)
+
+                # waiter = client.get_waiter('notebook_instance_in_service')
+                # waiter.wait(NotebookInstanceName=event['ResourceProperties']['NotebookInstanceName'])
+                print('Sagemager CLI response')
+                print(str(instance))
+                #procced to create sagemaker endpoint if non exists.
+                ec2_client = boto3.client('ec2', region_name=region)
+                params = dict()
+                val = 'aws.sagemaker.'+region+'.notebook'
+                params['Filters'] = [{ 'Name': 'service-name',  'Values': [ val ]}]
+                described_vpc_endpoints = ec2_client.describe_vpc_endpoints(**params)
+                for endpoint in described_vpc_endpoints['VpcEndpoints']:
+                    print(endpoint)
+                if not described_vpc_endpoints['VpcEndpoints']:
+                    print("Sagemaker endpoint does not exists")
+                    #proceed to create endpoint
+                else:
+                    print("Sagemaker endpoint exists")
+                    #nothing to do
+                responseData = {'NotebookInstanceArn': instance['NotebookInstanceArn']}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+              except Exception as inst:
+                print(inst)
+                cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+  CreateNotebook:
+    Type: Custom::CreateNotebook
+    Properties:
+      ServiceToken: !GetAtt 'CreateNotebookFunction.Arn'
+      DirectInternetAccess: !Ref 'DirectInternetAccess'
+      NotebookInstanceName: !Ref 'NotebookInstanceName'
+      NotebookInstanceType: !Ref 'NotebookInstanceType'
+      SubnetId: !ImportValue 'Network-PrivateSubnet1A'
+      SecurityGroupId: !ImportValue 'Network-SecurityGroup-Global'
+      KMSKeyId: !ImportValue 'CMK-KeyId'
+#      LifecycleConfigName: !Ref 'LifecycleConfigName'
+      Region: !Sub ${AWS::Region}
+      SageMakerRoleArn: !GetAtt 'SageMakerExecutionRole.Arn'
+      Version: 1
+
+  SageMakerS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration: 
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketName: !Join
+                    - ''
+                    - - 'sagemaker-confidential-'
+                      - !Ref NotebookInstanceName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: 'aws:kms'
+              KMSMasterKeyID: !ImportValue 'CMK-KeyId'
+      LoggingConfiguration:
+        LogFilePrefix: access_logs
+      AccessControl: LogDeliveryWrite
+      Tags:
+        - Key: dataclass
+          Value: 'Confidential'
+
+   
+  BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref SageMakerS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Deny requests that are not TLS encrypted
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:*'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt SageMakerS3Bucket.Arn
+                  - '/*'
+              - !GetAtt SageMakerS3Bucket.Arn
+            Effect: Deny
+            Condition:
+               Bool:
+                'aws:SecureTransport': 'false'
+          - Sid: Deny requests to upload objects with public read or write permissions or change object's ACLs to public read or write
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:PutObject'
+              - 's3:PutObjectAcl'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt SageMakerS3Bucket.Arn
+                  - '/*'
+            Effect: Deny
+            Condition:
+              StringEquals:
+                's3:x-amz-acl':
+                  - public-read
+                  - public-read-write
+                  - authenticated-read
+          - Sid: Deny requests to upload objects with public read or write permissions or change object's ACLs to public read or write
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:PutObject'
+              - 's3:PutObjectAcl'
+            Resource:
+              - !Join
+                - ''
+                - - !GetAtt SageMakerS3Bucket.Arn
+                  - '/*'
+            Effect: Deny
+            Condition:
+              StringLike:
+                's3:x-amz-grant-read':
+                  - '*http://acs.amazonaws.com/groups/global/AllUsers*'
+                  - '*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*'
+          - Sid: Deny requests to upload objects with public read or write permissions or change object's ACLs to public read or write
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:PutBucketAcl'
+            Resource:
+              - !GetAtt SageMakerS3Bucket.Arn
+            Effect: Deny
+            Condition:
+              StringEquals:
+                's3:x-amz-acl':
+                  - public-read
+                  - public-read-write
+                  - authenticated-read
+          - Sid: Deny requests to upload objects with public read or write permissions or change object's ACLs to public read or write
+            Principal:
+              AWS: '*'
+            Action:
+              - 's3:PutBucketAcl'
+            Resource:
+              - !GetAtt SageMakerS3Bucket.Arn
+            Effect: Deny
+            Condition:
+              StringLike:
+                's3:x-amz-grant-read':
+                  - '*http://acs.amazonaws.com/groups/global/AllUsers*'
+                  - '*http://acs.amazonaws.com/groups/global/AuthenticatedUsers*'
+
+Outputs:
+  NotebookARN:
+    Description: SageMaker Notebook ARN
+    Value: !GetAtt
+      - CreateNotebook
+      - NotebookInstanceArn
+  NotebookName:
+    Description: 'Notebook Instance name, copy this value.'
+    Value: !Ref NotebookInstanceName
+
+  NotebookS3Bucket:
+    Description: 'Notebook Instance name, copy this value.'
+    Value: !Ref SageMakerS3Bucket

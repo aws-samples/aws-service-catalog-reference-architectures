@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Allows a Role/user to call the lambda to generate a URL for SageMaker Notebook'
+Parameters:
+  URLLambdaARN:
+    Type: String
+  URLLambdaRole:
+    Type: String
+  AdminRole:
+    Type: String
+    Default: IibsAdminAccess-DO-NOT-DELETE
+
+Resources:
+  #This is the entry that allows Developer to pass role to URLInstanciatorLambdaRoleExecution
+  DeveloperPassRolePolicy:
+    Type: AWS::IAM::Policy
+    DependsOn: DeveloperRole
+    Properties:
+      PolicyName : 'DeveloperPassRoleToSageMakerNotebookManagedPolicy'
+      Roles:
+        - 'Developer'
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+            - iam:GetRole
+            - iam:PassRole
+            Resource: !Ref 'URLLambdaARN'
+          - Effect: Allow
+            Action:
+            - lambda:CreateFunction
+            - lambda:InvokeFunction
+            Resource: "*"
+          - Effect: Allow
+            Action:
+            - iam:GetRole
+            - iam:PassRole
+            Resource: !Ref 'URLLambdaRole'
+          - Effect: Allow
+            Action:
+            - cloudformation:Describe*
+            Resource: '*'
+
+  DeveloperRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: 'Developer'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - 'servicecatalog.amazonaws.com'
+            Action:
+              - sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: 
+                - !Ref 'AdminRole'
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
+        - "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+        - "arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess"
+
+Outputs:
+  DeveloperRole:
+    Description: Developer Role
+    Value: !GetAtt 'DeveloperRole.Arn'
+    Export:
+      Name: 'Developer-ARN'

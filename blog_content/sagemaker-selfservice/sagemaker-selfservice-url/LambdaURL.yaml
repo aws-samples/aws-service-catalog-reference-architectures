@@ -1,0 +1,225 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Fetches the presigned notebook URL for SageMaker, including the role for SageMaker Notebook.'
+Parameters:
+  NoteBookName:
+    Type: String
+    Description: The name of the notebook to get a new URL.
+    Default: 'StudioName'
+  User:
+    Type: String
+    Description: The AIN username for the new URL.
+    Default: 'Daniel'
+  RandomValue:
+    Type: String
+    Default: '1'
+    Description: Change this value to update the product and generate a new URL.
+
+
+
+Resources:
+
+
+  StudioSignedURLGenaratorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Takes a sagemaker studio and generates a presigned URL for usage.
+      Handler: index.lambda_handler
+      Runtime: python3.6
+      VpcConfig:
+        SecurityGroupIds: 
+        - !ImportValue 'Network-SecurityGroup-Global'
+        SubnetIds: 
+        - !ImportValue 'Network-PublicSubnet1A'
+      Environment:
+        Variables:
+          PROFILE: !Ref 'User'
+          ENDPOINT: !ImportValue 'Network-APIDNS'
+          REGION: !Sub ${AWS::Region}
+          DUMMY: !ImportValue 'Network-APIDNS'
+      Timeout: 900
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/Notbook-URL-instanciator-SageMaker-Lambda-Role'
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import sys
+          import os
+          import json
+          import socket
+          import cfnresponse
+          import botocore.exceptions
+          from botocore.exceptions import ClientError
+          def lambda_handler(event, context):
+            print(event)
+            print(os.environ)
+            region=os.environ['REGION']
+            responseData = {}
+            if event['RequestType'] == 'Delete':
+              print('Received delete event')
+              cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+            else:
+              try:
+                endpoint = os.environ['ENDPOINT']
+                try:
+                  session = boto3.session.Session()
+                except Exception as inst1:
+                    cfnresponse.send(event, context, cfnresponse.FAILED, {})
+                try:
+                  aim_username=event['ResourceProperties']['PROFILE']
+                  print("Studio Profile: "+aim_username)
+                  endpointURL=event['ResourceProperties']['ENDPOINT']
+                  if not endpointURL.startswith("https"):
+                      endpointURL = "https://"+endpoint
+                  client = session.client('sagemaker',region,endpoint_url=endpointURL)
+                except Exception as inst:
+                  print("sagemaker boto client ERROR")
+                  print(inst)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+                  raise Exception(inst)
+                try:  
+                  domains = client.list_domains()
+                except Exception as inst:
+                  print("Failed to get domain list ERROR")
+                  print(inst)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+                  raise Exception(inst)
+                try:
+                  print("got domain list, ok")
+                  print(domains)
+                  domain_id = domains['Domains'][0]['DomainId']
+                  if domains['Domains'][0]['Status'] != 'InService':
+                    print("this is going to fail, domain not ready")
+                  print("calling to get URL")   
+                  response = client.create_presigned_domain_url(DomainId=domain_id,UserProfileName=aim_username,SessionExpirationDurationInSeconds=3600)
+                  print("got URL, OK!")
+                  url = response['AuthorizedUrl']
+                  responseData["AuthorizedUrl"] = url
+                  print(responseData)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+                except ClientError as ex:
+                  raise RuntimeError("Failed to create presigned url. Exception: {}".format(ex))
+                  cfnresponse.send(event, context, cfnresponse.FAILED, {})
+                  raise Exception(ex)
+                except Exception as inst:
+                    print(inst)
+                    raise RuntimeError("Failed to create presigned url. Exception: {}".format(inst))
+                    cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                    raise Exception(inst)
+              except Exception as inst:
+                responseData['Status'] = 'FAILED'
+                print("Last Exception ERROR")
+                print(inst)
+                cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                raise Exception(inst)
+                  
+  SignedURLGenaratorFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: Takes a Notebook instance and generates a presigned URL for usage.
+      Handler: index.lambda_handler
+      Runtime: python3.6
+      VpcConfig:
+        SecurityGroupIds: 
+        - !ImportValue 'Network-SecurityGroup-Global'
+        SubnetIds: 
+        - !ImportValue 'Network-PrivateSubnet1A'
+      Environment:
+        Variables:
+          PRODUCT: !Ref 'NoteBookName'
+          ENDPOINT: !ImportValue 'Network-APIDNS'
+          REGION: !Sub ${AWS::Region}
+          DUMMY: !ImportValue 'Network-APIDNS'
+      Timeout: 900
+      Role: !Sub 'arn:aws:iam::${AWS::AccountId}:role/Notbook-URL-instanciator-SageMaker-Lambda-Role'
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import sys
+          import os
+          import json
+          import socket
+          import cfnresponse
+          import botocore.exceptions
+          from botocore.exceptions import ClientError
+          def lambda_handler(event, context):
+            print('### ENVIRONMENT VARIABLES')
+            print(os.environ)
+            print('### EVENT')
+            print(event)
+            region=os.environ['REGION']
+            responseData = {}
+            if event['RequestType'] == 'Delete':
+                try:
+                  print('Received delete event')
+                  print(str(event))
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+                except Exception as inst:
+                  print(inst)
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+            else:
+              try:
+                print("create or update action received")
+                endpoint = os.environ['ENDPOINT']
+                print("ENDPOINT:"+endpoint.split('/')[-1])
+                print(socket.gethostbyname(endpoint.split('/')[-1]))
+                session = boto3.session.Session()
+                try:
+                  notebook_instance_name=event['ResourceProperties']['PRODUCT']
+                  print("Notebook: "+notebook_instance_name)
+                  endpointURL=event['ResourceProperties']['ENDPOINT']
+                  if not endpointURL.startswith("https"):
+                      endpointURL = "https://"+endpoint
+                  client = session.client('sagemaker',region,endpoint_url=endpointURL)
+                  describe_notebook_instance_result = client.describe_notebook_instance(NotebookInstanceName=notebook_instance_name)
+                  if describe_notebook_instance_result['NotebookInstanceStatus'] == 'Stopped':
+                    client.start_notebook_instance(NotebookInstanceName=notebook_instance_name)
+                    waiter = client.get_waiter('notebook_instance_in_service')
+                    waiter.wait(NotebookInstanceName=notebook_instance_name)
+                  else:
+                    print("Notebook is ready for URL")
+                    print(describe_notebook_instance_result)
+                  response = client.create_presigned_notebook_instance_url(NotebookInstanceName=notebook_instance_name,SessionExpirationDurationInSeconds=1800)
+                  url = response['AuthorizedUrl']
+                  temp = url.split('/')[-1]
+                  temp2 = temp.split("?")[0]
+                  print("IP will be:")
+                  print(temp2)
+                  print(socket.gethostbyname(temp2))
+                  print(response)
+                  ip = socket.gethostbyname(temp2)
+                  responseData['AuthorizedUrl'] = response['AuthorizedUrl']
+                  responseData['IP'] = ip
+                  responseData['Hosts'] = "Copy: "+ip+"     "+temp2
+                  print(responseData)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+                except ClientError as ex:
+                  raise RuntimeError("Failed to create presigned url. Exception: {}".format(ex))
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                  raise Exception(ex)
+                except Exception as inst:
+                    print("Exceptiion ERROR")
+                    print(inst)
+                    cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                    raise Exception(inst)
+              except Exception as inst:
+                print("Exceptiion ERROR")
+                print(inst)
+                cfnresponse.send(event, context, cfnresponse.FAILED, responseData)  
+                raise Exception(inst)            
+
+
+
+
+Outputs:
+  CommonURLLambdaArn:
+    Description: SageMaker Notebook ARN
+    Value: !GetAtt 'SignedURLGenaratorFunction.Arn'
+    Export:
+      Name: 'Lambda-SageMakerNotebookURL'
+  DomainRLLambdaArn:
+    Description: SageMaker Notebook ARN
+    Value: !GetAtt 'StudioSignedURLGenaratorFunction.Arn'
+    Export:
+      Name: 'Lambda-SageMakerStudioURL'

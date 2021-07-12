@@ -1,0 +1,271 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Deploys the role for SageMaker Notebook'
+Parameters:
+  EnableVpcRestrictions:
+    Type: String
+    Description: This enables the second VPC and restrict Pre-Signed URLs from public access
+    Default: 'true'
+    AllowedValues:
+    - true
+    - false
+Conditions:
+  EnableVpcRestrictionsCondition: !Equals [!Ref 'EnableVpcRestrictions', 'true']
+Resources:
+
+  MLDataPrepLaunchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: MLDataPrep-Launch-Role
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - servicecatalog.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+          - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+          - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+          - arn:aws:iam::aws:policy/AmazonS3FullAccess
+          - arn:aws:iam::aws:policy/IAMFullAccess
+
+  MLModelTrainLaunchRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: MLModel-Launch-Role
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+                  - servicecatalog.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+          - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+          - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+          - arn:aws:iam::aws:policy/AmazonS3FullAccess
+          - arn:aws:iam::aws:policy/IAMFullAccess
+          - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+
+  SCSageMakerLaunchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: 'Launch-Constrain-SageMaker-Role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - sagemaker.amazonaws.com
+              - servicecatalog.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: CreateIAMRoles
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: 
+              - iam:CreateRole
+              - iam:AttachRolePolicy
+              - iam:Describe*
+              - iam:GetRolePolicy
+              - iam:PutRolePolicy
+              - iam:CreatePolicy
+              - iam:ListPolicyVersions 
+              - iam:ListPolicies
+              - iam:ListRoles
+              - iam:ListRolePolicies
+              - iam:DeleteRole
+              - iam:DeletePolicy
+              - iam:DeleteRolePolicy 
+              - iam:DetachRolePolicy
+              Resource:
+              - 'arn:aws:iam::aws:role/SageMakerNotebookExecutionRole-*'
+              - 'arn:aws:iam::aws:role/CreateNotebookFunctionRole-*'
+              - 'arn:aws:iam::aws:policy/CreateNotebookFunctionPolicy*'
+              - 'arn:aws:iam::aws:policy/SageMakerNoteBookRestricted*'
+              - 'arn:aws:iam::aws:policy/SageMakerS3BucketAccess*'
+              - 'arn:aws:iam::aws:policy/SageMakerNoteBookExecutionRole*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/SageMakerNotebookExecutionRole-*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/CreateNotebookFunctionRole-*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/CreateNotebookFunctionPolicy*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/SageMakerNoteBookRestricted*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/SageMakerS3BucketAccess*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/SageMakerNoteBookExecutionRole*'
+              - !Sub 'arn:aws:iam::${AWS::AccountId}:role/service-role/SageMakerNotebookExecutionRole-*'
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
+        - "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+        - "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
+
+#This policy is used by the Role deployed with each Notebook when deployed.
+  SageMakerExecutionPolicy1:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: 'SageNotebookExecRole-Policy'
+      Path: '/'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - sagemaker:*
+          NotResource:
+          - arn:aws:sagemaker:*:*:domain/*
+          - arn:aws:sagemaker:*:*:user-profile/*
+          - arn:aws:sagemaker:*:*:app/*
+          - arn:aws:sagemaker:*:*:flow-definition/*
+        - Effect: Allow
+          Action:
+          - sagemaker:ListNotebook*
+          - sagemaker:End*
+          - sagemaker:ListDomains
+          - sagemaker:ListTags
+          Resource: "*"
+        - Effect: Allow
+          Action:
+          - sagemaker:CreatePresignedDomainUrl
+          - sagemaker:Describe*
+          - sagemaker:ListUserProfiles
+          - sagemaker:*App
+          - sagemaker:ListApps
+          Resource: "*"
+          Condition:
+            IpAddress:
+              aws:SourceIp: 10.0.0.0/8
+        - Effect: Allow
+          Action: sagemaker:*
+          Resource:
+          - arn:aws:sagemaker:*:*:flow-definition/*
+          Condition:
+            StringEqualsIfExists:
+              sagemaker:WorkteamType:
+              - private-crowd
+              - vendor-crowd
+        - Effect: Allow
+          Action:
+          - cloudwatch:DeleteAlarms
+          - cloudwatch:DescribeAlarms
+          - cloudwatch:GetMetricData
+          - cloudwatch:GetMetricStatistics
+          - cloudwatch:ListMetrics
+          - cloudwatch:PutMetricAlarm
+          - cloudwatch:PutMetricData
+          - iam:ListRoles
+          - kms:DescribeKey
+          - kms:ListAliases
+          - lambda:ListFunctions
+          - logs:CreateLogDelivery
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:DeleteLogDelivery
+          - logs:Describe*
+          - logs:GetLogDelivery
+          - logs:GetLogEvents
+          - logs:ListLogDeliveries
+          - logs:PutLogEvents
+          - logs:PutResourcePolicy
+          - logs:UpdateLogDelivery
+          - secretsmanager:ListSecrets
+          - sns:ListTopics
+          Resource: "*"
+          Condition:
+            IpAddress:
+              aws:SourceIp: 10.0.0.0/8
+
+#Role of Lambda Function that is called to generate the URL
+  URLInstanciatorLambdaRoleExecution:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: 'Notbook-URL-instanciator-SageMaker-Lambda-Role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: ModIAMRoles
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action: 
+              - iam:Describe*
+              - iam:getRolePolicy
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource: "*"
+            - Effect: Allow
+              Action: 
+              - ec2:CreateNetworkInterface 
+              - ec2:DescribeNetworkInterfaces
+              - ec2:DeleteNetworkInterface
+              - sagemaker:DescribeNotebookInstance
+              Resource: "*"
+            - Effect: Allow
+              Action: 
+              - sagemaker:CreatePresignedNotebookInstanceUrl
+              - sagemaker:ListDomains
+              - sagemaker:CreatePresignedDomainUrl
+              Resource: "*"
+              Condition:
+                !If 
+                  - EnableVpcRestrictionsCondition
+                  - 
+                    ForAnyValue:StringEquals:
+                      aws:SourceVpc: 
+                        - !ImportValue Network-VPC
+                 #     aws:SourceVpce: !ImportValue Network-SageMakerNotebookEndpoint
+                  - !Ref "AWS::NoValue"
+            # - !If 
+            #   - EnableVpcRestrictionsCondition
+            #   - 
+            #     Effect: Deny
+            #     Action: 
+            #     - sagemaker:CreatePresignedNotebookInstanceUrl
+            #     - sagemaker:DescribeNotebookInstance
+            #     Resource: "*"
+            #     Condition:
+            #       StringNotEquals:
+            #         aws:SourceVpc: !ImportValue Network-VPC
+            #   - !Ref "AWS::NoValue"
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+        - "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
+        - "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+        
+
+Outputs:
+  OutSCSageMakerLaunchRole:
+    Description: SCSageMakerLaunchRole ARN
+    Value: !GetAtt 'SCSageMakerLaunchRole.Arn'
+
+  OutURLInstanciatorLambdaRoleExecution:
+    Description: URLInstanciatorLambdaRoleExecution ARN
+    Value: !GetAtt 'URLInstanciatorLambdaRoleExecution.Arn'
+  
+  OutMLDataPrepLaunchRole:
+    Description: MLDataPrepLaunchRole ARN
+    Value: !GetAtt 'MLDataPrepLaunchRole.Arn'
+

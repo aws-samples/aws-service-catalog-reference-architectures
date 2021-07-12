@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Fetches the presigned notebook URL for SageMaker, including the role for SageMaker Notebook.'
+Parameters:
+  NoteBookName:
+    Type: String
+    Description: The name of the notebook to get a new URL.
+    Default: 'replace-name'
+    AllowedPattern: '[a-z0-9-]{1,63}'
+  RandomValue:
+    Type: String
+    Default: '1'
+    Description: Change this value to update the product and generate a new URL.
+
+
+
+Resources:
+
+  
+  PresignURL:
+    Type: Custom::CreateURL
+    Properties:
+      ServiceToken: !ImportValue 'Lambda-SageMakerNotebookURL'
+      PRODUCT: !Ref 'NoteBookName'
+      ENDPOINT: !ImportValue 'Network-APIDNS'
+      RoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/Notbook-URL-instanciator-SageMaker-Lambda-Role'
+      Version: 1
+
+Outputs:
+  IP:
+    Description: SageMaker Notebook FQDN
+    Value: !GetAtt
+      - PresignURL
+      - IP
+
+  PresignedURL:
+    Description: SageMaker Notebook URL
+    Value: !GetAtt
+      - PresignURL
+      - AuthorizedUrl
+
+  CopyPaste:
+    Description: Copy & Paste into /etc/hosts to change DNS resolution of this notebook
+    Value: !GetAtt
+      - PresignURL
+      - Hosts

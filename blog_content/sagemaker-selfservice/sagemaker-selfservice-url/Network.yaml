@@ -1,0 +1,386 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Portfolio setup for Service Catalog with EC2 and VPC products. (fdp-1p4da46nc)
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Network parameters
+        Parameters:
+        - VPCCIDR
+        - PrivateSubnet1ACIDR
+        - PrivateSubnet1BCIDR
+Parameters:
+  VPCCIDR:
+    Type: String
+    Default: '172.29.10.0/24'
+  PrivateSubnet1ACIDR:
+    Default: 172.29.10.0/26
+    Description: CIDR block for private subnet 1A
+    Type: String
+  PublicSubnet1ACIDR:
+    Default: '172.29.10.128/26'
+    Description: CIDR block for private subnet
+    Type: String
+  SecGroupFromIP:
+    Default: 100.100.100.100/32
+    Description: IP Address to allow Bastion conection on RDP
+    Type: String
+  WindowsAMI:
+    Description: Windows AMI ID to use, depeds on region.
+    Type: String 
+  InstanceType:
+    Description: Bastion host instace type
+    Type: String 
+  KeyNameLabel:
+    Description: This is the Ec2 key pair name Label
+    Type: String
+
+
+Resources:
+
+#blumbing first
+  DHCPOptions:
+    Type: AWS::EC2::DHCPOptions
+    Properties:
+      DomainName: 'ec2.internal'
+      DomainNameServers:
+        - AmazonProvidedDNS
+
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref 'VPCCIDR'
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: 'SageMaker VPC'
+
+  VPCDHCPOptionsAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties:
+      VpcId: !Ref 'VPC'
+      DhcpOptionsId: !Ref 'DHCPOptions'
+
+  PrivateSubnet1A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'VPC'
+      CidrBlock: !Ref 'PrivateSubnet1ACIDR'
+      Tags:
+        - Key: Name
+          Value: Private subnet 1A
+        - Key: Network
+          Value: Private
+
+
+  PrivateSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+      Tags:
+        - Key: Name
+          Value: Private subnets A
+        - Key: Network
+          Value: Private
+
+  PublicSubnet1A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref 'VPC'
+      CidrBlock: !Ref 'PublicSubnet1ACIDR'
+      Tags:
+        - Key: Name
+          Value: Public subnet 1A
+        - Key: Network
+          Value: Public      
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Network
+          Value: Public
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+      Tags:
+        - Key: Name
+          Value: Public subnets 1a
+        - Key: Network
+          Value: Public
+    
+  PublicSubnetRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref 'PublicSubnetRouteTable'
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:  !Ref 'InternetGateway'
+
+  PublicSubnet1ARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'PublicSubnet1A'
+      RouteTableId: !Ref 'PublicSubnetRouteTable'
+
+  PrivateSubnet1ARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref 'PrivateSubnet1A'
+      RouteTableId: !Ref 'PrivateSubnetRouteTable'
+
+
+# This is the interface endpoint for CloudFormation. You can only deploy this
+# once per region since it will consume the unique DNS entry for the endpoint.
+
+  S3VPCEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Action: '*'
+            Effect: Allow
+            Resource: '*'
+            Principal: '*'
+      RouteTableIds: 
+        - !Ref PrivateSubnetRouteTable
+        - !Ref PublicSubnetRouteTable
+      ServiceName: !Join ['', [com.amazonaws., !Ref 'AWS::Region', .s3]]
+      VpcId: !Ref 'VPC'
+
+
+  CfnEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.cloudformation"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+  SageMakerAPIEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.sagemaker.api"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+  SageMakerNotebookEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "aws.sagemaker.${AWS::Region}.notebook"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+  SageMakerNotebookEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "aws.sagemaker.${AWS::Region}.notebook"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+  STSEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.sts"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+  SageMakerRuntimeEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcId: !Ref VPC
+      ServiceName: !Sub "com.amazonaws.${AWS::Region}.sagemaker.runtime"
+      VpcEndpointType: "Interface"
+      PrivateDnsEnabled: true
+      SubnetIds:
+        - !Ref PrivateSubnet1A
+      SecurityGroupIds:
+        - !Ref EndpointSG
+
+
+
+  EndpointSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Traffic into CloudFormation Endpoint"
+      SecurityGroupIngress:
+      -
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: "0.0.0.0/0"
+      -
+          IpProtocol: udp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: "0.0.0.0/0"
+      VpcId: !Ref VPC
+      Tags:
+        -
+          Key: Name
+          Value: EndpointSG
+  #############    BASRION 
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH Access to Bastion Instance
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - Ref: AWS::StackName
+            - "-bastion-access"
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: '3389'
+        ToPort: '3389'
+        CidrIp: !Ref SecGroupFromIP
+      SecurityGroupEgress:
+      - IpProtocol: "-1"
+        CidrIp: '0.0.0.0/0'
+      
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    DependsOn:
+    - BastionSecurityGroup
+    Properties:
+      ImageId: !Ref WindowsAMI
+      InstanceType: !Ref InstanceType
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "BastionSecurityGroup"
+          SubnetId: 
+            !Ref PublicSubnet1A
+      KeyName: !Ref KeyNameLabel
+      UserData:
+        Fn::Base64:
+          'Fn::Join':
+          - ''
+          - - |
+              <powershell>
+            - |
+              Set-Location "C:\Windows\system32"
+            - |
+              C:\Windows\System32\tzutil /s "AUS Eastern Standard Time"
+            - | 
+              $Path = $env:TEMP;
+            - |
+              $Installer = "chrome_installer.exe";
+            - |
+              Invoke-WebRequest "http://dl.google.com/chrome/install/375.126/chrome_installer.exe" -OutFile     $Path\$Installer; 
+            - |
+              Start-Process -FilePath $Path\$Installer -ArgumentList "/silent /install" -Verb RunAs -Wait;
+            - |
+              Remove-Item $Path\$Installer
+            - |
+              #Set Chrome as default browser
+            - |
+              $chromePath = "${Env:ProgramFiles(x86)}\Google\Chrome\Application\" 
+            - |
+              $chromeApp = "chrome.exe"
+            - |
+              $chromeCommandArgs = "--make-default-browser"
+            - |  
+              & "$chromePath$chromeApp" $chromeCommandArgs
+            - |
+              </powershell>
+
+  #########################
+
+
+
+Outputs:
+  VPCID:
+    Description: VPC ID
+    Value: !Ref 'VPC'
+    Export:
+      Name: 'Network-VPC'
+  PrivateSubnet1A:
+    Description: Private subnet 1A
+    Value: !Ref 'PrivateSubnet1A'
+    Export:
+      Name: 'Network-PrivateSubnet1A'
+  PrivateSubnet1ACIDR:
+    Description: Private subnet 1A CIDR
+    Value: !Ref 'PrivateSubnet1ACIDR'
+    Export:
+      Name: 'Network-PrivateSubnet1ACIDR'
+  PrivateSubnetRouteTable:
+    Description: Subnet Route Table
+    Value: !Ref PrivateSubnetRouteTable
+    Export:
+      Name: Network-PrivateSubnetRouteTable
+  SecurityGroupGlobal:
+    Description: This security group will be used everywhere
+    Value: !Ref 'EndpointSG'
+    Export:
+      Name: 'Network-SecurityGroup-Global'
+  SageMakerAPIDNS:
+    Description: The DNS entries for endpoint
+    Value: !Select ['1', !Split [":", !Select ['0', !GetAtt 'SageMakerAPIEndpoint.DnsEntries'] ] ]
+    Export:
+      Name: 'Network-APIDNS'
+  SageMakerNotebookEndpointVPCE:
+    Description: The ID for Notebook endpoint
+    Value: !Ref SageMakerNotebookEndpoint
+    Export:
+      Name: 'Network-SageMakerNotebookEndpoint'
+  PublicSubnet1A:
+    Description: Private subnet 1A
+    Value: !Ref 'PublicSubnet1A'
+    Export:
+      Name: 'Network-PublicSubnet1A'
+  PublicSubnet1ACIDR:
+    Description: Private subnet 1A CIDR
+    Value: !Ref 'PrivateSubnet1ACIDR'
+    Export:
+      Name: 'Network-2-PublicSubnet1ACIDR'
+  SecurityGroupBastion:
+    Description: This security group will be used everywhere
+    Value: !Ref 'BastionSecurityGroup'
+    Export:
+      Name: 'Network-2-SecurityGroup-Bastion'
+  PublicName:
+    Description: Public DNS of Windows Bastion
+    Value: !GetAtt EC2Instance.PublicDnsName
+  PublicIP:
+    Description: The public IP to connect to the bastion
+    Value: !GetAtt EC2Instance.PublicIp

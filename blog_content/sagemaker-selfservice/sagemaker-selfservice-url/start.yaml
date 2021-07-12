@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Portfolio setup for Service Catalog with EC2 and VPC products. (fdp-1p4da46nc)
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: (Mandatory) Network details to build
+        Parameters:
+          - RepoRootURL
+      - Label:
+          default: (Mandatory) Portfolio Information
+        Parameters:
+          - LabelAdminRole
+      - Label:
+          default: Network security restrictions, secondary network with windows bastion host.
+        Parameters:
+          - KeyNameLabel
+          - InstanceType
+          - WindowsAMI
+          - MyIPAddress
+Parameters:
+  RepoRootURL:
+    Type: String
+    Description: Root url for the repo containing the product templates.
+    Default: https://raw.githubusercontent.com/aws-samples/aws-service-catalog-reference-architectures/master/blog_content/sagemaker-selfservice-url
+  LabelAdminRole:
+    Type: String
+    Description: The ARN of the User/Role that can make use of the products, this adds the permissions to access the portfolio in SC and KMS
+  EnableSecNetwork:
+    Type: String
+    Description: This enables the second VPC and restrict Pre-Signed URLs to deny public access
+    Default: true
+    AllowedValues:
+    - true
+    - false
+  KeyNameLabel: 
+    Description: DO THIS FIRST - Key-pair to retrieve password for bastion host
+    Type: String
+    Default: BURNER
+  InstanceType: 
+    Description: Instance type of the bastion host
+    Type: String
+    Default: 't2.small'
+  WindowsAMI: 
+    Description: AMI of the Windows Bastion host. 02 for us-east-1, or 55 for canada.
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base'
+  MyIPAddress: 
+    Description: What is your public IP to restrict the bastion security group i.e 72.21.196.65/32
+    Type: String
+    
+
+Resources:
+  Network:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/Network.yaml'
+      Parameters:
+        VPCCIDR: '172.29.10.0/24'
+        PrivateSubnet1ACIDR: '172.29.10.0/26'
+        PublicSubnet1ACIDR: '172.29.10.128/26'
+        KeyNameLabel: !Ref KeyNameLabel
+        InstanceType: !Ref 'InstanceType'
+        WindowsAMI: !Ref 'WindowsAMI'
+        SecGroupFromIP: !Ref MyIPAddress
+
+  SCEC2portfolio:
+    Type: 'AWS::ServiceCatalog::Portfolio'
+    Properties:
+      ProviderName: 'IT Services'
+      Description: 'Service Catalog Sample Portfolio'
+      DisplayName: !Sub 'Service Catalog Portfolio ${AWS::StackName}'
+
+  NotebookLaunchConstraintRole:
+    Type: 'AWS::CloudFormation::Stack'
+    DependsOn: Network
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/SC-Notebook-Constrain.yaml'
+      TimeoutInMinutes: 5
+      Parameters:
+        EnableVpcRestrictions: !Ref EnableSecNetwork
+
+  SageMakerNotebookProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    DependsOn: 
+      - Network
+      - NotebookLaunchConstraintRole
+    Properties:
+      Name: 'SageMaker Notebook'
+      Distributor: "IT"
+      Owner: "IT"
+      SupportDescription: "Please call any time for support"
+      SupportEmail: "info@example.com"
+      SupportUrl: "https://www.example.com"
+      ProvisioningArtifactParameters:
+      -
+        Name: "Sage Maker Notebook"
+        Description: "This product creates a SageMaker product asking in which network to place it."
+        Info:
+          LoadTemplateFromURL: !Sub '${RepoRootURL}/SageMaker-Notebook-Product.yaml'
+
+  SageMakerNoteBookLaunchConstrain:
+    Type: AWS::ServiceCatalog::LaunchRoleConstraint
+    DependsOn: 
+      - NotebookLaunchConstraintRole
+      - SageMakerNotebookProduct
+      - PortfolioProductSageMakerNotebookAssoc
+    Properties: 
+      PortfolioId: !Ref SCEC2portfolio
+      ProductId: !Ref SageMakerNotebookProduct
+      RoleArn: !GetAtt NotebookLaunchConstraintRole.Outputs.OutSCSageMakerLaunchRole
+  
+  URLLambda:
+    DependsOn: 
+      - SageMakerNoteBookLaunchConstrain
+      - Network
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/LambdaURL.yaml'
+      Parameters:
+        NoteBookName: 'dummy-parameter'
+        RandomValue: '1'
+
+  PortfolioProductSageMakerNotebookAssoc:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId: !Ref SCEC2portfolio
+      ProductId: !Ref SageMakerNotebookProduct
+
+  DeveloperPolicy:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/DeveloperPolicy.yaml'
+      TimeoutInMinutes: 5
+      Parameters:
+        URLLambdaARN: !GetAtt 'NotebookWatcher.Outputs.FunctionARN'
+        URLLambdaRole: !GetAtt 'NotebookLaunchConstraintRole.Outputs.OutURLInstanciatorLambdaRoleExecution'
+        AdminRole: !Ref LabelAdminRole
+
+  CMK:
+    DependsOn: DeveloperPolicy
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/CMK-KMS.yaml'
+      TimeoutInMinutes: 5
+      Parameters:
+        Service: 'ALL_SERVICES'
+        AdminRole: !Ref LabelAdminRole
+
+
+  NotebookWatcher:
+    Type: 'AWS::CloudFormation::Stack'
+    DependsOn: SageMakerNotebookProduct
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/Watcher.yaml'
+      TimeoutInMinutes: 5
+      Parameters:
+        ProductARN: !Sub arn:aws:catalog:${AWS::Region}:${AWS::AccountId}:product/${SageMakerNotebookProduct}
+        ProlicyName: 'DeveloperPassRoleToSageMakerNotebookManagedPolicy'
+
+
+  SageMakerDomainUrlProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Name: 'URL for SageMaker Studio'
+      Distributor: "IT"
+      Owner: "IT"
+      SupportDescription: "Please call any time for support"
+      SupportEmail: "info@example.com"
+      SupportUrl: "https://www.example.com"
+      ProvisioningArtifactParameters:
+      -
+        Name: "PreSign Domain URL for SageMaker Studio"
+        Description: "This product retrieves a SageMaker URL."
+        Info:
+          LoadTemplateFromURL: !Sub '${RepoRootURL}/PreSignedDomainURL-SageMaker.yml'
+
+  SageMakerUrlProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Name: 'URL for SageMaker Notebook'
+      Distributor: "IT"
+      Owner: "IT"
+      SupportDescription: "Please call any time for support"
+      SupportEmail: "info@example.com"
+      SupportUrl: "https://www.example.com"
+      ProvisioningArtifactParameters:
+      -
+        Name: "PreSign URL for SageMaker Notebook"
+        Description: "This product retrieves a SageMaker URL."
+        Info:
+          LoadTemplateFromURL: !Sub '${RepoRootURL}/PreSignedURL-SageMaker.yml'
+
+  PortfolioStudioProductURLAssoc:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId: !Ref SCEC2portfolio
+      ProductId: !Ref SageMakerDomainUrlProduct
+
+  PortfolioProductURLAssoc:
+    Type: "AWS::ServiceCatalog::PortfolioProductAssociation"
+    Properties:
+      PortfolioId: !Ref SCEC2portfolio
+      ProductId: !Ref SageMakerUrlProduct
+
+
+
+  PortfolioPrincipalAssociation:
+    Type: "AWS::ServiceCatalog::PortfolioPrincipalAssociation"
+    Properties:
+      PortfolioId: !Ref SCEC2portfolio
+      PrincipalARN: !Ref 'LabelAdminRole'
+      PrincipalType: "IAM"
+
+  PortfolioPrincipalAssociationDeveloper:
+    Type: "AWS::ServiceCatalog::PortfolioPrincipalAssociation"
+    DependsOn: DeveloperPolicy
+    Properties:
+      PortfolioId: !Ref SCEC2portfolio
+      PrincipalARN: !Sub 'arn:aws:iam::${AWS::AccountId}:role/Developer'
+      PrincipalType: "IAM"
+
+  SimpleNotebookInstance:
+    Type: 'AWS::CloudFormation::Stack'
+    DependsOn:
+      - Network
+      - CMK
+      - SageMakerNoteBookLaunchConstrain
+    Properties:
+      TemplateURL: !Sub '${RepoRootURL}/SimpleNotebook.yaml'
+      Parameters:
+        NotebookInstanceName: 'qwertynotebook'

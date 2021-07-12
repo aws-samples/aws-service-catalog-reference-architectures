@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Deploys automation infrastructure for SageMaker, including the role for SageMaker Notebook'
+Parameters:
+  NotebookInstanceName:
+    Type: String
+    Description: The name of the notebook
+
+Resources:
+
+  SageMakerExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub 'SageMakerNotebookExecutionRole-${NotebookInstanceName}'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/service-role/"
+      Policies:
+        - PolicyName: !Sub 'SageMakerS3BucketAccess-${AWS::StackName}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                Resource:
+                  - !Sub 'arn:aws:s3:::${NotebookInstanceName}'
+                  - !Sub 'arn:aws:s3:::${NotebookInstanceName}/*'        
+      ManagedPolicyArns:
+        - !Sub 'arn:aws:iam::${AWS::AccountId}:policy/SageNotebookExecRole-Policy'
+
+
+  ####### SageMaker Notebook
+  SageMakerNotebook:
+    Type: AWS::SageMaker::NotebookInstance
+    DependsOn: SageMakerExecutionRole
+    Properties: 
+      DirectInternetAccess: 'Disabled'
+      InstanceType: 'ml.t2.medium'
+      KmsKeyId: !ImportValue 'CMK-KeyId'
+      NotebookInstanceName: !Ref 'NotebookInstanceName'
+      RoleArn: !GetAtt 'SageMakerExecutionRole.Arn'
+      RootAccess: 'Disabled'
+      SecurityGroupIds: 
+        - !ImportValue 'Network-SecurityGroup-Global'
+      SubnetId: !ImportValue 'Network-PrivateSubnet1A'
+      VolumeSizeInGB: '50'
+
+
+Outputs:
+  Notebook:
+    Description: The notebook
+    Value: !Ref 'SageMakerNotebook'
