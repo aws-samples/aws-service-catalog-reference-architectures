@@ -28,7 +28,7 @@ Parameters:
     Default: python3.7
     AllowedValues:
     - nodejs12.x
-    - nodejs10.x    
+    - nodejs14.x    
     - java8
     - java11
     - python2.7

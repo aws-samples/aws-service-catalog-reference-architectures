@@ -4,6 +4,7 @@ This reference architecture creates a framework of lambdas, Step functions, and 
 
 ## Bulk Deployment for Amazon WorkSpaces
 
+
 <img src=images/wait.jpeg width=90>
 
 ### Prerequisites
@@ -34,8 +35,8 @@ Once you have the information needed your CSV file should look like this.
 
 ```
 DirectoryId,UserName,BundleId,KMSKey
-d-YourDirectoryId,scwpuser001,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
-d-YourDirectoryId,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:676575380427:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
+d-YourDirectoryId,scwpuser001,wsb-8vbljg4r6,arn:aws:kms:us-east-1:youraccount:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
+d-YourDirectoryId,scwpuser002,wsb-8vbljg4r6,arn:aws:kms:us-east-1:youraccount:key/9c631fc8-6b-YOUR-KEY-84a06dfd3
 ```
 
 - Upload the file to an Amazon S3 bucket in your account
