@@ -1,5 +1,5 @@
 
-**Using AWS Control Tower and AWS Service Catalog to automate Control Tower lifecycle events**
+Using AWS Control Tower and AWS Service Catalog to automate Control Tower lifecycle events
  
 
 
