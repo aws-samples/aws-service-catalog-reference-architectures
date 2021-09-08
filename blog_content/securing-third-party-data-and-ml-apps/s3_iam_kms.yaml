@@ -1,0 +1,250 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: S3 Bucket and IAM roles(fdp-mlmp-iam)
+
+Parameters:
+  S3PostfixUnique:
+    Type: String
+    Default: opp50
+    Description: Unique string for S3 bucket name
+Resources:
+  S3BucketLogs:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-logs'
+      AccessControl: LogDeliveryWrite
+  LogsBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3BucketLogs
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+            - 's3:PutObject'
+            - 's3:PutObjectAcl'
+            Effect: Allow
+            Principal:
+              Service: "s3.amazonaws.com"
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketLogs
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketLogs
+                  - /*
+  S3BucketData:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-data'
+      AccessControl: Private
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3BucketLogs
+        LogFilePrefix: testing-logs
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+  SSLRequestsOnlyBucketDataPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3BucketData
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:*'
+            Effect: Deny
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketData
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketData
+                  - /*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+            Principal: '*'
+  S3BucketInfra:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-infra'
+      AccessControl: Private
+      LoggingConfiguration:
+        DestinationBucketName: !Ref S3BucketLogs
+        LogFilePrefix: testing-logs
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+  SSLRequestsOnlyBucketInfraPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref S3BucketInfra
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:*'
+            Effect: Deny
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketInfra
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref S3BucketInfra
+                  - /*
+            Condition:
+              Bool:
+                aws:SecureTransport: 'false'
+            Principal: '*'
+  KMSKeyDataCapture:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encryption key for data capture S3 location
+      EnableKeyRotation: True
+      Enabled: True
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            "AWS": { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+          Action:
+          - kms:*
+          Resource: '*'
+        - Sid: 'AllowKeyUsageSMRole'
+          Effect: Allow
+          Principal:
+            AWS: !GetAtt SageMakerRole.Arn
+          Action:
+          - kms:DescribeKey
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey
+          - kms:GenerateDataKeyWithoutPlaintext
+          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/SageMaker-Capture
+  KeyAliasDataCapture:
+    Type: AWS::KMS::Alias
+    Properties:
+        AliasName: alias/SageMaker-Capture
+        TargetKeyId: !Ref KMSKeyDataCapture
+
+  SageMakerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'MLWorkshop-ModelExecutionRole-${AWS::Region}'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        -
+          PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: IAMGenericPolicy
+                Effect: Allow
+                Action:
+                  -  cloudwatch:PutMetricData
+                  -  logs:CreateLogStream
+                  -  logs:PutLogEvents
+                  -  logs:CreateLogGroup
+                  -  logs:DescribeLogStreams
+                  -  ecr:GetAuthorizationToken
+                  -  ecr:BatchCheckLayerAvailability
+                  -  ecr:GetDownloadUrlForLayer
+                  -  ecr:BatchGetImage
+                  -  ec2:CreateNetworkInterface
+                  -  ec2:CreateNetworkInterfacePermission
+                  -  ec2:DeleteNetworkInterface
+                  -  ec2:DeleteNetworkInterfacePermission
+                  -  ec2:DescribeNetworkInterfaces
+                  -  ec2:DescribeVpcs
+                  -  ec2:DescribeDhcpOptions
+                  -  ec2:DescribeSubnets
+                  -  ec2:DescribeSecurityGroups
+                Resource: '*'
+              - Sid: S3Access
+                Effect: Allow
+                Action:
+                  -  s3:Get*
+                  -  s3:List*
+                  -  s3:Describe*
+                  -  s3:PutObject
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketInfra
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketInfra
+                      - /*
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketData
+                      - /*
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketData
+                      - /*
+
+  IAMPolicyforKMSDataCapture:
+    Type: AWS::IAM::ManagedPolicy
+    DependsOn:
+      - SageMakerRole
+      - KMSKeyDataCapture
+    Properties:
+      ManagedPolicyName: managedKMSDataCapturePolicy
+      Description: Managed Policy for KMS Data Capture
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey
+            "Resource": !GetAtt KMSKeyDataCapture.Arn
+      Roles:
+        - !Ref SageMakerRole
+Outputs:
+  SageMakerRole:
+    Value: !GetAtt
+      - SageMakerRole
+      - Arn
+  S3BucketData:
+    Value: !Ref S3BucketData
+  S3BucketInfra:
+    Value: !Ref S3BucketInfra
+  KMSKeyDataCapture:
+    Value: !Ref KMSKeyDataCapture
