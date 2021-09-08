@@ -1,0 +1,206 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Application stack(fdp-mlmp-adminapp)
+Parameters:
+  RegionAZ1Name:
+    Description: Availability Zone 1 Name in Region
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-2a ## hardcoded region
+  RegionAZ2Name:
+    Description: Availability Zone 2 Name in Region
+    Type: AWS::EC2::AvailabilityZone::Name
+    Default: us-east-2b ## hardcoded region
+  VPCCIDR:
+    Description: CIDR block for the VPC
+    Type: String
+    Default: 10.229.0.0/16
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    AllowedPattern: >-
+      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+  SubnetAPrivateCIDR:
+    Description: CIDR block for the private subnet in availability zone
+    Type: String
+    Default: 10.229.30.0/24
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    AllowedPattern: >-
+      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+  SubnetBPrivateCIDR:
+    Description: CIDR block for the private subnet in availability zone
+    Type: String
+    Default: 10.229.40.0/24
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    AllowedPattern: >-
+      ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+  EnableVPCFlowLogs:
+    Description: Create a Flow logs for the VPC
+    Type: String
+    Default: true
+    ConstraintDescription: ''
+    AllowedValues:
+      - true
+      - false
+  Suffix:
+    Type: String
+    Default: reinforce15
+    Description: Unique string for resource naming suffix
+Resources:
+  SuffixParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /MLWorkshop/Suffix
+      Type: String
+      Value: !Ref Suffix
+  S3AndIAMRolesProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    Properties:
+      ProductName: S3 buckets, KMS keys, and IAM roles
+      ProvisioningArtifactName: 'v2.1'
+      ProvisioningParameters:
+         -
+            Key: S3PostfixUnique
+            Value: !Ref Suffix
+  VPCProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      ProductName: VPC
+      ProvisioningArtifactName: 'v2.1'
+      ProvisioningParameters:
+         -
+            Key: Suffix
+            Value: !Ref Suffix
+         -
+            Key: RegionAZ1Name
+            Value: !Ref RegionAZ1Name
+         -
+            Key: RegionAZ2Name
+            Value: !Ref RegionAZ2Name
+         -
+            Key: VPCCIDR
+            Value: !Ref VPCCIDR
+         -
+            Key: SubnetAPrivateCIDR
+            Value: !Ref SubnetAPrivateCIDR
+         -
+            Key: SubnetBPrivateCIDR
+            Value: !Ref SubnetBPrivateCIDR
+         -
+            Key: EnableVPCFlowLogs
+            Value: !Ref EnableVPCFlowLogs
+  NotebookInstanceRoleParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/NotebookInstanceRole/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.NotebookInstanceRole]
+  SageMakerRoleParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/SageMakerRole/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.SageMakerRole]
+  GetNewRevisionRoleParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/GetNewRevisionRole/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.GetNewRevisionRole]
+  SubnetAPrivateParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - VPCProduct
+    Properties:
+      Name: !Sub /MLWorkshop/SubnetAPrivate/${Suffix}
+      Type: String
+      Value: !GetAtt [VPCProduct, Outputs.SubnetAPrivate]
+  SubnetBPrivateParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - VPCProduct
+    Properties:
+      Name: !Sub /MLWorkshop/SubnetBPrivate/${Suffix}
+      Type: String
+      Value: !GetAtt [VPCProduct, Outputs.SubnetBPrivate]
+  S3BucketDataParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/S3BucketData/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.S3BucketData]
+  S3DataCapturePathParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/S3DataCapturePath/${Suffix}
+      Type: String
+      Value: !Join [ "", ['s3://',
+        !GetAtt [S3AndIAMRolesProduct, Outputs.S3BucketInfra],
+        'data_capture_logs' ]]
+  S3BucketInfraParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/S3BucketInfra/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.S3BucketInfra]
+  KMSKeyDataCaptureParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/KMSKeyDataCapture/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.KMSKeyDataCapture]
+  KMSKeyMLStorageParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - S3AndIAMRolesProduct
+    Properties:
+      Name: !Sub /MLWorkshop/KMSKeyMLStorage/${Suffix}
+      Type: String
+      Value: !GetAtt [S3AndIAMRolesProduct, Outputs.KMSKeyMLStorage]
+  NotebookSecurityGroupParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - VPCProduct
+    Properties:
+      Name: !Sub /MLWorkshop/NotebookSecurityGroup/${Suffix}
+      Type: String
+      Value: !GetAtt [VPCProduct, Outputs.NotebookInstanceSecurityGroup]
+  ModelSecurityGroupParam:
+    Type: AWS::SSM::Parameter
+    DependsOn:
+      - VPCProduct
+    Properties:
+      Name: !Sub /MLWorkshop/ModelSecurityGroup/${Suffix}
+      Type: String
+      Value: !GetAtt [VPCProduct, Outputs.ModelSecurityGroup]
+Outputs:
+  SubnetAPrivate:
+    Value: !GetAtt [VPCProduct, Outputs.SubnetAPrivate]
+  SubnetBPrivate:
+    Value: !GetAtt [VPCProduct, Outputs.SubnetBPrivate]
+  SageMakerRole:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.SageMakerRole]
+  NotebookInstanceRole:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.NotebookInstanceRole]
+  GetNewRevisionRole:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.GetNewRevisionRole]
+  S3BucketData:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.S3BucketData]
+  S3BucketInfra:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.S3BucketInfra]
+  KMSKeyMLStorage:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.KMSKeyMLStorage]
+  KMSKeyDataCapture:
+    Value: !GetAtt [S3AndIAMRolesProduct, Outputs.KMSKeyDataCapture]

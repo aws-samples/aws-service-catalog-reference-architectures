@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Application (fdp-mlmp-app)
+Mappings:
+  ModelAddressPrefix:
+    us-west-1:
+      base: "arn:aws:sagemaker:us-west-1:382657785993:model-package"
+    us-west-2:
+      base: "arn:aws:sagemaker:us-west-2:594846645681:model-package"
+    us-east-1:
+      base: "arn:aws:sagemaker:us-east-1:865070037744:model-package"
+    us-east-2:
+      base: "arn:aws:sagemaker:us-east-2:057799348421:model-package"
+    ap-northeast-1:
+      base: "arn:aws:sagemaker:ap-northeast-1:977537786026:model-package"
+    ap-northeast-2:
+      base: "arn:aws:sagemaker:ap-northeast-2:745090734665:model-package"
+    ap-southeast-1:
+      base: "arn:aws:sagemaker:ap-southeast-1:192199979996:model-package"
+    ap-southeast-2:
+      base: "arn:aws:sagemaker:ap-southeast-2:666831318237:model-package"
+    ca-central-1:
+      base: "arn:aws:sagemaker:ca-central-1:470592106596:model-package"
+    eu-central-1:
+      base: "arn:aws:sagemaker:eu-central-1:446921602837:model-package"
+    eu-north-1:
+      base: "arn:aws:sagemaker:eu-north-1:136758871317:model-package"
+    eu-west-1:
+      base: "arn:aws:sagemaker:eu-west-1:985815980388:model-package"
+    eu-west-2:
+      base: "arn:aws:sagemaker:eu-west-2:856760150666:model-package"
+    eu-west-3:
+      base: "arn:aws:sagemaker:eu-west-3:843114510376:model-package"
+    sa-east-1:
+      base: "arn:aws:sagemaker:sa-east-1:270155090741:model-package"
+    ap-south-1:
+      base: "arn:aws:sagemaker:ap-south-1:077584701553:model-package"
+Parameters:
+  Suffix:
+    Description: Enter resource name suffix (please enter same suffix provided by Admin)
+    Type: String
+    Default: reinforce15
+  ParamVersion:
+    Description: Enter the SSM parameter version (same version used for all params)
+    Type: String
+    Default: '1'
+  MLModelPackageID:
+    Description: ProductID for the ML model
+    Type: String
+    Default: 'pytorch-ic-resnet18-cpu-bf7befed326dda897b640d3554105a28'
+  DatasetID:
+    Description: DataSetID of the product
+    Type: String
+    Default: '9424406a644431a9bf7b4a3d1499fc0f'
+  RevisionID:
+    Description: RevisionID of the dataset
+    Type: String
+    Default: '8cc7989a9b3cd8f42adc684be3064371'
+Resources:
+  NotebookInstance:
+    DependsOn:
+      - ADXProduct
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    Properties:
+      ProductName: Amazon SageMaker Notebook Instance
+      ProvisioningArtifactName: 'v2.1'
+      ProvisioningParameters:
+         -  Key: NotebookInstanceRole
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/NotebookInstanceRole/${Suffix}:${ParamVersion}}}'
+         -  Key: KMSKeyMLStorage
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/KMSKeyMLStorage/${Suffix}:${ParamVersion}}}'
+         -  Key: NotebookSecurityGroupId
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/NotebookSecurityGroup/${Suffix}:${ParamVersion}}}'
+         -  Key: SubnetId
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/SubnetAPrivate/${Suffix}:${ParamVersion}}}'
+  MLModel:
+    DependsOn:
+      - NotebookInstance
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    Properties:
+      ProductName: Third-party ML Model
+      ProvisioningArtifactName: 'v2.1'
+      ProvisioningParameters:
+         -  Key: SubnetId1
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/SubnetAPrivate/${Suffix}:${ParamVersion}}}'
+         -  Key: SubnetId2
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/SubnetBPrivate/${Suffix}:${ParamVersion}}}'
+         -  Key: ModelSecurityGroupId
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/ModelSecurityGroup/${Suffix}:${ParamVersion}}}'
+         -  Key: KMSKeyMLStorage
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/KMSKeyMLStorage/${Suffix}:${ParamVersion}}}'
+         -  Key: KMSKeyAliasDataCapture
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/KMSKeyDataCapture/${Suffix}:${ParamVersion}}}'
+         -  Key: S3DataCapturePath
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/S3DataCapturePath/${Suffix}:${ParamVersion}}}'
+         -  Key: SageMakerModelRole
+            Value: !Sub '{{resolve:ssm:/MLWorkshop/SageMakerRole/${Suffix}:${ParamVersion}}}'
+         -  Key: ProductARN
+            Value: !Sub
+              - '${baseurl}/${MLModelPackageID}'
+              - { baseurl: !FindInMap [ModelAddressPrefix, !Ref "AWS::Region", "base"], MLModelPackageID: !Ref MLModelPackageID }
+  ADXProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProvisionedProduct
+    Properties:
+      ProductName: Third-party dataset
+      ProvisioningArtifactName: 'v2.1'
+      ProvisioningParameters:
+        -  Key: SubnetId1
+           Value: !Sub '{{resolve:ssm:/MLWorkshop/SubnetAPrivate/${Suffix}:${ParamVersion}}}'
+        -  Key: SubnetId2
+           Value: !Sub '{{resolve:ssm:/MLWorkshop/SubnetBPrivate/${Suffix}:${ParamVersion}}}'
+        -  Key: SecurityGroupId
+           Value: !Sub '{{resolve:ssm:/MLWorkshop/NotebookSecurityGroup/${Suffix}:${ParamVersion}}}'
+        -  Key: DatasetID
+           Value: !Ref DatasetID
+        -  Key: RevisionID
+           Value: !Ref RevisionID
+        -  Key: DataS3Bucket
+           Value: !Sub '{{resolve:ssm:/MLWorkshop/S3BucketData/${Suffix}:${ParamVersion}}}'
+        -  Key: RoleGetNewRevisionArn
+           Value: !Sub '{{resolve:ssm:/MLWorkshop/GetNewRevisionRole/${Suffix}:${ParamVersion}}}'
+Outputs:
+  EndpointName:
+    Value: !GetAtt [MLModel, Outputs.EndpointName]
+  Notebook:
+    Value: !GetAtt [NotebookInstance, Outputs.SageMakerNoteBookURL]
+  S3DataPath:
+    Value: !GetAtt [ADXProduct, Outputs.S3DataPath]

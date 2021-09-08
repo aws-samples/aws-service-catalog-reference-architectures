@@ -1,0 +1,793 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'This cloudformation template creates resources for the Workshop(fdp-mlmp-metaworkshop)'
+
+Parameters:
+  S3RootUrl:
+    Type: String
+    Default: https://reinforce-kanchan-testing.s3.amazonaws.com/activation_day
+    Description: Root URL for S3 path containing CFN templates, do not end with /
+  EnvironmentPrefix:
+    Type: String
+    Default: user-1
+    Description: Prefix for user environment
+Resources:
+
+############################################
+  AdminPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      AcceptLanguage: en
+      Description: Admin - ML Infrastructure stack
+      DisplayName: Admin - ML Infrastructure stack
+      ProviderName: CCOE
+
+  UserPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      AcceptLanguage: en
+      Description: Dev - ML Project
+      DisplayName: Dev - ML Project
+      ProviderName: CCOE
+##############################################
+  VPCProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: VPC with private subnets and endpoints
+      Distributor: MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: VPC
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub ${S3RootUrl}/network.yaml
+          Name: v2.1
+  IAMProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: IAM roles, KMS keys, S3 buckets
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: S3 buckets, KMS keys, and IAM roles
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub '${S3RootUrl}/s3_iam_kms.yaml'
+          Name: v2.1
+  ADXProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: AWS Data Exchange product
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: Third-party dataset
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub '${S3RootUrl}/adx.yaml'
+          Name: v2.1
+  AdminAppProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: Infrastructure product that creates VPCs, IAM roles, etc.
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: Infrastructure product
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub ${S3RootUrl}/admin-setup-app.yaml
+          Name: v2.1
+  AppProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: An application product
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: An application product
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub ${S3RootUrl}/application.yaml
+          Name: v2.1
+  NotebookProduct:
+    Type: 'AWS::ServiceCatalog::CloudFormationProduct'
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: A classic SageMaker notebook instance
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: 'https://support.com'
+      Name: Amazon SageMaker Notebook Instance
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub ${S3RootUrl}/notebook.yaml
+          Name: v2.1
+  MLProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    DependsOn:
+      - IAMProduct
+    Properties:
+      Owner: MP Team
+      SupportDescription: Support Description
+      Description: A Machine Learning Model Package.
+      Distributor: AWS MP Team
+      SupportEmail: awsmp@example.com
+      AcceptLanguage: en
+      SupportUrl: https://support.com
+      Name: Third-party ML Model
+      ProvisioningArtifactParameters:
+        - Description: Base Version
+          Info:
+            LoadTemplateFromURL: !Sub ${S3RootUrl}/mlmodel.yaml
+          Name: v2.1
+#############################################
+  # Network:
+  #  Type: 'AWS::CloudFormation::Stack'
+  #   Properties:
+  #     TemplateURL: !Sub '${S3RootUrl}/network.yaml'
+
+#############################################
+  AssociateVPCProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - AdminPortfolio
+      - VPCProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      ProductId: !Ref VPCProduct
+  VPCLaunchRoleConstraint:
+    Type: 'AWS::ServiceCatalog::LaunchRoleConstraint'
+    DependsOn:
+      - AssociateVPCProduct
+      - VPCLaunchRole
+    Properties:
+      Description: >-
+        Launch role associated has permissions to create and manage VPC / network
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      ProductId: !Ref VPCProduct
+      RoleArn: !GetAtt VPCLaunchRole.Arn
+#############################################
+  AssociateIAMProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - AdminPortfolio
+      - IAMProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      ProductId: !Ref IAMProduct
+  IAMLaunchRoleConstraint:
+    Type: 'AWS::ServiceCatalog::LaunchRoleConstraint'
+    DependsOn:
+      - AssociateIAMProduct
+      - IAMLaunchRole
+    Properties:
+      Description: >-
+        Launch role associated has permissions to create, manage S3, KMS and IAM product
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      ProductId: !Ref IAMProduct
+      RoleArn: !GetAtt IAMLaunchRole.Arn
+
+##############################################
+  AssociateADXProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - UserPortfolio
+      - ADXProduct
+      - ADXLaunchRole
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref ADXProduct
+  ADXLaunchRoleConstraint:
+    Type: 'AWS::ServiceCatalog::LaunchRoleConstraint'
+    DependsOn:
+      - AssociateADXProduct
+      - ADXLaunchRole
+    Properties:
+      Description: >-
+        Launch role associated has permissions to set up data exports for new revisions
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref ADXProduct
+      RoleArn: !GetAtt ADXLaunchRole.Arn
+  AssociateMLProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - UserPortfolio
+      - MLProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref MLProduct
+  MLProductLaunchRoleConstraint:
+    Type: 'AWS::ServiceCatalog::LaunchRoleConstraint'
+    DependsOn:
+      - AssociateMLProduct
+      - MLModelLaunchRole
+    Properties:
+      Description: >-
+        Launch role associated has permissions to create, manage, and terminate
+        ML Product
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref MLProduct
+      RoleArn: !GetAtt MLModelLaunchRole.Arn
+
+ ########################################################
+
+  AssociateNotebookProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - UserPortfolio
+      - NotebookProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref NotebookProduct
+  NotebookProductLaunchRoleConstraint:
+    Type: 'AWS::ServiceCatalog::LaunchRoleConstraint'
+    DependsOn:
+      - AssociateNotebookProduct
+      - NotebookLaunchRole
+    Properties:
+      Description: >-
+        Launch role associated has permissions to create, manage, and terminate
+        Notebook Product
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref NotebookProduct
+      RoleArn: !GetAtt NotebookLaunchRole.Arn
+
+  #######################################################
+  AssociateAppProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - UserPortfolio
+      - AppProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      ProductId: !Ref AppProduct
+  LabTagoption:
+    DependsOn:
+      - UserPortfolio
+      - AdminPortfolio
+    Type: 'AWS::ServiceCatalog::TagOption'
+    Properties:
+      Active: 'True'
+      Value: '2002'
+      Key: cost-center
+  TagAssoAdminPort:
+    DependsOn: LabTagoption
+    Type: 'AWS::ServiceCatalog::TagOptionAssociation'
+    Properties:
+      TagOptionId: !Ref LabTagoption
+      ResourceId: !Ref AdminPortfolio
+  TagAssoUserPort:
+    DependsOn: LabTagoption
+    Type: 'AWS::ServiceCatalog::TagOptionAssociation'
+    Properties:
+      TagOptionId: !Ref LabTagoption
+      ResourceId: !Ref UserPortfolio
+
+############################################################
+  AssociateAdminAppProduct:
+    Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
+    DependsOn:
+      - AdminPortfolio
+      - AdminAppProduct
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      ProductId: !Ref AdminAppProduct
+############################################################
+  VPCLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${EnvironmentPrefix}-VPCLaunchRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: VPCLaunchPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ec2:CreateTags
+                  - ec2:DescribeAvailabilityZones
+                  - ec2:DescribeFlowLogs
+                  - ec2:DescribeRouteTables
+                  - ec2:DescribeSecurityGroups
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeVpcEndpoints
+                  - ec2:DescribeVpcs
+                  - ec2:DisassociateRouteTable
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ec2:AssociateRouteTable
+                  - ec2:CreateRouteTable
+                  - ec2:DeleteRouteTable
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:AuthorizeSecurityGroupEgress
+                  - ec2:AuthorizeSecurityGroupIngress
+                  - ec2:CreateSecurityGroup
+                  - ec2:DeleteSecurityGroup
+                  - ec2:RevokeSecurityGroupEgress
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateSubnet
+                  - ec2:DeleteSubnet
+                  - ec2:CreateNetworkInterface
+                  - ec2:DetachNetworkInterface
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeNetworkInterfaceAttribute
+                  - ec2:DeleteNetworkInterface
+                  - ec2:AttachNetworkInterface
+                  - ec2:DescribeNetworkInterfacePermissions
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - ec2:CreateVpcEndpoint
+                  - ec2:DeleteVpcEndpoints
+                  - ec2:ModifyVpcEndpoint
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutRetentionPolicy
+                  - logs:deleteRetentionPolicy
+                  - logs:DeleteLogGroup
+                  - logs:DeleteLogStream
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateFlowLogs
+                  - ec2:DeleteFlowLogs
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - ec2:CreateRouteTable
+                  - ec2:CreateSubnet
+                  - ec2:CreateVpc
+                  - ec2:CreateVpcEndpoint
+                  - ec2:DeleteVpc
+                  - ec2:ModifyVpcAttribute
+                  - route53:AssociateVPCWithHostedZone
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:TagRole
+                  - iam:GetRole
+                  - iam:UntagRole
+                  - iam:PutRolePolicy
+                  - iam:GetRolePolicy
+                  - iam:DeleteRolePolicy
+                Resource: "arn:aws:iam::*:role/SC*"
+  ADXLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${EnvironmentPrefix}-ADXLaunchRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
+        #- arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - serverlessrepo:CreateApplication
+                  - serverlessrepo:CreateApplicationVersion
+                  - serverlessrepo:GetApplication
+                  - serverlessrepo:ListApplicationVersions
+                  - serverlessrepo:DeleteApplication
+                  - serverlessrepo:UpdateApplication
+                  - serverlessrepo:CreateCloudFormationTemplate
+                  - serverlessrepo:GetCloudFormationTemplate
+                  - events:DescribeRule
+                  - events:ListRules
+                  - events:PutRule
+                  - events:DeleteRule
+                  - events:PutTargets
+                  - events:RemoveTargets
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:ExecuteChangeSet'
+                  - 'lambda:AddPermission'
+                  - 'lambda:CreateFunction'
+                  - 'lambda:DeleteFunction'
+                  - 'lambda:GetFunctionCodeSigningConfig'
+                  - 'lambda:PublishLayerVersion'
+                  - 'lambda:InvokeFunction'
+                  - 'lambda:RemovePermission'
+                  - dataexchange:GetJob
+                  - dataexchange:ListJobs
+                  - dataexchange:CreateJob
+                  - dataexchange:StartJob
+                  - dataexchange:CancelJob
+                Resource: '*'
+              - Sid: GetAndPassRole
+                Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:PassRole
+                Resource:
+                  - arn:aws:iam::*:role/SC-*
+                  - arn:aws:iam::*:role/MLWorkshop-*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:DescribeLogGroups
+                  - logs:DescribeLogStreams
+                  - logs:PutRetentionPolicy
+                  - logs:deleteRetentionPolicy
+                  - logs:DeleteLogGroup
+                  - logs:DeleteLogStream
+                Resource: '*'
+  MLModelLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${EnvironmentPrefix}-MLModelLaunchRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSageMakerFullAccess'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 'kms:CreateGrant'
+                  - 'kms:RevokeGrant'
+                Resource: '*'
+              - Sid: GetAndPassRole
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                  - iam:GetRole
+                Resource:
+                  - arn:aws:iam::*:role/MLWorkshop-*
+  NotebookLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${EnvironmentPrefix}-NotebookLaunchRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSageMakerFullAccess'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 'kms:CreateGrant'
+                  - 'kms:RevokeGrant'
+                Resource: '*'
+  LaunchRoleADXPolicy:
+    Type: 'AWS::IAM::Policy'
+    DependsOn:
+      - ADXLaunchRole
+    Properties:
+      PolicyName: ADXLaunchRolePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - cloudformation:CreateStack
+              - cloudformation:DeleteStack
+              - cloudformation:DescribeStackEvents
+              - cloudformation:DescribeStacks
+              - cloudformation:SetStackPolicy
+              - cloudformation:ValidateTemplate
+              - cloudformation:UpdateStack
+            Resource: 'arn:aws:cloudformation:*:*:stack/*/*'
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource: '*'
+          - Effect: Allow
+            Action:
+              - cloudformation:GetTemplateSummary
+            Resource: '*'
+      Roles:
+        - !Ref ADXLaunchRole
+  LaunchRolePolicy:
+    Type: 'AWS::IAM::Policy'
+    DependsOn:
+      - IAMLaunchRole
+      - NotebookLaunchRole
+      - MLModelLaunchRole
+      - VPCLaunchRole
+    Properties:
+      PolicyName: SCLaunchRolePolicy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStackEvents
+                  - cloudformation:DescribeStacks
+                  - cloudformation:SetStackPolicy
+                  - cloudformation:ValidateTemplate
+                  - cloudformation:UpdateStack
+            Resource: 'arn:aws:cloudformation:*:*:stack/*/*'
+          - Effect: Allow
+            Action:
+                  - s3:GetObject
+            Resource: '*'
+            Condition:
+              StringEquals:
+                "s3:ExistingObjectTag/servicecatalog:provisioning" : "true"
+          - Effect: Allow
+            Action:
+                 - s3:GetObject
+            Resource:
+                 - 'arn:aws:s3:::ml-3p-workshop-data-*'
+          - Effect: Allow
+            Action:
+                 - cloudformation:GetTemplateSummary
+            Resource: '*'
+      Roles:
+        - !Ref IAMLaunchRole
+        - !Ref NotebookLaunchRole
+        - !Ref MLModelLaunchRole
+        - !Ref VPCLaunchRole
+  IAMLaunchRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub ${EnvironmentPrefix}-IAMLaunchRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/IAMReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - servicecatalog.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID1
+                Effect: Allow
+                Action:
+                  - 'iam:CreatePolicy'
+                  - 'iam:DeletePolicy'
+                  - 'iam:ModifyPolicy'
+                  - 'iam:DeleteRolePolicy'
+                  - 'iam:CreateRolePolicy'
+                  - iam:DetachRolePolicy
+                  - iam:AttachRolePolicy
+                  - 'iam:PutRolePolicy'
+                  - 'kms:PutKeyPolicy'
+                  - 'kms:ScheduleKeyDeletion'
+                  - 'kms:EnableKeyRotation'
+                Resource: '*'
+              - Sid: S3LaunchPolicySID2
+                Effect: Allow
+                Action:
+                  - 'iam:CreateRole'
+                  - 'iam:DeleteRole'
+                  - 'iam:GetRole'
+                  - 'iam:PassRole'
+                Resource: "arn:aws:iam::*:role/MLWorkshop-*"
+  SCAdminUser:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              AWS: !Sub '${AWS::AccountId}'
+            Action: 'sts:AssumeRole'
+      RoleName: !Sub ${EnvironmentPrefix}-service_catalog_lead_end_user
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 'servicecatalog:GetProvisionedProductOutputs'
+                  - 'servicecatalog:ListRecordHistory'
+                  - 'cloudformation:ListStacks'
+                  - 'cloudformation:DescribeStacks'
+                  - 'servicecatalog:DescribeProvisionedProduct'
+                  - 'ec2:DescribeAvailabilityZones'
+                Resource: '*'
+              - Sid: SSSMPolicySID
+                Effect: Allow
+                Action:
+                  - 'ssm:AddTagsToResource'
+                  - 'ssm:RemoveTagsFromResource'
+                  - 'ssm:PutParameter*'
+                  - 'ssm:GetParameter*'
+                  - 'ssm:DeleteParameter'
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MLWorkshop/*'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MLWorkshop/'
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 's3:GetObject*'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    "s3:ExistingObjectTag/servicecatalog:provisioning" : "true"
+  AdminPortfolioPrincipalAssociation:
+    Type: 'AWS::ServiceCatalog::PortfolioPrincipalAssociation'
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref AdminPortfolio
+      PrincipalARN: !GetAtt
+        - SCAdminUser
+        - Arn
+      PrincipalType: IAM
+  SCEndUser:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: ''
+            Effect: Allow
+            Principal:
+              AWS: !Sub '${AWS::AccountId}'
+            Action: 'sts:AssumeRole'
+      RoleName: !Sub ${EnvironmentPrefix}-service_catalog_end_user
+      Policies:
+        - PolicyName: ServiceActionsPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 'servicecatalog:GetProvisionedProductOutputs'
+                  - 'servicecatalog:ListRecordHistory'
+                  - 'cloudformation:ListStacks'
+                  - 'cloudformation:DescribeStacks'
+                  - 'ec2:DescribeSubnets'
+                  - ec2:DescribeSecurityGroups
+                  - 'sagemaker:CreatePresignedNotebookInstanceUrl'
+                  - 'servicecatalog:DescribeProvisionedProduct'
+                Resource: '*'
+              - Sid: SSSMPolicySID
+                Effect: Allow
+                Action:
+                  - 'ssm:DescribeParameter*'
+                  - 'ssm:GetParameter*'
+                Resource:
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MLWorkshop/*'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/MLWorkshop/'
+        - PolicyName: S3Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: S3LaunchPolicySID
+                Effect: Allow
+                Action:
+                  - 's3:GetObject*'
+                Resource: '*'
+                Condition:
+                  StringEquals:
+                    "s3:ExistingObjectTag/servicecatalog:provisioning" : "true"
+  EndUserPortfolioPrincipalAssociation:
+    Type: 'AWS::ServiceCatalog::PortfolioPrincipalAssociation'
+    Properties:
+      AcceptLanguage: en
+      PortfolioId: !Ref UserPortfolio
+      PrincipalARN: !GetAtt
+        - SCEndUser
+        - Arn
+      PrincipalType: IAM
+Outputs:
+  SwitchRoleSCLeadEndUser:
+    Value: !Sub >-
+      https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${EnvironmentPrefix}-service_catalog_lead_end_user&displayName=${EnvironmentPrefix}-SC_Team_Lead
+  SwitchRoleSCDeveloper:
+    Value: !Sub >-
+      https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${EnvironmentPrefix}-service_catalog_end_user&displayName=${EnvironmentPrefix}-SC_Developer

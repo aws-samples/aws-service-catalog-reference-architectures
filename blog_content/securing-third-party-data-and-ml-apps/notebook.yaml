@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  License: Apache-2.0
+Description: 'AWS CloudFormation Sample Template SageMaker NotebookInstance: This template demonstrates
+  the creation of a SageMaker NotebookInstance with encryption. You will be billed for the AWS resources used if you create a stack from
+  this template. (fdp-mlmp-notebook)'
+Parameters:
+  NotebookInstanceName:
+    AllowedPattern: '[A-Za-z0-9-]{1,63}'
+    ConstraintDescription: Maximum of 63 alphanumeric characters. Can include hyphens
+      (-), but not spaces. Must be unique within your account in an AWS Region.
+    Description: SageMaker Notebook instance name
+    MaxLength: '63'
+    MinLength: '1'
+    Type: String
+    Default: 'myNotebook'
+  NotebookInstanceType:
+    AllowedValues:
+      - ml.t2.medium
+    ConstraintDescription: Must select a valid notebook instance type.
+    Default: ml.t2.medium
+    Description: Select Instance type for the SageMaker Notebook
+    Type: String
+  VolumeSize:
+    Description: EBS Volume size in GB
+    Type: Number
+    Default: '30'
+  SubnetId:
+    Description: subnetID
+    Type: AWS::EC2::Subnet::Id
+  KMSKeyMLStorage:
+    Description: KMSKey to be associated with notebook instance.
+    Type: String
+  NotebookInstanceRole:
+    Description: IAM Role ARN to be associated with notebook instance.
+    Type: String
+  NotebookSecurityGroupId:
+    Description: Security group to be associated with notebook instance.
+    Type: AWS::EC2::SecurityGroup::Id
+Resources:
+  SageMakerNotebookInstance:
+    Type: "AWS::SageMaker::NotebookInstance"
+    Properties:
+      KmsKeyId: !Ref KMSKeyMLStorage
+      NotebookInstanceName: !Ref NotebookInstanceName
+      InstanceType: !Ref NotebookInstanceType
+      SecurityGroupIds: [!Ref NotebookSecurityGroupId]
+      RootAccess: Disabled
+      DirectInternetAccess: Disabled
+      VolumeSizeInGB: !Ref VolumeSize
+      RoleArn: !Ref NotebookInstanceRole
+      SubnetId: !Ref SubnetId
+      LifecycleConfigName: !GetAtt NotebookInstanceLifecycleConfig.NotebookInstanceLifecycleConfigName
+  NotebookInstanceLifecycleConfig:
+    Type: "AWS::SageMaker::NotebookInstanceLifecycleConfig"
+    Properties:
+      OnStart:
+        - Content:
+            Fn::Base64: "aws s3 cp s3://marketplace-sa-resources-ct-us-east-2/using-dataset-product-from-aws-data-exchange-with-ml-model-from-aws-marketplace.ipynb  /home/ec2-user/SageMaker/finding-toffee.ipynb"
+Outputs:
+  SageMakerNoteBookURL:
+    Description: "URL for the newly created SageMaker Notebook Instance"
+    Value: !Sub 'https://${AWS::Region}.console.aws.amazon.com/sagemaker/home?region=${AWS::Region}#/notebook-instances/openNotebook/${NotebookInstanceName}'
+  SageMakerNoteBookTerminalURL:
+    Description: "Terminal access URL for the newly created SageMaker Notebook Instance"
+    Value: !Sub 'https://${NotebookInstanceName}.notebook.${AWS::Region}.sagemaker.aws/terminals/1'

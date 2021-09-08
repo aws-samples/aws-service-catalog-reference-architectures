@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "This AWS CloudFormation template creates an endpoint for ResNet 18 ML Model (fdp-mlmp-mlmodel)"
+Parameters:
+  SubnetId1:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet Id for ML Model to Execute
+  SubnetId2:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet Id for ML Model to Execute
+  ModelSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Security Group Id for ML Model to Execute
+  KMSKeyAliasDataCapture:
+    Type: String
+    Default: alias/SageMaker-Capture
+    Description: KMS Key Alias for Data Capture
+  S3DataCapturePath:
+    Type: String
+    Default: 's3://reinforce2021-workshop-3pml-logs/data_capture_logs'
+    Description: S3 Data Capture Path
+  EndPointName:
+    Type: String
+    Default: "Endpoint-ResNet-18-1"
+    Description: Specify suitable name to host the model endpoint. This is a mandatory field.
+  SageMakerModelRole:
+    Type: String
+    Description: IAM role for ml model.
+  ProductARN:
+    Type: String
+    Default: "arn:aws:sagemaker:us-east-1:865070037744:model-package/pytorch-ic-resnet18-cpu-bf7befed326dda897b640d3554105a28"
+    Description: Product identifier based on software version and region.
+  InstanceType:
+    Type: String
+    Default: "ml.m5.large"
+    Description: The deployment instance type.
+    AllowedValues:
+      - "ml.m5.large"
+      - "ml.m5.xlarge"
+      - "ml.c5.xlarge"
+      - "ml.c5.2xlarge"
+  InstanceCount:
+    Type: Number
+    Default: "1"
+    Description: Initial instance count for the endpoint.
+Resources:
+  Model:
+    Type: "AWS::SageMaker::Model"
+    Properties:
+      EnableNetworkIsolation: True
+      ExecutionRoleArn: !Ref SageMakerModelRole
+      PrimaryContainer:
+        ModelPackageName: !Ref ProductARN
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref ModelSecurityGroupId
+        Subnets:
+          - !Ref SubnetId1
+          - !Ref SubnetId2
+  EndPointConfig:
+    Type: "AWS::SageMaker::EndpointConfig"
+    Properties:
+      DataCaptureConfig:
+        CaptureOptions:
+          - CaptureMode: Input
+          - CaptureMode: Output
+        DestinationS3Uri: !Ref S3DataCapturePath
+        EnableCapture: True
+        InitialSamplingPercentage: 100
+        KmsKeyId: !Ref KMSKeyAliasDataCapture
+      KmsKeyId: !Ref KMSKeyMLStorage
+      ProductionVariants:
+      - ModelName: !GetAtt Model.ModelName
+        VariantName: AllTraffic
+        InitialInstanceCount: !Ref InstanceCount
+        InstanceType: !Ref InstanceType
+        InitialVariantWeight: 1
+  EndPoint:
+    Type: "AWS::SageMaker::Endpoint"
+    Properties:
+      EndpointName: !Ref EndPointName
+      EndpointConfigName: !GetAtt EndPointConfig.EndpointConfigName
+Outputs:
+  EndPointConfigName:
+    Description: Endpoint confirmation.
+    Value: !GetAtt 'EndPointConfig.EndpointConfigName'
+  EndpointName:
+    Description: Endpoint Name.
+    Value: !Ref EndPointName
+  EndPointURL:
+    Description: Please use the URL only after endpoint has been created. Endpoint creation can take time. Use SageMaker console to check the status.
+    Value: !Sub 'https://runtime.sagemaker.${AWS::Region}.amazonaws.com/endpoints/${EndPointName}/invocations'
