@@ -4,11 +4,11 @@ Parameters:
   RegionAZ1Name:
     Description: Availability Zone 1 Name in Region
     Type: AWS::EC2::AvailabilityZone::Name
-    Default: us-east-2a ## hardcoded region
+    Default: us-east-2a
   RegionAZ2Name:
     Description: Availability Zone 2 Name in Region
     Type: AWS::EC2::AvailabilityZone::Name
-    Default: us-east-2b ## hardcoded region
+    Default: us-east-2b
   VPCCIDR:
     Description: CIDR block for the VPC
     Type: String

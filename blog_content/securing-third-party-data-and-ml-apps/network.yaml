@@ -22,10 +22,6 @@ Parameters:
     Description: Suffix for resources
     Type: String
     Default: 'suffix'
-  S3PostfixUnique:
-    Type: String
-    Default: opp50
-    Description: Unique string for S3 bucket name
   RegionAZ1Name:
     Description: Availability Zone 1 Name in Region
     Type: AWS::EC2::AvailabilityZone::Name
@@ -97,7 +93,7 @@ Resources:
         - Key: Name
           Value: !Sub 'SC-VPC-RA-${VPCCIDR}'
         - Key: Description
-          Value: VPC-Reference-Architecture
+          Value: Service-Catalog-VPC-Reference-Architecture
   VPCFlowLogs:
     Condition: CreateVPCFlowLogs
     Type: 'AWS::EC2::FlowLog'
@@ -153,7 +149,7 @@ Resources:
         - Key: Reach
           Value: private
         - Key: Description
-          Value: VPC-Reference-Architecture
+          Value: Service-Catalog-VPC-Reference-Architecture
   SubnetBPrivate:
     Type: 'AWS::EC2::Subnet'
     Properties:
@@ -166,7 +162,7 @@ Resources:
         - Key: Reach
           Value: private
         - Key: Description
-          Value: VPC-Reference-Architecture
+          Value: Service-Catalog-VPC-Reference-Architecture
   RouteTableAPrivate:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -175,7 +171,7 @@ Resources:
         - Key: Name
           Value: A Private - sc-vpc-ra
         - Key: Description
-          Value: VPC-Reference-Architecture
+          Value: Service-Catalog-VPC-Reference-Architecture
   RouteTableBPrivate:
     Type: 'AWS::EC2::RouteTable'
     Properties:
@@ -184,7 +180,7 @@ Resources:
         - Key: Name
           Value: B Private - sc-vpc-ra
         - Key: Description
-          Value: VPC-Reference-Architecture
+          Value: Service-Catalog-VPC-Reference-Architecture
   RouteTableAssociationAPrivate:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Properties:
@@ -195,31 +191,31 @@ Resources:
     Properties:
       SubnetId: !Ref SubnetBPrivate
       RouteTableId: !Ref RouteTableBPrivate
-  #NotebookInstanceSecurityGroup:
-  #  Type: 'AWS::EC2::SecurityGroup'
-  #  Properties:
-  #    GroupDescription: None
-  #    VpcId: !Ref VPC
-  #    SecurityGroupEgress:
-  #      - Description: allow all outgoing
-  #        IpProtocol: '-1'
-  #        CidrIp: !Ref VPCCIDR
-  #      - Description: allow all outgoing to s3
-  #        IpProtocol: '-1'
-  #      DestinationPrefixListId: !Sub
-    #        - '${prefix}'
-    #        - { prefix: !FindInMap [prefixlist, !Ref "AWS::Region", "base"]}
+  NotebookInstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: None
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - Description: allow all outgoing
+          IpProtocol: '-1'
+          CidrIp: !Ref VPCCIDR
+        - Description: allow all outgoing to s3
+          IpProtocol: '-1'
+          DestinationPrefixListId: !Sub
+            - '${prefix}'
+            - { prefix: !FindInMap [prefixlist, !Ref "AWS::Region", "base"]}
   ModelSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: Enables access for models
       VpcId: !Ref VPC
-    #  SecurityGroupIngress:
-    #    - Description: allow Invocations from notebook instance
-    #      IpProtocol: 'tcp'
-    #      FromPort : 443
-      #    ToPort : 443
-      #    SourceSecurityGroupId: !Ref NotebookInstanceSecurityGroup
+      SecurityGroupIngress:
+        - Description: allow Invocations from notebook instance
+          IpProtocol: 'tcp'
+          FromPort : 443
+          ToPort : 443
+          SourceSecurityGroupId: !Ref NotebookInstanceSecurityGroup
       SecurityGroupEgress:
         - Description: allow all outgoing
           IpProtocol: '-1'
@@ -241,7 +237,7 @@ Resources:
             Resource: '*'
       PrivateDnsEnabled: True
       SecurityGroupIds:
-      #  - !Ref NotebookInstanceSecurityGroup
+        - !Ref NotebookInstanceSecurityGroup
         - !Ref ModelSecurityGroup
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.sagemaker.runtime'
       SubnetIds:
@@ -261,7 +257,7 @@ Resources:
             Resource: '*'
       PrivateDnsEnabled: True
       SecurityGroupIds:
-      #  - !Ref NotebookInstanceSecurityGroup
+        - !Ref NotebookInstanceSecurityGroup
         - !Ref ModelSecurityGroup
       SubnetIds:
         - !Ref SubnetAPrivate
@@ -274,7 +270,7 @@ Resources:
     Properties:
       PrivateDnsEnabled: True
       SecurityGroupIds:
-      #  - !Ref NotebookInstanceSecurityGroup
+        - !Ref NotebookInstanceSecurityGroup
         - !Ref ModelSecurityGroup
       SubnetIds:
         - !Ref SubnetAPrivate
@@ -294,12 +290,31 @@ Resources:
             Resource: '*'
       PrivateDnsEnabled: True
       SecurityGroupIds:
-      #  - !Ref NotebookInstanceSecurityGroup
+        - !Ref NotebookInstanceSecurityGroup
         - !Ref ModelSecurityGroup
       SubnetIds:
         - !Ref SubnetAPrivate
         - !Ref SubnetBPrivate
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.logs'
+      VpcId: !Ref VPC
+      VpcEndpointType: Interface
+  DataExchangeAPI:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: '*'
+            Resource: '*'
+      PrivateDnsEnabled: True
+      SecurityGroupIds:
+        - !Ref ModelSecurityGroup
+      SubnetIds:
+        - !Ref SubnetAPrivate
+        - !Ref SubnetBPrivate
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.dataexchange'
       VpcId: !Ref VPC
       VpcEndpointType: Interface
   S3API:
@@ -322,239 +337,9 @@ Resources:
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
       VpcId: !Ref VPC
       VpcEndpointType: Gateway
-  S3BucketLogs:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-logs'
-      AccessControl: LogDeliveryWrite
-  LogsBucketPolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref S3BucketLogs
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-            - 's3:PutObject'
-            - 's3:PutObjectAcl'
-            Effect: Allow
-            Principal:
-              Service: "s3.amazonaws.com"
-            Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketLogs
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketLogs
-                  - /*
-  S3BucketData:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-data'
-      AccessControl: Private
-      LoggingConfiguration:
-        DestinationBucketName: !Ref S3BucketLogs
-        LogFilePrefix: testing-logs
-      VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-  SSLRequestsOnlyBucketDataPolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref S3BucketData
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:*'
-            Effect: Deny
-            Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketData
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketData
-                  - /*
-            Condition:
-              Bool:
-                aws:SecureTransport: 'false'
-            Principal: '*'
-  S3BucketInfra:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName: !Sub 'ml-3p-workshop-data-${S3PostfixUnique}-infra'
-      AccessControl: Private
-      LoggingConfiguration:
-        DestinationBucketName: !Ref S3BucketLogs
-        LogFilePrefix: testing-logs
-      VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-  SSLRequestsOnlyBucketInfraPolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref S3BucketInfra
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:*'
-            Effect: Deny
-            Resource:
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketInfra
-              - !Join
-                - ''
-                - - 'arn:aws:s3:::'
-                  - !Ref S3BucketInfra
-                  - /*
-            Condition:
-              Bool:
-                aws:SecureTransport: 'false'
-            Principal: '*'
-  KMSKeyDataCapture:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: Encryption key for data capture S3 location
-      EnableKeyRotation: True
-      Enabled: True
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: Allow
-          Principal:
-            "AWS": { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
-          Action:
-          - kms:*
-          Resource: '*'
-        - Sid: 'AllowKeyUsageSMRole'
-          Effect: Allow
-          Principal:
-            AWS: !GetAtt SageMakerRole.Arn
-          Action:
-          - kms:DescribeKey
-          - kms:Encrypt
-          - kms:Decrypt
-          - kms:ReEncrypt*
-          - kms:GenerateDataKey
-          - kms:GenerateDataKeyWithoutPlaintext
-          Resource: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:alias/SageMaker-Capture
-  KeyAliasDataCapture:
-    Type: AWS::KMS::Alias
-    Properties:
-        AliasName: alias/SageMaker-Capture
-        TargetKeyId: !Ref KMSKeyDataCapture
-
-  SageMakerRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub 'MLWorkshop-ModelExecutionRole-${AWS::Region}'
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - "sagemaker.amazonaws.com"
-            Action:
-              - "sts:AssumeRole"
-      Policies:
-        -
-          PolicyName: "root"
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Sid: IAMGenericPolicy
-                Effect: Allow
-                Action:
-                  -  cloudwatch:PutMetricData
-                  -  logs:CreateLogStream
-                  -  logs:PutLogEvents
-                  -  logs:CreateLogGroup
-                  -  logs:DescribeLogStreams
-                  -  ecr:GetAuthorizationToken
-                  -  ecr:BatchCheckLayerAvailability
-                  -  ecr:GetDownloadUrlForLayer
-                  -  ecr:BatchGetImage
-                  -  ec2:CreateNetworkInterface
-                  -  ec2:CreateNetworkInterfacePermission
-                  -  ec2:DeleteNetworkInterface
-                  -  ec2:DeleteNetworkInterfacePermission
-                  -  ec2:DescribeNetworkInterfaces
-                  -  ec2:DescribeVpcs
-                  -  ec2:DescribeDhcpOptions
-                  -  ec2:DescribeSubnets
-                  -  ec2:DescribeSecurityGroups
-                Resource: '*'
-              - Sid: S3Access
-                Effect: Allow
-                Action:
-                  -  s3:Get*
-                  -  s3:List*
-                  -  s3:Describe*
-                  -  s3:PutObject
-                Resource:
-                  - !Join
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref S3BucketInfra
-                  - !Join
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref S3BucketInfra
-                      - /*
-                  - !Join
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref S3BucketData
-                      - /*
-                  - !Join
-                    - ''
-                    - - 'arn:aws:s3:::'
-                      - !Ref S3BucketData
-                      - /*
-
-  IAMPolicyforKMSDataCapture:
-    Type: AWS::IAM::ManagedPolicy
-    DependsOn:
-      - SageMakerRole
-      - KMSKeyDataCapture
-    Properties:
-      ManagedPolicyName: managedKMSDataCapturePolicy
-      Description: Managed Policy for KMS Data Capture
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - kms:DescribeKey
-              - kms:Encrypt
-              - kms:Decrypt
-              - kms:ReEncrypt*
-              - kms:GenerateDataKey
-            "Resource": !GetAtt KMSKeyDataCapture.Arn
-      Roles:
-        - !Ref SageMakerRole
 Outputs:
   TemplateID:
-    Value: reference-architectures/vpc-ra
+    Value: service-catalog-reference-architectures/sc-vpc-ra
   AWSRegionName:
     Value: !Ref 'AWS::Region'
   RegionAZ1Name:
@@ -573,7 +358,7 @@ Outputs:
     Value: !Ref RouteTableAPrivate
   RouteTableBPrivate:
     Value: !Ref RouteTableBPrivate
-  #NotebookInstanceSecurityGroup:
-    #Value: !Ref NotebookInstanceSecurityGroup
+  NotebookInstanceSecurityGroup:
+    Value: !Ref NotebookInstanceSecurityGroup
   ModelSecurityGroup:
     Value: !Ref ModelSecurityGroup

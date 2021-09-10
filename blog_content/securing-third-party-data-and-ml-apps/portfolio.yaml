@@ -143,13 +143,6 @@ Resources:
           Info:
             LoadTemplateFromURL: !Sub ${S3RootUrl}/mlmodel.yaml
           Name: v2.1
-#############################################
-  # Network:
-  #  Type: 'AWS::CloudFormation::Stack'
-  #   Properties:
-  #     TemplateURL: !Sub '${S3RootUrl}/network.yaml'
-
-#############################################
   AssociateVPCProduct:
     Type: 'AWS::ServiceCatalog::PortfolioProductAssociation'
     DependsOn:
@@ -416,7 +409,6 @@ Resources:
       RoleName: !Sub ${EnvironmentPrefix}-ADXLaunchRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess
-        #- arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
