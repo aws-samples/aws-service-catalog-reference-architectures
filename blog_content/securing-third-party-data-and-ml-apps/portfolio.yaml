@@ -4,7 +4,7 @@ Description: 'This cloudformation template creates resources for the Workshop(fd
 Parameters:
   S3RootUrl:
     Type: String
-    Default: https://reinforce-kanchan-testing.s3.amazonaws.com/activation_day
+    Default: https://aws-service-catalog-reference-architectures.s3.amazonaws.com/blog_content/securing-third-party-data-and-ml-apps
     Description: Root URL for S3 path containing CFN templates, do not end with /
   EnvironmentPrefix:
     Type: String
