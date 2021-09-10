@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: "AWS::Serverless-2016-10-31"
-Description: "AWS Data Exchange automated revision download upon publish Cloudwatch event(fdp-mlmp-adx)"
+Description: "AWS Data Exchange automated revision download upon publish Cloudwatch event((fdp-mlmp-adx)"
 
 Metadata:
   AWS::CloudFormation::Interface:

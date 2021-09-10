@@ -114,6 +114,39 @@ Resources:
               Bool:
                 aws:SecureTransport: 'false'
             Principal: '*'
+  KMSKeyMLStorage:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encryption key for ML storage volume
+      EnableKeyRotation: True
+      Enabled: True
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            "AWS": { "Fn::Sub": "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+          Action:
+          - kms:*
+          Resource: "*"
+        - Sid: 'AllowKeyUsageSMRole'
+          Effect: Allow
+          Principal:
+            AWS: !GetAtt SageMakerRole.Arn
+            AWS: !GetAtt NotebookInstanceRole.Arn
+          Action:
+          - kms:DescribeKey
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey
+          - kms:GenerateDataKeyWithoutPlaintext
+          Resource: '*'
+  KeyAliasMLStorage:
+    Type: AWS::KMS::Alias
+    Properties:
+        AliasName: alias/SageMaker-Volume
+        TargetKeyId: !Ref KMSKeyMLStorage
   KMSKeyDataCapture:
     Type: AWS::KMS::Key
     Properties:
@@ -133,6 +166,7 @@ Resources:
           Effect: Allow
           Principal:
             AWS: !GetAtt SageMakerRole.Arn
+            AWS: !GetAtt NotebookInstanceRole.Arn
           Action:
           - kms:DescribeKey
           - kms:Encrypt
@@ -146,7 +180,88 @@ Resources:
     Properties:
         AliasName: alias/SageMaker-Capture
         TargetKeyId: !Ref KMSKeyDataCapture
-
+  NotebookInstanceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: !Sub 'MLWorkshop-NotebookInstanceRole-${AWS::Region}'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "sagemaker.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: IAMGenericPolicy
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                  - iam:GetRole
+                Resource: !GetAtt SageMakerRole.Arn
+              - Sid: SMpolicy
+                Effect: Allow
+                Action:
+                  - sagemaker:Describe*
+                  - sagemaker:List*
+                  - sagemaker:InvokeEndpoint
+                Resource: '*'
+              - Sid: AllowTagsToBeCreated
+                Effect: Allow
+                Action:
+                  - 'ec2:DeleteTags'
+                  - 'ec2:CreateTags'
+                Resource: 'arn:aws:sagemaker:*::*'
+              - Sid: VPCSpecificPolicies
+                Effect: Allow
+                Action:
+                  - ec2:CreateNetworkInterface
+                  - ec2:CreateNetworkInterfacePermission
+                  - ec2:DeleteNetworkInterface
+                  - ec2:DeleteNetworkInterfacePermission
+                  - ec2:DescribeNetworkInterfaces
+                  - ec2:DescribeVpcs
+                  - ec2:DescribeDhcpOptions
+                  - ec2:DescribeSubnets
+                  - ec2:DescribeSecurityGroups
+                  - cloudwatch:PutMetricData
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:CreateLogGroup
+                  - logs:DescribeLogStreams
+                  - s3:GetObject
+                  - ecr:GetAuthorizationToken
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ec2:DescribeRouteTables
+                Resource: '*'
+              - Action:
+                  -  s3:Get*
+                  -  s3:List*
+                  -  s3:Describe*
+                  -  s3:PutObject
+                Effect: Allow
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketData
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref S3BucketData
+                      - /*
   SageMakerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -215,7 +330,6 @@ Resources:
                     - - 'arn:aws:s3:::'
                       - !Ref S3BucketData
                       - /*
-
   IAMPolicyforKMSDataCapture:
     Type: AWS::IAM::ManagedPolicy
     DependsOn:
@@ -237,14 +351,111 @@ Resources:
             "Resource": !GetAtt KMSKeyDataCapture.Arn
       Roles:
         - !Ref SageMakerRole
+  IAMPolicyforKMSKeyMLStorage:
+    Type: AWS::IAM::ManagedPolicy
+    DependsOn:
+      - SageMakerRole
+      - NotebookInstanceRole
+      - KMSKeyMLStorage
+    Properties:
+      ManagedPolicyName: managedKMSMLStoragePolicy
+      Description: Managed Policy for KMS Data Capture
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:GenerateDataKey
+            "Resource": !GetAtt KMSKeyMLStorage.Arn
+      Roles:
+        - !Ref NotebookInstanceRole
+        - !Ref SageMakerRole
+#IAM Roles for Lambda
+  GetNewRevisionRole:
+     Type: "AWS::IAM::Role"
+     Properties:
+       RoleName: !Sub 'MLWorkshop-GetNewRevisionRole-${AWS::Region}'
+       Policies:
+         - PolicyName: DataExchange
+           PolicyDocument:
+             Version: "2012-10-17"
+             Statement:
+               - Effect: Allow
+                 Action:
+                   - "dataexchange:StartJob"
+                   - "dataexchange:CreateJob"
+                   - "dataexchange:GetJob"
+                   - "dataexchange:GetRevision"
+                 Resource: "*"
+         - PolicyName: CloudWatch
+           PolicyDocument:
+             Version: "2012-10-17"
+             Statement:
+               - Effect: Allow
+                 Action:
+                   - "logs:CreateLogGroup"
+                   - "logs:CreateLogStream"
+                   - "logs:PutLogEvents"
+                 Resource: "arn:aws:logs:*:*:*"
+               - Effect: Allow
+                 Action:
+                   - "ec2:DescribeSubnets"
+                   - "ec2:DescribeVpcs"
+                   - "ec2:DescribeSecurityGroups"
+                 Resource: "*"
+         - PolicyName: RevisionS3
+           PolicyDocument:
+             Version: "2012-10-17"
+             Statement:
+               - Effect: Allow
+                 Action:
+                   - "s3:PutObject"
+                 Resource:
+                   - !Join ["", [!GetAtt S3BucketData.Arn, "/"]]
+                   - !Join ["", [!GetAtt S3BucketData.Arn, "/*"]]
+         - PolicyName: dataexchangeS3
+           PolicyDocument:
+             Version: "2012-10-17"
+             Statement:
+               - Effect: Allow
+                 Action:
+                   - "s3:GetObject"
+                 Resource:
+                   - "arn:aws:s3:::*aws-data-exchange*"
+       AssumeRolePolicyDocument:
+         Version: "2012-10-17"
+         Statement:
+           - Effect: Allow
+             Principal:
+               Service: "lambda.amazonaws.com"
+             Action: "sts:AssumeRole"
+       ManagedPolicyArns:
+         - "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+         - "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 Outputs:
   SageMakerRole:
     Value: !GetAtt
       - SageMakerRole
       - Arn
+  NotebookInstanceRole:
+    Value: !GetAtt
+      - NotebookInstanceRole
+      - Arn
   S3BucketData:
     Value: !Ref S3BucketData
   S3BucketInfra:
     Value: !Ref S3BucketInfra
+  KMSKeyMLStorage:
+    Value: !Ref KMSKeyMLStorage
   KMSKeyDataCapture:
     Value: !Ref KMSKeyDataCapture
+  #KMSKeyCloudWatchLogs:
+  #  Value: !Ref KMSKeyCloudWatchLogs
+  GetNewRevisionRole:
+    Value: !GetAtt
+      - GetNewRevisionRole
+      - Arn

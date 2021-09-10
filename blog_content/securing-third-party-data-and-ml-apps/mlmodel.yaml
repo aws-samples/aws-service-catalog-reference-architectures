@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "This AWS CloudFormation template creates an endpoint for ResNet 18 ML Model (fdp-mlmp-mlmodel)"
+Description: "This AWS CloudFormation template creates an endpoint for \"ResNet 18\" in \"us-east-1\" region.(fdp-mlmp-mlmodel)"
 Parameters:
   SubnetId1:
     Type: AWS::EC2::Subnet::Id
@@ -10,6 +10,10 @@ Parameters:
   ModelSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
     Description: Security Group Id for ML Model to Execute
+  KMSKeyMLStorage:
+    Type: String
+    Default: alias/SageMaker-Volume
+    Description: KMS Key Alias for ML volume
   KMSKeyAliasDataCapture:
     Type: String
     Default: alias/SageMaker-Capture
@@ -22,7 +26,7 @@ Parameters:
     Type: String
     Default: "Endpoint-ResNet-18-1"
     Description: Specify suitable name to host the model endpoint. This is a mandatory field.
-  SageMakerModelRole:
+  SageMakerModelRole: 
     Type: String
     Description: IAM role for ml model.
   ProductARN:
@@ -50,10 +54,10 @@ Resources:
       ExecutionRoleArn: !Ref SageMakerModelRole
       PrimaryContainer:
         ModelPackageName: !Ref ProductARN
-      VpcConfig:
-        SecurityGroupIds:
+      VpcConfig: 
+        SecurityGroupIds: 
           - !Ref ModelSecurityGroupId
-        Subnets:
+        Subnets: 
           - !Ref SubnetId1
           - !Ref SubnetId2
   EndPointConfig:
@@ -89,3 +93,4 @@ Outputs:
   EndPointURL:
     Description: Please use the URL only after endpoint has been created. Endpoint creation can take time. Use SageMaker console to check the status.
     Value: !Sub 'https://runtime.sagemaker.${AWS::Region}.amazonaws.com/endpoints/${EndPointName}/invocations'
+
