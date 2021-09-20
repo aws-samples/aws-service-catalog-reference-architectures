@@ -31,16 +31,4 @@ The example templates here cannot create and manage SSL for you, so it must be d
 
 For more example ECS tamplates and to see the original source of the provided templates see this [repo](https://github.com/awslabs/aws-cloudformation-templates/tree/master/aws/services/ECS)
 
-### Install from your own S3 bucket  
-1. clone this git repo:  
-  ```git clone git@github.com:aws-samples/aws-service-catalog-reference-architectures.git```  
-2. Copy everything in the repo to an S3 bucket:  
-  ```cd aws-service-catalog-reference-architectures```  
-  ```aws s3 cp . s3://[YOUR-BUCKET-NAME-HERE] --exclude "*" --include "*.json" --include "*.yml" --recursive```  
-3. In the AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation) choose "Create Stack" and supply the Portfolio S3 url:  
-  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/ecs/sc-portfolio-ecs.json```  
-5. Set the _LinkedRole1_ and _LinkedRole2_ parameters to any additional end user roles you may want to link to the Portfolio.
-6. Set the _CreateEndUsers_ parameter to No if you have already run a Portfolio stack from this repo (ServiceCatalogEndusers already exists).
-7. Change the _RepoRootURL_ parameter to your bucket's root url:  
-  ```https://s3.amazonaws.com/[YOUR-BUCKET-NAME-HERE]/``` 
 

@@ -1,0 +1,157 @@
+{
+    "Description": "AWS EC2 NGINX webserver (fdp-1p4dlgcpk)",
+    "Parameters": {
+        "VPC": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "Select the VPC where the EC2 instances will be created",
+            "ConstraintDescription": "must be an existing VPC"
+        },
+        "InstanceType": {
+            "Type": "String",
+            "Default":"t3.micro",
+            "AllowedValues": ["t2.micro","t2.medium","t3.micro","t3.medium","t3.large"]
+        },
+        "LatestAmiId": {
+            "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+            "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+        }
+    },    
+    "Resources": {
+	"AppRegApplicationAssoc":{
+		  "Type" : "AWS::ServiceCatalogAppRegistry::ResourceAssociation",
+		  "Properties" : {
+			  "Application" : {"Fn::ImportValue": "AppRegApplication-Id"},
+			  "Resource" : {"Fn::Sub": "${AWS::StackId}"},
+			  "ResourceType" : "CFN_STACK"
+			}
+		},
+      "WebSecurityGroup" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Enable HTTP and HTTPS access",
+          "VpcId" : {"Ref" : "VPC"},
+          "SecurityGroupIngress" : [ 
+              {"Description":"allow incoming HTTP", "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
+              {"Description":"allow incoming HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+          ],
+          "SecurityGroupEgress" : [
+              {"Description":"allow outgoing HTTP",  "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
+              {"Description":"allow outgoing HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+          ]
+        }
+      }, 
+      "WebServerInstance": {
+        "Type": "AWS::EC2::Instance",
+        "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "All": [
+              "extras",
+              "confignginx"
+            ]
+          },
+          "extras":{
+             "commands": {
+                "enable_nginx": {
+                  "command":"amazon-linux-extras enable nginx1.12"
+                }
+             }
+          },
+          "confignginx": {
+            "packages": {
+              "yum": {
+                "nginx": []
+              }
+            },
+            "files": {
+              "/usr/share/nginx/html/index.html": {
+                "content": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "<h1>Welcome to your new NGINX webserver.  web files can be found in /usr/share/nginx/html </h1>"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "nginx": {
+                  "enabled": "true",
+                  "ensureRunning": "true"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "ImageId": {
+          "Ref":"LatestAmiId"
+        },
+        "Tags" : [
+          {"Key" : "Name", "Value" : {"Fn::Sub":"EC2-NGINX-${AWS::StackName}"} }
+        ],
+        "SecurityGroupIds" :[{ "Fn::GetAtt": ["WebSecurityGroup", "GroupId"] }],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "# Install the files and packages from the metadata\n",
+                "/opt/aws/bin/cfn-init -v ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource WebServerInstance ",
+                "         --configsets All ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "/opt/aws/bin/cfn-signal -e $? ",
+                "         --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                "         --resource WebServerInstance ",
+                "         --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT5M"
+        }
+      }
+    }
+    },
+    "Outputs": {
+    "WebsiteURL": {
+      "Description": "DNS root URL of the new webserver",
+      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["WebServerInstance", "PublicDnsName"] }]]}
+    },
+    "WebsiteIP": {
+      "Description": "IP root URL of the new webserver",
+      "Value" : { "Fn::Join" : [ "", ["http://", { "Fn::GetAtt" : ["WebServerInstance", "PublicIp"] }]]}
+    }
+  }
+}

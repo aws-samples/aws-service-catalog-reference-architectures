@@ -21,8 +21,7 @@
                     "Parameters": [
                         "LaunchRoleName",
                         "LinkedRole1",
-                        "LinkedRole2",
-                        "CreateEndUsers"
+                        "LinkedRole2"
                     ]
                 } ,
                 {
@@ -70,17 +69,10 @@
             "Type":"String",
             "Description":"Root url for the repo containing the product templates.",
             "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
-        },
-        "CreateEndUsers":{
-            "Type":"String",
-            "Description":"Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group",
-             "AllowedValues": ["Yes","No"],
-             "Default":"Yes" 
         }
       },
       "Conditions":{
         "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
-        "CondCreateEndUsers" : {"Fn::Equals" : [{"Ref" : "CreateEndUsers"}, "Yes"]},
         "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}            
     },
@@ -107,40 +99,6 @@
           "Condition":"CondLinkRole2",
           "Properties" : {
             "PrincipalARN" : {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${LinkedRole2}" },
-            "PortfolioId" : {"Ref":"SCS3portfolio"},
-            "PrincipalType" : "IAM"
-          }
-        },        
-        "stackServiceCatalogEndusers": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Condition":"CondCreateEndUsers",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
-            "TimeoutInMinutes" : 5
-          }
-        },        
-        "LinkEndusersRole":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers" }
-                ]},
-            "PortfolioId" : {"Ref":"SCS3portfolio"},
-            "PrincipalType" : "IAM"
-          }
-        },
-        "LinkEndusersGroup":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Properties" : {
-            "PrincipalARN" : 
-                {"Fn::If" : [
-                    "CondCreateEndUsers",
-                    {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers" }
-                ]},
             "PortfolioId" : {"Ref":"SCS3portfolio"},
             "PrincipalType" : "IAM"
           }

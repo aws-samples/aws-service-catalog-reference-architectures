@@ -20,8 +20,7 @@
                     "Parameters": [
                         "LinkedRole1",
                         "LinkedRole2",
-                        "LaunchRoleName",
-                        "CreateEndUsers"
+                        "LaunchRoleName"
                     ]
                 },{
                     "Label": {
@@ -67,17 +66,10 @@
             "Type":"String",
             "Description":"S3 root url for the repository containing the product templates.",
             "Default":"https://s3.amazonaws.com/aws-service-catalog-reference-architectures/"
-        },
-        "CreateEndUsers":{
-            "Type":"String",
-            "Description":"Select Yes to Create an example ServiceCatalogEndusers IAM group and role.",
-             "AllowedValues": ["Yes","No"],
-             "Default":"No" 
         }
       },
       "Conditions":{
         "CreateLaunchConstraint" : {"Fn::Equals" : [{"Ref" : "LaunchRoleName"}, ""]},
-        "CondCreateEndUsers" : {"Fn::Equals" : [{"Ref" : "CreateEndUsers"}, "Yes"]},
         "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}
     },
@@ -124,32 +116,6 @@
           "Properties" : {
             "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-ec2vpc-launchrole.yml"},
             "TimeoutInMinutes" : 5
-          }
-        },        
-        "stackServiceCatalogEndusers": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Condition":"CondCreateEndUsers",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
-            "TimeoutInMinutes" : 5
-          }
-        },        
-        "LinkEndusersRole":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Condition":"CondCreateEndUsers",
-		  "Properties" : {
-            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]},
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
-            "PrincipalType" : "IAM"
-          }
-        },
-        "LinkEndusersGroup":{
-          "Type" : "AWS::ServiceCatalog::PortfolioPrincipalAssociation",
-          "Condition":"CondCreateEndUsers",
-		  "Properties" : {
-            "PrincipalARN" : {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]},
-            "PortfolioId" : {"Ref":"SCEC2portfolio"},
-            "PrincipalType" : "IAM"
           }
         },
         "ec2linuxproduct": {
@@ -235,19 +201,7 @@
           }
         }
     },
-    "Outputs": {
-		    "EndUserRoleArn":{
-          "Condition":"CondCreateEndUsers",
-          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserRoleArn"]}
-        },
-        "EndUserGroupArn":{
-          "Condition":"CondCreateEndUsers",
-          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupArn"]}
-        },
-		    "EndUserGroupName":{
-          "Condition":"CondCreateEndUsers",
-          "Value": {"Fn::GetAtt":["stackServiceCatalogEndusers","Outputs.EndUserGroupName"]}
-        },		
+    "Outputs": {		
         "LaunchConstraintRoleARN":{
           "Condition":"CreateLaunchConstraint",
           "Value": { "Fn::GetAtt":["LaunchConstraintRole", "Outputs.LaunchRoleArn"] } 

@@ -25,22 +25,12 @@ Parameters:
     Type: String
     Description: Root url for the repo containing the product templates
     Default: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/
-  CreateEndUsersGroup:
-    Type: String
-    Description: Select Yes to Create the ServiceCatalogEndusers IAM group. No if you have already created the group
-    AllowedValues:
-      - Yes
-      - No
-    Default: No
 
 Conditions:
   CreateLaunchConstraint: !Equals [!Ref LaunchRoleName, ""]
   CondLinkRole: !Not
     - !Equals [!Ref LinkedRole, ""]
-  CondCreateEndUsersGroup: !Equals
-    - !Ref CreateEndUsersGroup
-    - Yes
-
+  
 Resources:
   SCDynamoDBportfolio:
     Type: AWS::ServiceCatalog::Portfolio
@@ -56,29 +46,6 @@ Resources:
       PrincipalARN: !Sub arn:aws:iam::${AWS::AccountId}:role/${LinkedRole}
       PortfolioId: !Ref SCDynamoDBportfolio
       PrincipalType: IAM
-
-  StackServiceCatalogEndusers:
-    Type: AWS::CloudFormation::Stack
-    Condition: CondCreateEndUsersGroup
-    Properties:
-      TemplateURL: !Sub ${RepoRootURL}iam/sc-enduser-iam.yml
-      TimeoutInMinutes: 5
-
-  LinkEndusersRole:
-    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
-    Condition: CondCreateEndUsersGroup
-    Properties:
-      PrincipalARN: !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserRoleArn"]
-      PortfolioId: !Ref SCDynamoDBportfolio
-      PrincipalType: IAM
-
-  LinkEndusersGroup:
-    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
-    Condition: CondCreateEndUsersGroup
-    Properties:
-      PrincipalARN: !GetAtt ["StackServiceCatalogEndusers", "Outputs.EndUserGroupArn"]
-      PortfolioId: !Ref SCDynamoDBportfolio
-      PrincipalType: "IAM"
 
   LaunchConstraintRole:
     Type: AWS::CloudFormation::Stack

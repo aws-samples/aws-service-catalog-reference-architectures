@@ -10,13 +10,6 @@
         }
       },
     "Resources": {
-        "SCEndUSersIAM": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
-            "TimeoutInMinutes" : 5
-          }
-        },
         "ec2vpcCLaunchConstraintRole": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
@@ -47,12 +40,6 @@
         }        
     },
     "Outputs": {
-        "SCEndUSersGroupARN":{
-          "Value": { "Fn::GetAtt":["SCEndUSersIAM", "Outputs.EndUserGroupName"] },
-          "Export" : {
-            "Name" : "sc-enduser-group"
-          }
-        },
         "ec2vpcLaunchConstraintRoleARN":{
           "Value": { "Fn::GetAtt":["ec2vpcCLaunchConstraintRole", "Outputs.LaunchRoleArn"] },
           "Export" : {

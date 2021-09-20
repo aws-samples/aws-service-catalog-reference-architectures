@@ -1,0 +1,65 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AppRegistry sample appplicaiton and attribute group",    
+    "Parameters": {
+        "ApplicationName": {
+            "Description": "Name for your AppRegistry Applicaiton",
+            "Type": "String",
+            "Default": "myapplication"
+        },
+		"ApplicationDescription": {
+            "Description": "Description for your AppRegistry Applicaiton",
+            "Type": "String",
+            "Default": "this is a sample application"
+        },
+		"AttributeGroupName": {
+            "Description": "Name for your AppRegistry AttributeGroup",
+            "Type": "String",
+            "Default": "SampleApplication_businessServices"			
+        },		
+		"AttributeGroupDescription": {
+            "Description": "Description for your AppRegistry AttributeGroup",
+            "Type": "String",
+            "Default": "Sample Application business Services and runtime information"			
+        }
+    },
+    "Resources": {
+		"AppRegApplication":{
+		  "Type" : "AWS::ServiceCatalogAppRegistry::Application",
+		  "Properties" : {
+			  "Description" : {"Ref":"ApplicationDescription"},
+			  "Name" : {"Ref":"ApplicationName"},
+			  "Tags" : {"TeamOwner" : "Supplychain-devteam-blue"}			   
+			}
+		},
+		"AppRegAttributeGroup":{
+		  "Type" : "AWS::ServiceCatalogAppRegistry::AttributeGroup",
+		  "Properties" : {
+			  "Description" : {"Ref":"AttributeGroupDescription"},
+			  "Name" : {"Ref":"AttributeGroupName"},
+			  "Attributes": {"K8":{"helmName":"myhelm","version":"1.0"},"Team":"Supplychain","app-type":"processing","SLA":"1h","Runtime":"Python-3.8","Compliance":["SOC-1","ISO-27018"]}
+			}
+		},
+		"AppRegAttributeGroupAssoc":{
+		  "Type" : "AWS::ServiceCatalogAppRegistry::AttributeGroupAssociation",
+		  "Properties" : {
+			  "Application" : {"Ref":"AppRegApplication"},
+			  "AttributeGroup" : {"Ref":"AppRegAttributeGroup"}
+			}
+		}
+    },
+    "Outputs": {        
+        "ApplicationId": {
+            "Value": {
+                "Fn::GetAtt": ["AppRegApplication","Id"]
+            },
+			"Export" : { "Name" : {"Fn::Sub": "AppRegApplication-Id" }}
+        },
+        "AttributeGroupId": {
+            "Value": {
+                "Fn::GetAtt": ["AppRegAttributeGroup","Id"]
+            }
+        }
+        
+    }
+}

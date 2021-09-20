@@ -16,8 +16,6 @@ Metadata:
       - LaunchRoleName
       - LinkedRole1
       - LinkedRole2
-      - ServiceCatalogEndUsers
-      - CreateEndUsersGroup
     - Label:
         default: Product Settings
       Parameters:
@@ -55,34 +53,11 @@ Parameters:
     Type: String
     Description: Root url for the repo containing the product templates.
     Default: 'https://s3.amazonaws.com/aws-service-catalog-reference-architectures/'
-  CreateEndUsersGroup:
-    Type: String
-    Description: Select Yes to Create the ServiceCatalogEndUsers IAM group. No if
-      you have already created the group
-    AllowedValues:
-    - 'Yes'
-    - 'No'
-    Default: 'Yes'
-  ServiceCatalogEndUsers:
-    Type: CommaDelimitedList
-    Description: (Optional) Users to add ServiceCatalogEndUsers.
-    Default: ''
 Conditions:
   CreateLaunchConstraint:
     Fn::Equals:
     - Ref: LaunchRoleName
     - ''
-  CondCreateEndUsersGroup:
-    Fn::Equals:
-    - Ref: CreateEndUsersGroup
-    - 'Yes'
-  CondHasEndUsers: 
-    Fn::Not:
-    - Fn::Equals:
-      - Fn::Join:
-        - ''
-        - Ref: ServiceCatalogEndUsers
-      - ''
   CondLinkRole1:
     Fn::Not:
     - Fn::Equals:
@@ -131,38 +106,7 @@ Resources:
     Properties:
       TemplateURL:
         Fn::Sub: "${RepoRootURL}iam/sc-serverless-launchrole.yml"
-      TimeoutInMinutes: 5
-  stackServiceCatalogEndUsers:
-    Type: AWS::CloudFormation::Stack
-    Condition: CondCreateEndUsersGroup
-    Properties:
-      TemplateURL:
-        Fn::Sub: "${RepoRootURL}iam/sc-enduser-iam.yml"
-      TimeoutInMinutes: 5
-  LinkEndusers:
-    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
-    Properties:
-      PrincipalARN:
-        Fn::If:
-        - CondCreateEndUsersGroup
-        - Fn::GetAtt:
-          - stackServiceCatalogEndUsers
-          - Outputs.EndUserGroupArn
-        - Fn::Sub: arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndUsers
-      PortfolioId:
-        Ref: SCServerlessPortfolio
-      PrincipalType: IAM
-  AddUsersToGroup:
-    Type: AWS::IAM::UserToGroupAddition
-    Condition: CondHasEndUsers
-    Properties: 
-      GroupName: 
-        !GetAtt
-        - stackServiceCatalogEndUsers
-        - Outputs.EndUserGroupName
-      Users:
-        Ref: ServiceCatalogEndUsers
-    DependsOn: stackServiceCatalogEndUsers
+      TimeoutInMinutes: 5  
   serverlessproduct:
     Type: AWS::CloudFormation::Stack
     Properties:

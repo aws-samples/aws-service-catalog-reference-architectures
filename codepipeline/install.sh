@@ -40,7 +40,7 @@ until [ "$STATUS" = "SUCCEEDED" ]; do
 done
 
 echo "creating the ServiceCatalog Portfolio StackSet"
-aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"CreateEndUsers\",\"ParameterValue\":\"No\"},{\"ParameterKey\":\"LinkedRole1\",\"ParameterValue\":\"$LinkedRole1\"},{\"ParameterKey\":\"LinkedRole2\",\"ParameterValue\":\"\"},{\"ParameterKey\":\"LaunchRoleName\",\"ParameterValue\":\"SCEC2LaunchRole\"},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"$S3RootURL/\"}]" --template-url "$S3RootURL/ec2/sc-portfolio-ec2demo.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
+aws cloudformation create-stack-set --stack-set-name SC-IAC-automated-portfolio --parameters "[{\"ParameterKey\":\"LinkedRole1\",\"ParameterValue\":\"$LinkedRole1\"},{\"ParameterKey\":\"LinkedRole2\",\"ParameterValue\":\"\"},{\"ParameterKey\":\"LaunchRoleName\",\"ParameterValue\":\"SCEC2LaunchRole\"},{\"ParameterKey\":\"RepoRootURL\",\"ParameterValue\":\"$S3RootURL/\"}]" --template-url "$S3RootURL/ec2/sc-portfolio-ec2demo.json" --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND
 aws cloudformation create-stack-instances --stack-set-name SC-IAC-automated-portfolio --regions $allregions --accounts $ACC --operation-preferences FailureToleranceCount=0,MaxConcurrentCount=3
 
 date

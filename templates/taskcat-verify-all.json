@@ -40,22 +40,13 @@
         "CondLinkRole1" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole1"}, ""]} ]},
         "CondLinkRole2" : {"Fn::Not" : [ {"Fn::Equals" : [{"Ref" : "LinkedRole2"}, ""]} ]}
     },
-    "Resources": {
-       
-        "IAMenduser": {
-          "Type" : "AWS::CloudFormation::Stack",
-          "Properties" : {
-            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-enduser-iam.yml"},
-            "TimeoutInMinutes" : 5
-          }
-        },        
+    "Resources": {            
         "STACKec2portfolio": {
           "Type" : "AWS::CloudFormation::Stack",
           "DependsOn" : "IAMenduser",
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
-                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -70,7 +61,6 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": {"Fn::GetAtt":["STACKec2portfolio","Outputs.LaunchConstraintRoleName"]},
-                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -85,7 +75,6 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
-                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -100,7 +89,6 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
-                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}
@@ -115,7 +103,6 @@
           "Properties" : {
             "Parameters" : {         
                 "LaunchRoleName": "",
-                "CreateEndUsers":"No",
                 "LinkedRole1": {"Ref":"LinkedRole1"},
                 "LinkedRole2": {"Ref":"LinkedRole2"},
                 "RepoRootURL":{"Ref":"RepoRootURL"}

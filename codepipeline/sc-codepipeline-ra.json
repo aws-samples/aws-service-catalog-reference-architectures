@@ -218,9 +218,7 @@
                                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/${AWS::StackName}-CodeBuildRole-*"},
                                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/SC-RA-IACPipeline-*"},
                                     {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/tcat-tag-*"},
-                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:instance-profile/tcat-tag-*"},
-                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:group/ServiceCatalogEndusers"},
-                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:role/ServiceCatalogEndusers"}
+                                    {"Fn::Sub": "arn:aws:iam::${AWS::AccountId}:instance-profile/tcat-tag-*"}
                                 ]
                             }
                         ]

@@ -25,7 +25,7 @@ Parameters:
     Default: wsgi.handler
   Runtime:
     Type: String
-    Default: python3.7
+    Default: python3.8
     AllowedValues:
     - nodejs12.x
     - nodejs14.x    
