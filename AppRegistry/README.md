@@ -3,7 +3,7 @@
 This reference architecture creates an AWS Service Catalog AppRegistry Application and Attribute group. 
 For an example of how to automatically associatge AWS Service Catalog products with AppRegistry see this [sample EC2 template with AppRegistry](https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/ec2/sc-ec2-linux-nginx-nokey-appreg.json).
 
-###Try this in your account:
+### Try this in your account:
 1. Launch the AppRegistry stack below
 2. Add the [sample EC2 template with AppRegistry](https://github.com/aws-samples/aws-service-catalog-reference-architectures/blob/master/ec2/sc-ec2-linux-nginx-nokey-appreg.json) as a version or product in AWS Service Catalog.
 3. Provision the EC2 product from [AWS Service Catalog](https://console.aws.amazon.com/servicecatalog/#products).
