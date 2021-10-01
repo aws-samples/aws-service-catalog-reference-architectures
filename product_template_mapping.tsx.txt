@@ -21,6 +21,6 @@ ecs/container-codepipeline-ra.json	Container CI/CD Automation Pipeline	The produ
 glue/sc-glue-ra.yaml	AWS Glue Crawler	This product creates a glue crawler
 elasticbeanstalk/sc-elasticbeanstalk-ra.json	AWS Elastic Beanstalk Application	This product creates an Elastic Beanstalk application.
 workspaces/sc-workspaces-ra.json	Amazon WorkSpaces	This product creates an Amazon Workspace desktop.
-blog_content/securing-third-party-data-and-ml-apps/network.yaml	VPC infrastructure for ML Models 	"This product creates VPC infrastructure that can be used for deploy ML models and Amazon SageMaker notebooks "
+blog_content/securing-third-party-data-and-ml-apps/network.yaml	VPC infrastructure for ML Models	"This product creates VPC infrastructure that can be used for deploy ML models and Amazon SageMaker notebooks "
 blog_content/securing-third-party-data-and-ml-apps/notebook.yaml	Amazon SageMaker Notebooks 	"This product creates an Amazon SageMaker notebook."
-blog_content/securing-third-party-data-and-ml-apps/mlmodel.yaml	Amazon SageMaker Model Package from AWS Marketplace "This product deploys a Model Package from AWS Marketplace in form of an Amazon SageMaker Endpoint for performing real-time inference."
+blog_content/securing-third-party-data-and-ml-apps/mlmodel.yaml 	Amazon SageMaker Model Package from AWS Marketplace 	"This product deploys a Model Package from AWS Marketplace in form of an Amazon SageMaker Endpoint for performing real-time inference."
