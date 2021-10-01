@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: "This AWS CloudFormation template creates an endpoint for \"ResNet 18\" in \"us-east-1\" region.(fdp-mlmp-mlmodel)"
+Description: "This AWS CloudFormation template creates an endpoint for the AWS Marketplace model package ARN specified.(fdp-mlmp-mlmodel)"
 Parameters:
   SubnetId1:
     Type: AWS::EC2::Subnet::Id
@@ -32,7 +32,7 @@ Parameters:
   ProductARN:
     Type: String
     Default: "arn:aws:sagemaker:us-east-1:865070037744:model-package/pytorch-ic-resnet18-cpu-bf7befed326dda897b640d3554105a28"
-    Description: Product identifier based on software version and region.
+    Description: Model Package ARN of an ML model from AWS Marketplace.
   InstanceType:
     Type: String
     Default: "ml.m5.large"
