@@ -102,7 +102,15 @@
             "PortfolioId" : {"Ref":"SCElasticBeanstalkportfolio"},
             "PrincipalType" : "IAM"
           }
-        },      
+        },
+        "LaunchConstraintRole": {
+          "Type" : "AWS::CloudFormation::Stack",
+          "Condition":"CreateLaunchConstraint",
+          "Properties" : {
+            "TemplateURL" : {"Fn::Sub": "${RepoRootURL}iam/sc-elasticbeanstalk-launchrole.yml"},
+            "TimeoutInMinutes" : 5
+          }
+        },       		
         "pythonbeanstalkproduct": {
           "Type" : "AWS::CloudFormation::Stack",
           "Properties" : {
