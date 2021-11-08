@@ -67,7 +67,7 @@ Resources:
         - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
         - "arn:aws:iam::aws:policy/AWSKeyManagementServicePowerUser"
         - "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
-        - "arn:aws:iam::aws:policy/AWSLambdaReadOnlyAccess"
+        - "arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess"
 
 Outputs:
   DeveloperRole:

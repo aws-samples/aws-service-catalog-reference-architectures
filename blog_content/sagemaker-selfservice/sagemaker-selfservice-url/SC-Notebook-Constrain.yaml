@@ -29,7 +29,7 @@ Resources:
                 - sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-          - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+          - arn:aws:iam::aws:policy/AWSLambda_FullAccess
           - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
           - arn:aws:iam::aws:policy/AmazonS3FullAccess
           - arn:aws:iam::aws:policy/IAMFullAccess
@@ -51,7 +51,7 @@ Resources:
                 - sts:AssumeRole
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-          - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+          - arn:aws:iam::aws:policy/AWSLambda_FullAccess
           - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
           - arn:aws:iam::aws:policy/AmazonS3FullAccess
           - arn:aws:iam::aws:policy/IAMFullAccess
@@ -109,7 +109,7 @@ Resources:
               - !Sub 'arn:aws:iam::${AWS::AccountId}:role/service-role/SageMakerNotebookExecutionRole-*'
       ManagedPolicyArns:
         - "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-        - "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
         - "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
         - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
         - "arn:aws:iam::aws:policy/AmazonSageMakerFullAccess"
@@ -251,7 +251,7 @@ Resources:
             #         aws:SourceVpc: !ImportValue Network-VPC
             #   - !Ref "AWS::NoValue"
       ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/AWSLambdaFullAccess"
+        - "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
         - "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess"
         - "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
         
