@@ -4,4 +4,4 @@ Customers need a way to track all of their AWS application resources in one plac
 
 In this post I will show you how to manage application metadata across AWS regions and accounts using AWS Service Catalog AppRegistry, AWS Neptune, and a few other AWS services.
  
- https://aws.amazon.com/blogs/mt/managing-your-application-metadata-using-aws-service-catalog-app-registry/
+https://aws.amazon.com/blogs/mt/managing-your-application-metadata-using-aws-service-catalog-app-registry/
