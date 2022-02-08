@@ -1,4 +1,4 @@
-**Managing your application metadata using Service Catalog App Registry 
+**Managing your application metadata using Service Catalog App Registry** 
 
 Customers need a way to track all of their AWS application resources in one place, and associate metadata like cost center, business unit with those resources centrally. AWS Service Catalog AppRegistry removes the need for complex tag management and allows for customers to aggregate application metadata such as cost center and business units across multiple AWS services into one registry. It also unlocks ITSM or CMDB use cases to be able to track resources ServiceNow, leveraging the AWS Service Management Connector for ServiceNow. Customers I work with would like to be able to track application information across AWS accounts and regions.
 
