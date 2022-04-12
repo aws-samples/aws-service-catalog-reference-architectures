@@ -2,7 +2,7 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      docker: 18
+      docker: 19
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
@@ -16,5 +16,7 @@ phases:
   post_build:
     commands:
       - echo Pushing the Docker image to ECR...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$CODEBUILD_BUILD_NUMBER
+      - MANIFEST=$(aws ecr batch-get-image --repository-name $IMAGE_REPO_NAME --image-ids imageTag=$CODEBUILD_BUILD_NUMBER --output json | jq --raw-output '.images[0].imageManifest')
+      - aws ecr put-image --repository-name $IMAGE_REPO_NAME --image-tag $IMAGE_TAG_LATEST --image-manifest "$MANIFEST"
       #- aws ecs update-service --service <<SERVICE NAME HERE>> --cluster <<CLUSTER NAME HERE>> --force-new-deployment  
