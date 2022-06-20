@@ -29,7 +29,8 @@
                         "default": "Product Settings"
                     },
                     "Parameters": [
-                        "RepoRootURL"
+						"DirectoryId",
+                        "RepoRootURL"						
                     ]
                 } 
   
@@ -38,6 +39,10 @@
     },
     "Parameters":
       {
+	    "DirectoryId":{
+		  "Type":"String",
+          "Description":"AD Directory ID for workspaces"
+	    },
         "PortfolioProvider": {
             "Type":"String",
             "Description":"Provider Name",
@@ -129,5 +134,12 @@
           }
         }
 
-    }  
+    },
+  "Outputs": {
+    "DirectoryID": {
+      "Description": "AD Directory for WorkSpaces",
+      "Value": { "Ref": "DirectoryId" },
+	  "Export": { "Name":"WorkspacesDirectoryID" }
+    }
+  }	
 }
