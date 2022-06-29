@@ -44,7 +44,7 @@
 					{
                         "Description": "Easy Launch",
                         "Info": {
-                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}workspaces/sc-workspaces-simple.yaml"}
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}workspaces/sc-workspaces-simple.yml"}
                         },
                         "Name": "Easy Launch v1.0"
                     }
