@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Amazon WorkSpaces Deployment Template.  This template will deploy the resources needed to
+  deploy a single Amazon WorkSpaces desktop.
+Mappings:
+  WSTypeMap:
+    Standard-Linux-Desktop:
+      BundleId: wsb-clj85qzj1
+    Standard-Win10-Desktop:
+      BundleId: wsb-gk1wpk43z
+    Performance-Win10-Desktop:
+      BundleId: wsb-fn373c5rw
+
+Metadata:
+  Comments: Template to deploy an Amazon WorkSpace
+  LastUpdated: '2018-04-26'
+  Version: 1.0.0
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Setup
+      Parameters:
+        - UserName
+        - WorkstationType
+    ParameterLabels:
+      UserName:
+        default: User Name
+      WorkstationType:
+        default: Workstation Type
+
+Parameters:
+  UserName:
+    Description: Your Windows login ID
+    Type: String
+  WorkstationType:
+    AllowedValues:
+      - Standard-Linux-Desktop
+      - Standard-Win10-Desktop
+      - Performance-Win10-Desktop
+    Description: Select the type of workstation
+    Default: Standard-Win10-Desktop
+    Type: String
+
+Resources:
+  MyWorkSpace:
+    Type: AWS::WorkSpaces::Workspace
+    Properties:
+      BundleId: !FindInMap
+        - WSTypeMap
+        - !Ref 'WorkstationType'
+        - BundleId
+      DirectoryId: !ImportValue WorkspacesDirectoryID
+      UserName: !Ref 'UserName'
+
+Outputs:
+  WorkSpaceID:
+    Description: ID of the newly created WorkSpace
+    Value: !Ref 'MyWorkSpace'
+  UserName:
+    Description: The username for WorkSpace
+    Value: !Ref 'UserName'
+  LogonURL:
+    Description: Use this URL to download client software used to connect to your cloud desktop
+    Value: 'https://clients.amazonworkspaces.com/'
+
+

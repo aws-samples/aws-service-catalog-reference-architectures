@@ -35,11 +35,18 @@
                 "SupportUrl": "http://helpdesk.yourcompany.com",
                 "ProvisioningArtifactParameters": [
                     {
-                        "Description": "baseline version",
+                        "Description": "baseline version with KMS, Directory, and Bundle",
                         "Info": {
                             "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}workspaces/sc-workspaces-ra.json"}
                         },
-                        "Name": "v1.0"
+                        "Name": "Baseline v1.0"
+                    },
+					{
+                        "Description": "Easy Launch",
+                        "Info": {
+                            "LoadTemplateFromURL": {"Fn::Sub": "${RepoRootURL}workspaces/sc-workspaces-simple.yml"}
+                        },
+                        "Name": "Easy Launch v1.0"
                     }
                 ]
             }

@@ -37,6 +37,8 @@ cleanonly: .clean
 	find . -type d -name __pycache__ -delete
 	rm -rf __pycache__
 
+docker: .copyfiles
+
 lambda: clean
 	mkdir -p build/
 	cp -r pycalc build
@@ -49,15 +51,9 @@ lambda: clean
 	mkdir -p flaskapp
 	cp flask/requirements.txt ./flaskapp
 	cp flask/application.py ./flaskapp	
-	cp -r ./pycalc/ ./flaskapp
-	
-	python3 -m venv ./flaskapp
+	cp -r pycalc flaskapp
 	cp -r bin flaskapp
-	
-	cd ./flaskapp; . bin/activate; \
-	pip install -r requirements.txt; \
-	deactivate
-	
+
 local: .copyfiles
 	cp flask/rungunicorn.sh ./flaskapp	
 	cp flask/gu.local ./flaskapp/gu.py
