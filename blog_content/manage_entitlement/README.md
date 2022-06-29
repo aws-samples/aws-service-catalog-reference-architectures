@@ -7,3 +7,4 @@ AWS Control Tower helps customers create accounts and manage many account config
 Managing AWS Marketplace licenses across accounts can be complex, and customers want to automate this as part of their normal solution process. In this blog post, we will show you how to use AWS Control Tower and AWS Service Catalog to grant AWS Marketplace licenses to accounts managed by Control Tower, enabling you to easily use AWS Marketplace products in your solutions and services.
 
 https://aws.amazon.com/blogs/mt/using-aws-control-tower-aws-service-catalog-and-aws-marketplace-to-deploy-aws-marketplace-license-subscriptions/
+ 
