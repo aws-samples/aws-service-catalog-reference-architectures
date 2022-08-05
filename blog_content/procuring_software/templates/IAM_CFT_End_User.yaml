@@ -1,0 +1,87 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Marketplace IAM Setup for Enterprise Procurement - End User'
+Resources:
+  mpenduser:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref 'AWS::AccountId'
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess'
+        - 'arn:aws:iam::aws:policy/AWSServiceCatalogEndUserReadOnlyAccess'
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - 'aws-marketplace:ViewSubscriptions'
+                  - 'aws-marketplace:StartBuild'
+                  - 'aws-marketplace:ListBuilds'
+                  - 'servicecatalog:SearchProductsAsAdmin'
+                  - 'servicecatalog:createProduct'
+                  - 'license-manager:ListDistributedGrants'
+                  - 'license-manager:ListLicenseConfigurations'
+                  - 'license-manager:ListLicenseVersions'
+                  - 'license-manager:ListLicenses'
+                  - 'license-manager:ListReceivedGrants'
+                  - 'license-manager:ListReceivedLicenses'
+                  - 'license-manager:GetLicenseUsage'
+                Effect: Allow
+                Resource: '*'
+              - Action:
+                  - 'ec2:RunInstances'
+                Effect: Deny
+                Resource: 'arn:*:ec2:*::image/*'    
+                Condition:
+                  'StringNotEquals':
+                    'ec2:Owner': 'aws-marketplace'  
+              - Action:
+                  - 'ec2:RunInstances'
+                Effect: Allow
+                Resource: '*'    
+              - Action:
+                  - 'ec2:DescribeInstances'
+                  - 'ec2:DescribeImages'
+                  - 'ec2:DescribeInstanceTypes'
+                  - 'ec2:DescribeKeyPairs'
+                  - 'ec2:DescribeVpcs'
+                  - 'ec2:DescribeSubnets'
+                  - 'ec2:DescribeSecurityGroups'
+                  - 'ec2:CreateSecurityGroup'
+                  - 'ec2:AuthorizeSecurityGroupIngress'
+                  - 'ec2:CreateKeyPair'
+                Effect: Allow
+                Resource: '*'                    
+              - Action:
+                  - 'ec2:CreateTags'
+                Effect: Allow
+                Resource: 'arn:*:ec2:*:*:*/*'    
+                Condition:
+                  'StringEquals':
+                    'ec2:CreateAction': 'RunInstances'                    
+              - Action:
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:CreateStackInstances'
+                  - 'cloudformation:CreateStackSet'
+                  - 'cloudformation:ListChangeSets'
+                  - 'cloudformation:RollbackStack'
+                  - 'cloudformation:UpdateStack'
+                  - 'cloudformation:UpdateStackInstances'
+                  - 'cloudformation:UpdateStackSet'
+                Effect: Allow
+                Resource: '*'
+            Version: '2012-10-17'
+          PolicyName: mpenduser
+    Type: AWS::IAM::Role
+Outputs:
+  MPEndUser:
+    Description: 'Use this role for a Marketplace enduser'
+    Value: !Sub 'https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${mpenduser}&displayName=MPEndUser'
