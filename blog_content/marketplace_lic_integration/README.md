@@ -1,0 +1,1 @@
+Marketplace License Manager integration
