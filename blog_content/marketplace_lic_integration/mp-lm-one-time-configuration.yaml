@@ -1,0 +1,156 @@
+---
+# The sample code; software libraries; command line tools; proofs of concept; templates; 
+# or other related technology (including any of the foregoing that are provided by our personnel)
+# is provided to you as AWS Content under the AWS Customer Agreement, or the relevant written 
+# agreement between you and AWS (whichever applies). You should not use this AWS Content in your 
+# production accounts, or on production or other critical data. You are responsible for testing, 
+# securing, and optimizing the AWS Content, such as sample code, as appropriate for production 
+# grade use based on your specific quality control practices and standards. Deploying AWS Content 
+# may incur AWS charges for creating or using AWS chargeable resources, such as running Amazon EC2 
+# instances or using Amazon S3 storage.” 
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This template when run in Management account will configure the one setup
+  between AWS Marketplace and AWS License Manager to utilize Managed Entitlements
+Resources:
+  LicenseManagerMarketplaceTrust:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: license-management.marketplace.amazonaws.com
+      Description: Enables access to AWS Services and Resources used or managed by
+        AWS Marketplace for license management
+  LicenseManagerServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: license-manager.amazonaws.com
+      Description: Enables access to AWS Services and Resources for license management
+  LicenseManagerManagementAccountServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: license-manager.master-account.amazonaws.com
+      Description: Enables access to Management account for license management
+  LicenseManagerMemberAccountServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Properties:
+      AWSServiceName: license-manager.member-account.amazonaws.com
+      Description: Enables access to Member account for license management
+  LambdaOrganizationsSettingsUpdateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Lambda execution role for updating Organization settings
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - organizations:EnableAWSServiceAccess
+                Effect: Allow
+                Resource: '*'
+            Version: '2012-10-17'
+          PolicyName: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - OrganizationServiceSettingsUpdatePolicy
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  OrganizationsSettingsUpdateLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Role: !GetAtt 'LambdaOrganizationsSettingsUpdateRole.Arn'
+      ReservedConcurrentExecutions: 3
+      Code:
+        ZipFile: !Join
+          - "\n"
+          - - import json
+            - import boto3
+            - import cfnresponse
+            - ''
+            - org_client = boto3.client('organizations')
+            - 'def lambda_handler(event, context):'
+            - '    try:'
+            - '        lm_integration = org_client.enable_aws_service_access('
+            - '            ServicePrincipal=''license-manager.amazonaws.com'''
+            - '        )'
+            - '        '
+            - '        lm_mp_integration = org_client.enable_aws_service_access('
+            - '            ServicePrincipal=''license-management.marketplace.amazonaws.com'''
+            - '        )'
+            - '        '
+            - '        lm_member_accounnt_ingration = org_client.enable_aws_service_access('
+            - '            ServicePrincipal=''license-manager.member-account.amazonaws.com'''
+            - '        )'
+            - '        cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={})'
+            - '    except Exception as e:'
+            - '        print("Lambda failed with an exception", e)'
+            - '        cfnresponse.send(event, context, cfnresponse.FAILED, responseData={})'
+      Runtime: python3.9
+  OrganizationSettingsUpdateCustomResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt 'OrganizationsSettingsUpdateLambda.Arn'
+  LambdaLicenseManagerSettingsUpdateRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: Lambda execution role for updating License Manager settings
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - license-manager:UpdateServiceSettings
+                Effect: Allow
+                Resource: '*'
+            Version: '2012-10-17'
+          PolicyName: !Join
+            - '-'
+            - - !Ref 'AWS::StackName'
+              - LicenseManagerSettingsUpdatePolicy
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  LicenseManagerSettingsUpdateLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Role: !GetAtt 'LambdaLicenseManagerSettingsUpdateRole.Arn'
+      ReservedConcurrentExecutions: 3
+      Code:
+        ZipFile: !Join
+          - "\n"
+          - - import json
+            - import boto3
+            - import cfnresponse
+            - ''
+            - 'def lambda_handler(event, context):'
+            - ''
+            - '    try:'
+            - '        lm_client = boto3.client(''license-manager'')'
+            - '        lm_client.update_service_settings('
+            - '            OrganizationConfiguration={'
+            - '                ''EnableIntegration'': True'
+            - '            }'
+            - '        )'
+            - '        cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={})'
+            - '    except Exception as e:'
+            - '        print("Lambda failed with an exception", e)'
+            - '        cfnresponse.send(event, context, cfnresponse.FAILED, responseData={})'
+      Runtime: python3.9
+  LambdaLicenseManagerSettingsUpdateCustomResource:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt 'LicenseManagerSettingsUpdateLambda.Arn'
+    DependsOn: OrganizationSettingsUpdateCustomResource
