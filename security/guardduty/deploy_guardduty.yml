@@ -6,11 +6,11 @@ Parameters:
     Type: String
     Description: >
       The Amazon Organizations ID for the Control Tower.
-    MinLength: 12
-    MaxLength: 12
-    AllowedPattern: '^[o][\-][a-z0-9]{10}$'
+    MinLength: 16
+    MaxLength: 16
+    AllowedPattern: '^[o][u][\-][a-z0-9]{4}[\-][a-z0-9]{8}$'
     ConstraintDescription: >
-      The Org Id must be a 12 character string starting with o- and followed by 10 lower case alphanumeric characters
+      The Org Id must be a 16 character string starting with ou- and followed by 13 lower case alphanumeric characters.
   GDDelegatedAdminAccountId:
     Type: String
     Description: >
