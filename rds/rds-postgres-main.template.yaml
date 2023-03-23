@@ -1,0 +1,762 @@
+Description: "AWS VPC + Linux bastion host + RDS PostgreSQL"
+Metadata:
+  LICENSE: Apache License Version 2.0
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E9101
+        - I3011
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Network configuration
+      Parameters:
+      - AvailabilityZones
+      - VPCCIDR
+      - PrivateSubnet1CIDR
+      - PrivateSubnet2CIDR
+      - PrivateSubnet3CIDR
+      - PublicSubnet1CIDR
+      - PublicSubnet2CIDR
+      - PublicSubnet3CIDR
+    - Label:
+        default: Linux Bastion Host configuration
+      Parameters:
+       - EnableBastion
+       - KeyPairName
+       - RemoteAccessCIDR
+       - EnableTCPForwarding
+    - Label:
+        default: Database configuration
+      Parameters:
+      - DBEngineVersion
+      - DBInstanceClass
+      - DBPort
+      - DBName
+      - DBMasterUsername
+      - ManageMasterUserPassword
+      - DBMasterUserPassword
+      - DBMultiAZ
+      - DBMultiAZCluster
+      - DBAutoMinorVersionUpgrade
+      - DBBackupRetentionPeriod
+      - EnableIAMDBAuth
+    - Label:
+        default: Database Storage configuration
+      Parameters:
+      - DBStorageType
+      - DBAllocatedStorage
+      - DBAllocatedStorageEncrypted
+      - StorageIOPS
+      - StorageThroughput
+    - Label:
+        default: Database Monitoring configuration
+      Parameters:
+      - DBExportLogToCloudwatch
+      - EnablePerformanceInsights
+      - PerformanceInsightsRetentionPeriod
+      - EnableEnhancedMonitoring
+      - MonitoringInterval
+      - EnableEventSubscription  
+      - NotificationList
+    - Label:
+        default: Database tags (optional)
+      Parameters:
+      - EnvironmentStage
+      - Application
+      - ApplicationVersion
+      - ProjectCostCenter
+      - Confidentiality
+      - Compliance
+    - Label:
+        default: Quick Start configuration
+      Parameters:
+      - QSS3BucketName
+      - QSS3BucketRegion
+      - QSS3KeyPrefix
+    ParameterLabels:
+      
+      #VPC stack related parameter labels
+      AvailabilityZones:
+        default: Availability Zones
+      VPCCIDR:
+        default: VPC CIDR
+      PrivateSubnet1CIDR:
+        default: Private subnet 1 CIDR
+      PrivateSubnet2CIDR:
+        default: Private subnet 2 CIDR
+      PrivateSubnet3CIDR:
+        default: Private subnet 3 CIDR
+      PublicSubnet1CIDR:
+        default: Public subnet 1 CIDR
+      PublicSubnet2CIDR:
+        default: Public subnet 2 CIDR
+      PublicSubnet3CIDR:
+        default: Public subnet 3 CIDR  
+      
+      #Bastion host related parameter labels
+      EnableBastion:
+        default: Create bastion stack
+      KeyPairName:
+        default: Key Name
+      RemoteAccessCIDR:
+        default: Permitted IP range
+      EnableTCPForwarding:
+        default: Enable TCP Forwarding
+      
+      #Quickstart related parameter labels
+      QSS3BucketName:
+        default: Quick Start S3 bucket name
+      QSS3BucketRegion:
+        default: Quick Start S3 bucket region
+      QSS3KeyPrefix:
+        default: Quick Start S3 key prefix
+
+      #RDS related parameter labels
+      Application:
+        default: Application name
+      ApplicationVersion:
+        default: Application version
+      Compliance:
+        default: Compliance classifier
+      Confidentiality:
+       default: Confidentiality classifier
+      DBAllocatedStorage:
+        default: Database allocated storage size in GiB
+      DBAllocatedStorageEncrypted:
+        default: Database encryption enabled
+      DBAutoMinorVersionUpgrade:
+        default: Database auto minor version upgrade
+      DBBackupRetentionPeriod:
+        default: Database backup retention period
+      DBEngineVersion:
+        default: Database Engine Version
+      DBExportLogToCloudwatch:
+        default: Export Database Log to CloudWatch
+      DBInstanceClass:
+        default: Database instance class
+      DBMasterUsername:
+        default: Database master username
+      DBMasterUserPassword:
+        default: Database master password
+      DBMultiAZ:
+        default: RDS Multi-AZ DB Instance deployment
+      DBMultiAZCluster:
+        default: RDS Multi-AZ DB Cluster deployment
+      DBName:
+        default: Database name
+      DBPort:
+        default: Database port
+      DBStorageType:
+        default: Database storage type
+      EnableEnhancedMonitoring:
+        default: Enable Enhanced Monitoring
+      EnableEventSubscription:
+        default: Enable Event Subscription
+      EnableIAMDBAuth:
+        default: Enable IAM Database Authentication
+      EnablePerformanceInsights:
+        default: Enable RDS Performance Insights
+      EnvironmentStage:
+        default: Environment stage
+      ManageMasterUserPassword:
+        default: Manage DB master user password with AWS Secrets Manager
+      MonitoringInterval:
+        default: Enhanced monitoring interval
+      NotificationList:
+        default: SNS notification email
+      PerformanceInsightsRetentionPeriod:
+        default:  Number of days to retain Performance Insights data      
+      ProjectCostCenter:
+       default: Project cost center
+      StorageIOPS:
+        default: Provisioned IOPS for gp3/io1 storage type
+      StorageThroughput:
+        default: Provisioned Throughput for gp3 storage type in MiBps
+      
+Parameters:
+  
+  #VPC stack related parameters
+  AvailabilityZones:
+   Description: >-
+      List of Availability Zones to use for the subnets in the VPC. Only three
+      Availability Zones are used for this deployment, and the logical order of
+      your selections is preserved.
+   Type: 'List<AWS::EC2::AvailabilityZone::Name>'
+  PrivateSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/19
+    Description: CIDR block for private subnet 1 located in Availability Zone 1.
+    Type: String
+  PrivateSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.32.0/19
+    Description: CIDR block for private subnet 2 located in Availability Zone 2.
+    Type: String
+  PrivateSubnet3CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.64.0/19
+    Description: CIDR block for private subnet 3 located in Availability Zone 3.
+    Type: String
+  PublicSubnet1CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.96.0/20
+    Description: CIDR block for the public subnet 1 located in Availability Zone 1.
+    Type: String
+  PublicSubnet2CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.128.0/20
+    Description: CIDR block for the public subnet 2 located in Availability Zone 2.
+    Type: String
+  PublicSubnet3CIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.160.0/20
+    Description: CIDR block for the public subnet 3 located in Availability Zone 3.
+    Type: String
+  VPCCIDR:
+    AllowedPattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(1[6-9]|2[0-8]))$
+    ConstraintDescription: CIDR block parameter must be in the form x.x.x.x/16-28
+    Default: 10.0.0.0/16
+    Description: CIDR block for the VPC.
+    Type: String
+
+  #Bastion host related parameters
+  EnableBastion:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "If true, a bastion stack will be created."
+    Type: String
+  EnableTCPForwarding:
+    Type: String
+    Description: Enable/Disable TCP Forwarding for the bastion host
+    Default: 'false'
+    AllowedValues:
+      - 'true'
+      - 'false'
+  KeyPairName:
+    ConstraintDescription: "Name of an existing EC2 key pair."
+    Description: Name of an existing public/private key pair, for connecting to the bastion host.
+    Type: "AWS::EC2::KeyPair::KeyName"
+  RemoteAccessCIDR:
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
+    ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
+    Description: "Allowed CIDR block for external SSH access to the bastion host."
+    Default: 10.0.0.0/16
+    Type: String
+  
+  #Quickstart related parameters
+  QSS3BucketName:
+    AllowedPattern: "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$"
+    ConstraintDescription: "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Default: aws-quickstart
+    Description: "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-)."
+    Type: String
+  QSS3BucketRegion:
+    Default: 'us-east-1'
+    Description: 'The AWS Region where the Quick Start S3 bucket (QSS3BucketName) is hosted. When using your own bucket, you must specify this value.'
+    Type: String
+  QSS3KeyPrefix:
+    AllowedPattern: "^[0-9a-zA-Z-/]*$"
+    ConstraintDescription: "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Default: quickstart-amazon-aurora-postgresql/
+    Description: "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/)."
+    Type: String
+  
+  #RDS related parameters
+  Application:
+    Type: String
+    Default: ''
+    Description: Designates the application of the associated AWS resource. (Optional)
+  ApplicationVersion:
+    Type: String
+    Description: Designates the specific version of the application. (Optional)
+    Default: ''
+  Compliance:
+    Type: String
+    Default: ''
+    Description: Designates the compliance level for the AWS resource. (Optional)
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - ''
+  Confidentiality:
+    Type: String
+    Default: ''
+    Description: Designates the confidentiality classification of the data that is associated with the resource. (Optional)
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+      - ''
+  DBAllocatedStorage:
+    Default: 400
+    Description: Allocated storage size in GiB. For gp2 and gp3, must be an integer from 20 to 65536. For io1, must be an integer from 100 to 65536.
+    Type: Number
+    MinValue: 20
+    MaxValue: 65536
+    ConstraintDescription: Must be an integer from 20 to 65536 for gp2/gp3 and 100 to 65536 for io1.
+  DBAllocatedStorageEncrypted:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to encrypt the database.
+    Type: String
+  DBAutoMinorVersionUpgrade:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Select true to set up auto minor version upgrade."
+    Type: String
+  DBBackupRetentionPeriod:
+    Default: 35
+    Description: "The number of days for which automatic database snapshots are retained."
+    Type: Number
+    MinValue: 0
+    MaxValue: 35
+  DBEngineVersion:
+    Description: Select Database Engine Version
+    Type: String
+    Default: 15.2
+    AllowedValues:
+      - 10.17
+      - 10.18
+      - 10.19
+      - 10.20
+      - 10.21
+      - 10.22
+      - 10.23
+      - 11.12
+      - 11.13
+      - 11.14
+      - 11.15
+      - 11.16
+      - 11.17
+      - 11.18
+      - 11.19
+      - 12.7
+      - 12.8
+      - 12.9
+      - 12.10
+      - 12.11
+      - 12.12
+      - 12.13
+      - 12.14
+      - 13.3
+      - 13.4
+      - 13.5
+      - 13.6
+      - 13.7
+      - 13.8
+      - 13.9
+      - 13.10
+      - 14.1
+      - 14.2
+      - 14.3
+      - 14.4
+      - 14.5
+      - 14.6
+      - 14.7
+      - 15.2
+  DBExportLogToCloudwatch:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to export Database logs to CloudWatch
+    Type: String
+  DBInstanceClass:
+    Default: db.r5.large
+    Description: >-
+      The database instance type. 
+      Please see supported instance types for the PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.html.
+      For RDS Multi-AZ cluster supported instance class, please refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/create-multi-az-db-cluster.html#create-multi-az-db-cluster-settings.
+    Type: String
+    AllowedValues:
+      - db.m5.12xlarge
+      - db.m5.16xlarge
+      - db.m5.24xlarge
+      - db.m5.2xlarge
+      - db.m5.4xlarge
+      - db.m5.8xlarge
+      - db.m5.large
+      - db.m5.xlarge
+      - db.m5d.12xlarge
+      - db.m5d.16xlarge
+      - db.m5d.24xlarge
+      - db.m5d.2xlarge
+      - db.m5d.4xlarge
+      - db.m5d.8xlarge
+      - db.m5d.large
+      - db.m5d.xlarge
+      - db.m6g.12xlarge
+      - db.m6g.16xlarge
+      - db.m6g.2xlarge
+      - db.m6g.4xlarge
+      - db.m6g.8xlarge
+      - db.m6g.large
+      - db.m6g.xlarge
+      - db.m6gd.12xlarge
+      - db.m6gd.16xlarge
+      - db.m6gd.2xlarge
+      - db.m6gd.4xlarge
+      - db.m6gd.8xlarge
+      - db.m6gd.large
+      - db.m6gd.xlarge
+      - db.m6i.12xlarge
+      - db.m6i.16xlarge
+      - db.m6i.24xlarge
+      - db.m6i.2xlarge
+      - db.m6i.32xlarge
+      - db.m6i.4xlarge
+      - db.m6i.8xlarge
+      - db.m6i.large
+      - db.m6i.xlarge
+      - db.r5.12xlarge
+      - db.r5.16xlarge
+      - db.r5.24xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r5.8xlarge
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5b.12xlarge
+      - db.r5b.16xlarge
+      - db.r5b.24xlarge
+      - db.r5b.2xlarge
+      - db.r5b.4xlarge
+      - db.r5b.8xlarge
+      - db.r5b.large
+      - db.r5b.xlarge
+      - db.r5d.12xlarge
+      - db.r5d.16xlarge
+      - db.r5d.24xlarge
+      - db.r5d.2xlarge
+      - db.r5d.4xlarge
+      - db.r5d.8xlarge
+      - db.r5d.large
+      - db.r5d.xlarge
+      - db.r6g.12xlarge
+      - db.r6g.16xlarge
+      - db.r6g.2xlarge
+      - db.r6g.4xlarge
+      - db.r6g.8xlarge
+      - db.r6g.large
+      - db.r6g.xlarge
+      - db.r6gd.12xlarge
+      - db.r6gd.16xlarge
+      - db.r6gd.2xlarge
+      - db.r6gd.4xlarge
+      - db.r6gd.8xlarge
+      - db.r6gd.large
+      - db.r6gd.xlarge
+      - db.r6i.12xlarge
+      - db.r6i.16xlarge
+      - db.r6i.24xlarge
+      - db.r6i.2xlarge
+      - db.r6i.32xlarge
+      - db.r6i.4xlarge
+      - db.r6i.8xlarge
+      - db.r6i.large
+      - db.r6i.xlarge
+      - db.t3.2xlarge
+      - db.t3.large
+      - db.t3.medium
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.xlarge
+      - db.t4g.2xlarge
+      - db.t4g.large
+      - db.t4g.medium
+      - db.t4g.micro
+      - db.t4g.small
+      - db.t4g.xlarge
+      - db.x2g.12xlarge
+      - db.x2g.16xlarge
+      - db.x2g.2xlarge
+      - db.x2g.4xlarge
+      - db.x2g.8xlarge
+      - db.x2g.large
+      - db.x2g.xlarge
+      - db.x2iedn.16xlarge
+      - db.x2iedn.24xlarge
+      - db.x2iedn.2xlarge
+      - db.x2iedn.32xlarge
+      - db.x2iedn.4xlarge
+      - db.x2iedn.8xlarge
+      - db.x2iedn.xlarge
+  DBMasterUsername:
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Default: pgadmin
+    Description: "The database master username."
+    MaxLength: "16"
+    MinLength: "1"
+    Type: String
+  DBMasterUserPassword:
+    AllowedPattern: >-
+      ^(?=^.{8,255}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)((?=.*[^A-Za-z0-9])(?!.*[@/"'])).*$
+    ConstraintDescription: >-
+      Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol
+    Default: "Gjht56Ft$"
+    Description: "The database master user password. Required if _Manage DB master user password with AWS Secrets Manager_ option is set to false."
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  DBMultiAZ:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "false"
+    Description: "Select true to deploy a RDS Multi-AZ DB instance."
+    Type: String
+  DBMultiAZCluster:
+    Description: "Select true to deploy a RDS Multi-AZ DB cluster with two readable standbys."
+    Type: String
+    Default: "false"
+    AllowedValues:
+        - "true"
+        - "false"
+  DBName:
+    AllowedPattern: "[a-zA-Z0-9]*"
+    Description: "Name of the initial PostgreSQL database to create."
+    MaxLength: "64"
+    MinLength: "0"
+    Default: 'sampleapp'
+    Type: String
+  DBPort:
+    Default: 5432
+    Description: "The port the instance will listen for connections on."
+    Type: Number
+    ConstraintDescription: 'Must be in the range [1150-65535].'
+    MinValue: 1150
+    MaxValue: 65535
+  DBStorageType:
+    Default: io1
+    Description: Select the EBS storage type for the RDS PostgreSQL database. RDS Multi-AZ DB Cluster deployment only supports io1 storage type.
+    Type: String
+    AllowedValues:
+      - gp2
+      - gp3
+      - io1
+  EnableEnhancedMonitoring:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables RDS Performance Insights"
+    Type: String
+  EnableEventSubscription:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables event subscription to Notification List"
+    Type: String
+  EnableIAMDBAuth:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables IAM Database Authentication"
+    Type: String
+  EnablePerformanceInsights:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables RDS Performance Insights"
+    Type: String
+  EnvironmentStage:
+    Type: String
+    Description: Designates the environment stage of the associated AWS resource. (Optional)
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+      - none
+    Default: none
+  ManageMasterUserPassword:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Set to true to manage the master user password with AWS Secrets Manager."
+    Type: String
+  MonitoringInterval:
+    Default: 10
+    Description: "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the database."
+    Type: Number
+    AllowedValues:
+      - 1
+      - 5
+      - 10
+      - 15
+      - 30
+      - 60
+    ConstraintDescription: Valid values are 0, 1, 5, 10, 15, 30, 60 seconds.
+  NotificationList:
+    Type: String
+    Default: 'db-ops@domain.com'
+    Description: The email notification used to configure an SNS topic for sending CloudWatch alarm and RDS event notifications.
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: Provide a valid email address.
+  PerformanceInsightsRetentionPeriod:
+    Default: 7
+    Description: "The number of days for which automatic database snapshots are retained. Specify days based on (month * 31), where month is a number of months from 1-23"
+    Type: Number
+    MinValue: 7
+    MaxValue: 713
+  ProjectCostCenter:
+    Type: String
+    Default: ''
+    Description: Designates the cost center associated with the project of the given AWS resource. (Optional) 
+  StorageIOPS:
+    Default: 12000
+    Description: >-
+      If you choose gp3 (and allocate > 400 GiB) or io1, you can provision IOPS.
+      For io1, the ratio of IOPS to allocated storage (in GiB) must be from 0.5 to 50.
+      For gp3, the maximum ratio of IOPS to allocated storage (in GiB) is 500.
+      For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
+    Type: Number
+  StorageThroughput:
+    Default: 500
+    Description: >-
+      Provisioned throughput in MiBps. If you choose gp3 (and allocate > 400 GiB) as storage type, you can provision throughput.
+      The maximum ratio of storage throughput (in MiBps) to IOPS is 0.25.
+      For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
+    Type: Number
+  
+Conditions:
+  EnableBastionAccess: !Equals
+    - !Ref EnableBastion
+    - "true"
+  UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+Resources:
+  
+  VPCStack:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        Fn::Sub:
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-aws-vpc/templates/aws-vpc.template.yaml'
+          - S3Region: !If
+              - UsingDefaultBucket
+              - !Ref AWS::Region
+              - !Ref QSS3BucketRegion
+            S3Bucket: !If
+              - UsingDefaultBucket
+              - !Sub '${QSS3BucketName}-${AWS::Region}'
+              - !Ref QSS3BucketName
+      Parameters:
+        AvailabilityZones: !Join
+          - ','
+          - !Ref AvailabilityZones
+        NumberOfAZs: '3'
+        PrivateSubnet1ACIDR: !Ref PrivateSubnet1CIDR
+        PrivateSubnet2ACIDR: !Ref PrivateSubnet2CIDR
+        PrivateSubnet3ACIDR: !Ref PrivateSubnet3CIDR
+        PublicSubnet1CIDR: !Ref PublicSubnet1CIDR
+        PublicSubnet2CIDR: !Ref PublicSubnet2CIDR
+        PublicSubnet3CIDR: !Ref PublicSubnet3CIDR
+        VPCCIDR: !Ref VPCCIDR
+    
+  BastionStack:
+    Condition: EnableBastionAccess
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL:
+        !Sub
+          - 'https://${S3Bucket}.s3.${S3Region}.${AWS::URLSuffix}/${QSS3KeyPrefix}submodules/quickstart-linux-bastion/templates/linux-bastion.template'
+          - S3Region: !If [UsingDefaultBucket, !Ref 'AWS::Region', !Ref QSS3BucketRegion]
+            S3Bucket: !If [UsingDefaultBucket, !Sub '${QSS3BucketName}-${AWS::Region}', !Ref QSS3BucketName]
+      Parameters:
+        KeyPairName: !Ref KeyPairName
+        PublicSubnet1ID: !GetAtt
+          - VPCStack
+          - Outputs.PublicSubnet1ID
+        PublicSubnet2ID: !GetAtt
+          - VPCStack
+          - Outputs.PublicSubnet2ID
+        EnableTCPForwarding: !Ref EnableTCPForwarding
+        RemoteAccessCIDR: !Ref RemoteAccessCIDR
+        VPCID: !GetAtt
+          - VPCStack
+          - Outputs.VPCID
+        QSS3BucketName: !Ref QSS3BucketName
+        QSS3BucketRegion: !Ref QSS3BucketRegion
+        QSS3KeyPrefix: !Sub ${QSS3KeyPrefix}submodules/quickstart-linux-bastion/
+
+  RDSNS:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      #Update the following to the S3 staging location
+      TemplateURL: https://refarch-pg-rds-aurora.s3.amazonaws.com/rds-postgresql.template.yaml
+      Parameters:
+        #Database Network configuration
+        VPCID:
+          Fn::GetAtt:
+          - VPCStack
+          - Outputs.VPCID
+        Subnet1ID:
+          Fn::GetAtt:
+          - VPCStack
+          - Outputs.PrivateSubnet1AID
+        Subnet2ID:
+          Fn::GetAtt:
+          - VPCStack
+          - Outputs.PrivateSubnet2AID
+        Subnet3ID:
+          Fn::GetAtt:
+          - VPCStack
+          - Outputs.PrivateSubnet3AID
+        DBAccessCIDR: !Ref VPCCIDR
+        #Database General configuration
+        DBEngineVersion: !Ref DBEngineVersion
+        DBInstanceClass: !Ref DBInstanceClass
+        DBPort: !Ref DBPort
+        DBName: !Ref DBName
+        DBMasterUsername: !Ref DBMasterUsername
+        ManageMasterUserPassword: !Ref ManageMasterUserPassword
+        DBMasterUserPassword: !Ref DBMasterUserPassword
+        DBMultiAZ: !Ref DBMultiAZ
+        DBMultiAZCluster: !Ref DBMultiAZCluster
+        DBAutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+        DBBackupRetentionPeriod: !Ref DBBackupRetentionPeriod
+        EnableIAMDBAuth: !Ref EnableIAMDBAuth
+        #Database Storage configuration
+        DBStorageType: !Ref DBStorageType
+        DBAllocatedStorage: !Ref DBAllocatedStorage
+        DBAllocatedStorageEncrypted: !Ref DBAllocatedStorageEncrypted
+        StorageIOPS: !Ref StorageIOPS
+        StorageThroughput: !Ref StorageThroughput
+        #Database Monitoring configuration
+        DBExportLogToCloudwatch: !Ref DBExportLogToCloudwatch
+        EnablePerformanceInsights: !Ref EnablePerformanceInsights
+        PerformanceInsightsRetentionPeriod: !Ref PerformanceInsightsRetentionPeriod
+        EnableEnhancedMonitoring: !Ref EnableEnhancedMonitoring
+        MonitoringInterval: !Ref MonitoringInterval
+        EnableEventSubscription: !Ref EnableEventSubscription
+        NotificationList: !Ref NotificationList
+        #Database tags (optional)
+        EnvironmentStage: !Ref EnvironmentStage
+        Application: !Ref Application
+        ApplicationVersion: !Ref ApplicationVersion
+        ProjectCostCenter: !Ref ProjectCostCenter
+        Confidentiality: !Ref Confidentiality
+        Compliance: !Ref Compliance
