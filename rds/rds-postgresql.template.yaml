@@ -259,9 +259,6 @@ Conditions:
   isGP3: !Equals 
     - !Ref DBStorageType
     - 'gp3'
-  # isIO1: !Equals 
-  #   - !Ref DBStorageType
-  #   - 'io1'
   UseDatabaseEncryption: !Equals
     - !Ref DBAllocatedStorageEncrypted
     - "true"
