@@ -300,7 +300,7 @@ Parameters:
       - pii/phi
       - ''
   DBAllocatedStorage:
-    Default: 400
+    Default: 100
     Description: Allocated storage size in GiB. For gp2 and gp3, must be an integer from 20 to 65536. For io1, must be an integer from 100 to 65536.
     Type: Number
     MinValue: 20
@@ -626,26 +626,33 @@ Parameters:
     Default: ''
     Description: Designates the cost center associated with the project of the given AWS resource. (Optional) 
   StorageIOPS:
-    Default: 12000
+    Default: '0'
     Description: >-
-      If you choose gp3 (and allocate > 400 GiB) or io1, you can provision IOPS.
-      For io1, the ratio of IOPS to allocated storage (in GiB) must be from 0.5 to 50.
-      For gp3, the maximum ratio of IOPS to allocated storage (in GiB) is 500.
+      If you choose gp3 (and allocate >= 400 GiB) or io1, you must specify provisioned IOPS. Leave at default value otherwise.
+      For io1, the ratio of provisioned IOPS to allocated storage (in GiB) must be from 0.5 to 50.
+      For gp3, the maximum ratio of provisioned IOPS to allocated storage (in GiB) is 500.
       For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
-    Type: Number
+    Type: String
   StorageThroughput:
-    Default: 500
+    Default: '0'
     Description: >-
-      Provisioned throughput in MiBps. If you choose gp3 (and allocate > 400 GiB) as storage type, you can provision throughput.
-      The maximum ratio of storage throughput (in MiBps) to IOPS is 0.25.
+      Provisioned throughput in MiBps. 
+      If you choose gp3 (and allocate >= 400 GiB) as storage type, you must specify provisioned throughput. Leave at default value otherwise.
+      The maximum ratio of provisioned storage throughput (in MiBps) to IOPS is 0.25.
       For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
-    Type: Number
+    Type: String
   
 Conditions:
   EnableBastionAccess: !Equals
     - !Ref EnableBastion
     - "true"
   UsingDefaultBucket: !Equals [!Ref QSS3BucketName, 'aws-quickstart']
+
+Rules:
+  IOPSForIO1:
+    Assertions:
+      - Assert: !Or [!Not [!Equals [!Ref DBStorageType, 'io1']], !Not [!Equals [!Ref StorageIOPS, '0']]]
+        AssertDescription: "For io1 storage type, you must specify provisioned IOPS"
 
 Resources:
   

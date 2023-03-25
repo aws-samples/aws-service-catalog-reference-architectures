@@ -259,12 +259,43 @@ Conditions:
   isGP3: !Equals 
     - !Ref DBStorageType
     - 'gp3'
+  # isIO1: !Equals 
+  #   - !Ref DBStorageType
+  #   - 'io1'
   UseDatabaseEncryption: !Equals
     - !Ref DBAllocatedStorageEncrypted
     - "true"
   UseSecretsManager: !Equals
     - !Ref ManageMasterUserPassword
     - "true"
+  NAStorageIOPS: !Equals
+    - !Ref StorageIOPS
+    - '0'
+  NAStorageThrougput: !Equals
+    - !Ref StorageThroughput
+    - '0'
+
+Rules:
+  SubnetsInVPC:
+    Assertions:
+      - Assert: !Equals [!ValueOf ["Subnet1ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 1 ID doesn't belong to the specified VPC"
+      - Assert: !Equals [!ValueOf ["Subnet2ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 2 ID doesn't belong to the specified VPC"
+      - Assert: !Equals [!ValueOf ["Subnet3ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 3 ID doesn't belong to the specified VPC"
+  SubnetsUnique:
+    Assertions:
+      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet2ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet3ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+      - Assert: !Not [!Equals [!Ref Subnet2ID, !Ref Subnet3ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+  IOPSForIO1:
+    Assertions:
+      - Assert: !Or [!Not [!Equals [!Ref DBStorageType, 'io1']], !Not [!Equals [!Ref StorageIOPS, '0']]]
+        AssertDescription: "For io1 storage type, you must specify provisioned IOPS"
 
 Outputs:
   DBName:
@@ -335,7 +366,7 @@ Parameters:
     Type: String
     Default: 10.0.0.0/16
   DBAllocatedStorage:
-    Default: 400
+    Default: 100
     Description: Allocated storage size in GiB. For gp2 and gp3, must be an integer from 20 to 65536. For io1, must be an integer from 100 to 65536.
     Type: Number
     MinValue: 20
@@ -668,20 +699,21 @@ Parameters:
     Description: "Indicates whether the DB instance is an internet-facing instance"
     Type: String
   StorageIOPS:
-    Default: 12000
+    Default: '0'
     Description: >-
-      If you choose gp3 (and allocate > 400 GiB) or io1, you can provision IOPS.
-      For io1, the ratio of IOPS to allocated storage (in GiB) must be from 0.5 to 50.
-      For gp3, the maximum ratio of IOPS to allocated storage (in GiB) is 500.
+      If you choose gp3 (and allocate >= 400 GiB) or io1, you must specify provisioned IOPS. Leave at default value otherwise.
+      For io1, the ratio of provisioned IOPS to allocated storage (in GiB) must be from 0.5 to 50.
+      For gp3, the maximum ratio of provisioned IOPS to allocated storage (in GiB) is 500.
       For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
-    Type: Number
+    Type: String
   StorageThroughput:
-    Default: 500
+    Default: '0'
     Description: >-
-      Provisioned throughput in MiBps. If you choose gp3 (and allocate > 400 GiB) as storage type, you can provision throughput.
-      The maximum ratio of storage throughput (in MiBps) to IOPS is 0.25.
+      Provisioned throughput in MiBps. 
+      If you choose gp3 (and allocate >= 400 GiB) as storage type, you must specify provisioned throughput. Leave at default value otherwise.
+      The maximum ratio of provisioned storage throughput (in MiBps) to IOPS is 0.25.
       For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
-    Type: Number
+    Type: String
   Subnet1ID:
     Description: The ID of the private subnet in Availability Zone 1.
     Type: 'AWS::EC2::Subnet::Id'
@@ -840,7 +872,8 @@ Resources:
       EnablePerformanceInsights: !Ref EnablePerformanceInsights
       Engine: postgres
       EngineVersion: !Ref DBEngineVersion
-      Iops: !If [isGP2, !Ref "AWS::NoValue", !Ref StorageIOPS]
+      #IOPS property is only valid for io1 and gp2 (>=400GB)
+      Iops: !If [isGP2, !Ref "AWS::NoValue", !If [NAStorageIOPS, !Ref 'AWS::NoValue', !Ref StorageIOPS]]
       KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
       MasterUsername: !Ref DBMasterUsername
       ManageMasterUserPassword: !Ref ManageMasterUserPassword
@@ -856,7 +889,8 @@ Resources:
       PubliclyAccessible: !Ref PubliclyAccessible
       StorageType: !Ref DBStorageType  
       StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
-      StorageThroughput: !If [isGP3, !Ref StorageThroughput, !Ref "AWS::NoValue"]
+      #StorageThroughput property is only valid for gp3 (>=400GB)
+      StorageThroughput: !If [isGP3, !If [NAStorageThrougput, !Ref "AWS::NoValue", !Ref StorageThroughput], !Ref "AWS::NoValue"]
       Tags:
         -
           Key: Name
