@@ -713,7 +713,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       #Update the following to the S3 staging location
-      TemplateURL: https://refarch-pg-rds-aurora.s3.amazonaws.com/rds-postgresql.template.yaml
+      TemplateURL: https://s3.amazonaws.com/aws-service-catalog-reference-architectures/rds/rds-postgresql.template.yaml
       Parameters:
         #Database Network configuration
         VPCID:
