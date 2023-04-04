@@ -27,7 +27,7 @@ Metadata:
        - RemoteAccessCIDR
        - EnableTCPForwarding
     - Label:
-        default: Database configuration
+        default: Database General configuration
       Parameters:
       - DBEngineVersion
       - DBInstanceClass
@@ -79,8 +79,6 @@ Metadata:
       #VPC stack related parameter labels
       AvailabilityZones:
         default: Availability Zones
-      VPCCIDR:
-        default: VPC CIDR
       PrivateSubnet1CIDR:
         default: Private subnet 1 CIDR
       PrivateSubnet2CIDR:
@@ -92,17 +90,19 @@ Metadata:
       PublicSubnet2CIDR:
         default: Public subnet 2 CIDR
       PublicSubnet3CIDR:
-        default: Public subnet 3 CIDR  
+        default: Public subnet 3 CIDR
+      VPCCIDR:
+        default: VPC CIDR
       
       #Bastion host related parameter labels
       EnableBastion:
         default: Create bastion stack
+      EnableTCPForwarding:
+        default: Enable TCP Forwarding
       KeyPairName:
         default: Key Name
       RemoteAccessCIDR:
         default: Permitted IP range
-      EnableTCPForwarding:
-        default: Enable TCP Forwarding
       
       #Quickstart related parameter labels
       QSS3BucketName:

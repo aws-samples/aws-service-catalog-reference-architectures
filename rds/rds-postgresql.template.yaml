@@ -296,6 +296,7 @@ Rules:
 
 Outputs:
   DBName:
+    Condition: DoCreateDatabase
     Description: "Amazon RDS database name"
     Value: !Ref DBName
   DBMasterUsername:
@@ -315,9 +316,14 @@ Outputs:
   RDSEndPointPort:
     Description: "Amazon RDS port"
     Value: !If [isDBCluster, !Sub "${MAZDBC.Endpoint.Port}", !Sub "${MAZDBI.Endpoint.Port}"]
-  RDSEndPoints:
+  RDSMAZInstEndPoints:
+    Condition: isDBInstance
     Description: "Full Amazon RDS write endpoint"
-    Value: !If [isDBCluster, !Sub "${MAZDBC.Endpoint.Address}:${MAZDBC.Endpoint.Port}/${DBName}",  !Sub "${MAZDBI.Endpoint.Address}:${MAZDBI.Endpoint.Port}/${DBName}"]
+    Value: !If [DoCreateDatabase, !Sub "${MAZDBI.Endpoint.Address}:${MAZDBI.Endpoint.Port}/${DBName}", !Sub "${MAZDBI.Endpoint.Address}:${MAZDBI.Endpoint.Port}/postgres"]
+  RDSMAZClustEndPoints:
+    Condition: isDBCluster
+    Description: "Full Amazon RDS write endpoint"
+    Value: !If [DoCreateDatabase, !Sub "${MAZDBC.Endpoint.Address}:${MAZDBC.Endpoint.Port}/${DBName}", !Sub "${MAZDBC.Endpoint.Address}:${MAZDBC.Endpoint.Port}/postgres"]
   RDSEncryptionKey:
     Condition: UseDatabaseEncryption
     Description: The alias of the encryption key created for RDS
@@ -574,7 +580,7 @@ Parameters:
     ConstraintDescription: >-
       Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol
     Default: "Gjht56Ft$"
-    Description: "The database master user password. Required if _Manage DB master user password with AWS Secrets Manager_ option is set to false."
+    Description: The database master user password. Required if "Manage DB master user password with AWS Secrets Manager" option is set to false.
     MaxLength: "64"
     MinLength: "8"
     NoEcho: "True"
@@ -830,7 +836,7 @@ Resources:
     Type: AWS::RDS::DBParameterGroup
     Condition: isDBInstance
     Properties:
-      Description: !Join [ "- ", [ "RDS PG Database Instance Parameter Group for Cloudformation Stack ", !Ref DBName ] ]
+      Description: !Join [ "- ", [ "RDS PG Database Instance Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
       Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         log_rotation_age: '1440'
@@ -840,7 +846,7 @@ Resources:
     Type: AWS::RDS::DBClusterParameterGroup
     Condition: isDBCluster
     Properties:
-      Description: !Join [ "- ", [ "RDS PG Cluster Parameter Group for  Cloudformation Stack ", !Ref DBName ] ]
+      Description: !Join [ "- ", [ "RDS PG Cluster Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
       Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
       Parameters:
         log_rotation_age: '1440'
@@ -1082,6 +1088,7 @@ Resources:
     Type: 'AWS::RDS::EventSubscription'
     Properties:
       EventCategories:
+      - creation
       - failover
       - notification
       SnsTopicArn: !Ref DBSNSTopic
@@ -1094,7 +1101,9 @@ Resources:
     Properties:
       EventCategories:
       - availability
+      - backup
       - configuration change
+      - creation
       - deletion
       - failover
       - failure
