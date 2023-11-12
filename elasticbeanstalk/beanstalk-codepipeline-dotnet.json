@@ -56,7 +56,7 @@
                 },
                 "ManagedPolicyArns": [
                     "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
-                    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess",
+                    "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess",
 					"arn:aws:iam::aws:policy/AWSElasticBeanstalkFullAccess"
                 ],
                 "Policies": [ { 

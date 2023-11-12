@@ -92,7 +92,7 @@
                     "arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess",
                     "arn:aws:iam::aws:policy/AmazonEC2FullAccess",
                     "arn:aws:iam::aws:policy/AmazonSSMFullAccess",
-                    "arn:aws:iam::aws:policy/AWSCodePipelineFullAccess"
+                    "arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess"
                 ],
                 "Policies": [ { 
                     "PolicyName":"CodeBuildManageS3Artifacts",
