@@ -1,0 +1,1132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "Amazon RDS PostgreSQL"
+Metadata:
+  LICENSE: Apache License Version 2.0
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E9101
+        - W3011
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Database Network configuration
+      Parameters:
+      - VPCID
+      - Subnet1ID
+      - Subnet2ID
+      - Subnet3ID
+      - CustomDBSecurityGroup
+      - DBAccessCIDR
+      - PubliclyAccessible
+    - Label:
+        default: Database General configuration
+      Parameters:
+      - DBEngineVersion
+      - DBInstanceClass
+      - DBPort
+      - DBName
+      - DBMasterUsername
+      - ManageMasterUserPassword
+      - DBMasterUserPassword
+      - DBMultiAZ
+      - DBMultiAZCluster
+      - DBAutoMinorVersionUpgrade
+      - DBBackupRetentionPeriod
+      - EnableIAMDBAuth
+    - Label:
+        default: Database Storage configuration
+      Parameters:
+      - DBStorageType
+      - DBAllocatedStorage
+      - DBAllocatedStorageEncrypted
+      - StorageIOPS
+      - StorageThroughput
+    - Label:
+        default: Database Monitoring configuration
+      Parameters:
+      - DBExportLogToCloudwatch
+      - EnablePerformanceInsights
+      - PerformanceInsightsRetentionPeriod
+      - EnableEnhancedMonitoring
+      - MonitoringInterval
+      - EnableEventSubscription  
+      - NotificationList
+    - Label:
+        default: Database tags (optional)
+      Parameters:
+      - EnvironmentStage
+      - Application
+      - ApplicationVersion
+      - ProjectCostCenter
+      - Confidentiality
+      - Compliance
+    ParameterLabels:
+      Application:
+        default: Application name
+      ApplicationVersion:
+        default: Application version
+      Compliance:
+        default: Compliance classifier
+      Confidentiality:
+       default: Confidentiality classifier
+      CustomDBSecurityGroup:
+        default: Custom security group ID
+      DBAccessCIDR:
+        default: Database connection CIDR
+      DBAllocatedStorage:
+        default: Database allocated storage size in GiB
+      DBAllocatedStorageEncrypted:
+        default: Database encryption enabled
+      DBAutoMinorVersionUpgrade:
+        default: Database auto minor version upgrade
+      DBBackupRetentionPeriod:
+        default: Database backup retention period
+      DBEngineVersion:
+        default: Database Engine Version
+      DBExportLogToCloudwatch:
+        default: Export Database Log to CloudWatch  
+      DBInstanceClass:
+        default: Database instance class
+      DBMasterUsername:
+        default: Database master username
+      DBMasterUserPassword:
+        default: Database master password
+      DBMultiAZ:
+        default: RDS Multi-AZ DB Instance deployment
+      DBMultiAZCluster:
+        default: RDS Multi-AZ DB Cluster deployment
+      DBName:
+        default: Database name
+      DBPort:
+        default: Database port
+      DBStorageType:
+        default: Database storage type
+      EnableEnhancedMonitoring:
+        default: Enable Enhanced Monitoring
+      EnableEventSubscription:
+        default: Enable Event Subscription
+      EnableIAMDBAuth:
+        default: Enable IAM Database Authentication
+      EnablePerformanceInsights:
+        default: Enable RDS Performance Insights
+      EnvironmentStage:
+        default: Environment stage
+      ManageMasterUserPassword:
+        default: Manage DB master user password with AWS Secrets Manager
+      MonitoringInterval:
+        default: Enhanced monitoring interval
+      NotificationList:
+        default: SNS notification email
+      PerformanceInsightsRetentionPeriod:
+        default:  Number of days to retain Performance Insights data      
+      ProjectCostCenter:
+       default: Project cost center
+      PubliclyAccessible:
+       default: Publicly Accessible
+      StorageIOPS:
+        default: Provisioned IOPS for gp3/io1 storage type
+      StorageThroughput:
+        default: Provisioned Throughput for gp3 storage type in MiBps
+      Subnet1ID:
+        default: Private subnet 1 ID
+      Subnet2ID:
+        default: Private subnet 2 ID
+      Subnet3ID:
+        default: Private subnet 3 ID
+      VPCID:
+        default: VPC ID      
+      
+Mappings:
+  DBFamilyMap:
+    '10.17':
+      family: postgres10
+    '10.18':
+      family: postgres10
+    '10.19':
+      family: postgres10
+    '10.20':
+      family: postgres10
+    '10.21':
+      family: postgres10
+    '10.22':
+      family: postgres10
+    '10.23':
+      family: postgres10
+    '11.12':
+      family: postgres11
+    '11.13':
+      family: postgres11
+    '11.14':
+      family: postgres11
+    '11.15':
+      family: postgres11
+    '11.16':
+      family: postgres11
+    '11.17':
+      family: postgres11
+    '11.18':
+      family: postgres11
+    '11.19':
+      family: postgres11
+    '12.7':
+      family: postgres12
+    '12.8':
+      family: postgres12
+    '12.9':
+      family: postgres12
+    '12.10':
+      family: postgres12
+    '12.11':
+      family: postgres12
+    '12.12':
+      family: postgres12
+    '12.13':
+      family: postgres12
+    '12.14':
+      family: postgres12
+    '13.3':
+      family: postgres13
+    '13.4':
+      family: postgres13
+    '13.5':
+      family: postgres13
+    '13.6':
+      family: postgres13
+    '13.7':
+      family: postgres13
+    '13.8':
+      family: postgres13
+    '13.9':
+      family: postgres13
+    '13.10':
+      family: postgres13
+    '14.1':
+      family: postgres14
+    '14.2':
+      family: postgres14
+    '14.3':
+      family: postgres14
+    '14.4':
+      family: postgres14
+    '14.5':
+      family: postgres14
+    '14.6':
+      family: postgres14
+    '14.7':
+      family: postgres14
+    '15.2':
+      family: postgres15
+  
+Conditions:
+  CreateSecurityGroup: !Equals
+    - !Ref CustomDBSecurityGroup
+    - ''
+  CreateKMSKey: !Or
+    - !Condition UseDatabaseEncryption
+    - !Condition UseSecretsManager
+    - !Condition EnablePI
+  DoCreateDatabase:
+    !Not
+      - !Equals
+        - !Ref DBName
+        - ''
+  EnableDBLogExport: !Equals
+    - !Ref DBExportLogToCloudwatch
+    - "true"
+  isDBCluster: !Equals 
+    - !Ref DBMultiAZCluster
+    - 'true' 
+  isDBInstance: !Not [!Condition isDBCluster]
+  EventSubscription: !Equals
+    - !Ref EnableEventSubscription
+    - 'true'
+  EventSubscriptionDBCluster: !And
+    - !Condition EventSubscription
+    - !Condition isDBCluster
+  EventSubscriptionDBInstance: !And
+    - !Condition EventSubscription
+    - !Condition isDBInstance
+  EnableEM: !Equals
+    - !Ref EnableEnhancedMonitoring
+    - 'true'
+  EnablePI: !Equals
+    - !Ref EnablePerformanceInsights
+    - 'true'
+  isGP2: !Equals 
+    - !Ref DBStorageType
+    - 'gp2'
+  isGP3: !Equals 
+    - !Ref DBStorageType
+    - 'gp3'
+  UseDatabaseEncryption: !Equals
+    - !Ref DBAllocatedStorageEncrypted
+    - "true"
+  UseSecretsManager: !Equals
+    - !Ref ManageMasterUserPassword
+    - "true"
+  NAStorageIOPS: !Equals
+    - !Ref StorageIOPS
+    - '0'
+  NAStorageThrougput: !Equals
+    - !Ref StorageThroughput
+    - '0'
+
+Rules:
+  SubnetsInVPC:
+    Assertions:
+      - Assert: !Equals [!ValueOf ["Subnet1ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 1 ID doesn't belong to the specified VPC"
+      - Assert: !Equals [!ValueOf ["Subnet2ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 2 ID doesn't belong to the specified VPC"
+      - Assert: !Equals [!ValueOf ["Subnet3ID", "VpcId"], !Ref VPCID]
+        AssertDescription: "Private subnet 3 ID doesn't belong to the specified VPC"
+  SubnetsUnique:
+    Assertions:
+      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet2ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+      - Assert: !Not [!Equals [!Ref Subnet1ID, !Ref Subnet3ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+      - Assert: !Not [!Equals [!Ref Subnet2ID, !Ref Subnet3ID]]
+        AssertDescription: "Please provide 3 distinct private subnets"
+  IOPSForIO1:
+    Assertions:
+      - Assert: !Or [!Not [!Equals [!Ref DBStorageType, 'io1']], !Not [!Equals [!Ref StorageIOPS, '0']]]
+        AssertDescription: "For io1 storage type, you must specify provisioned IOPS"
+
+Outputs:
+  DBName:
+    Condition: DoCreateDatabase
+    Description: "Amazon RDS database name"
+    Value: !Ref DBName
+  DBMasterUsername:
+    Description: "Amazon RDS database master username"
+    Value: !Ref DBMasterUsername
+  MasterUserSecret:
+    Condition: UseSecretsManager
+    Description: "Master Credentials ARN"
+    Value: !If [isDBCluster, !Sub "${MAZDBC.MasterUserSecret.SecretArn}", !Sub "${MAZDBI.MasterUserSecret.SecretArn}"]
+  RDSEndPointAddress:
+    Description: "Amazon RDS write endpoint"
+    Value: !If [isDBCluster, !Sub "${MAZDBC.Endpoint.Address}", !Sub "${MAZDBI.Endpoint.Address}"]
+  RDSReadEndPointAddress:
+    Condition: isDBCluster
+    Description: "Amazon RDS read endpoint"
+    Value: !Sub ${MAZDBC.ReadEndpoint.Address}
+  RDSEndPointPort:
+    Description: "Amazon RDS port"
+    Value: !If [isDBCluster, !Sub "${MAZDBC.Endpoint.Port}", !Sub "${MAZDBI.Endpoint.Port}"]
+  RDSMAZInstEndPoints:
+    Condition: isDBInstance
+    Description: "Full Amazon RDS write endpoint"
+    Value: !If [DoCreateDatabase, !Sub "${MAZDBI.Endpoint.Address}:${MAZDBI.Endpoint.Port}/${DBName}", !Sub "${MAZDBI.Endpoint.Address}:${MAZDBI.Endpoint.Port}/postgres"]
+  RDSMAZClustEndPoints:
+    Condition: isDBCluster
+    Description: "Full Amazon RDS write endpoint"
+    Value: !If [DoCreateDatabase, !Sub "${MAZDBC.Endpoint.Address}:${MAZDBC.Endpoint.Port}/${DBName}", !Sub "${MAZDBC.Endpoint.Address}:${MAZDBC.Endpoint.Port}/postgres"]
+  RDSEncryptionKey:
+    Condition: UseDatabaseEncryption
+    Description: The alias of the encryption key created for RDS
+    Value: !Ref EncryptionKeyAlias
+
+Parameters:
+  Application:
+    Type: String
+    Default: ''
+    Description: Designates the application of the associated AWS resource. (Optional)
+  ApplicationVersion:
+    Type: String
+    Description: Designates the specific version of the application. (Optional)
+    Default: ''
+  Compliance:
+    Type: String
+    Default: ''
+    Description: Designates the compliance level for the AWS resource. (Optional)
+    AllowedValues:
+      - hipaa
+      - sox
+      - fips
+      - other
+      - ''
+  Confidentiality:
+    Type: String
+    Default: ''
+    Description: Designates the confidentiality classification of the data that is associated with the resource. (Optional)
+    AllowedValues:
+      - public
+      - private
+      - confidential
+      - pii/phi
+      - ''
+  CustomDBSecurityGroup:
+    Description: "ID of the security group (e.g., sg-0234se). One will be created for you if left empty."
+    Type: String
+    Default: ''
+  DBAccessCIDR:
+    AllowedPattern: "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
+    ConstraintDescription: "CIDR block parameter must be in the form x.x.x.x/x"
+    Description: "Allowed CIDR block for external access (use VPC CIDR)."
+    Type: String
+    Default: 10.0.0.0/16
+  DBAllocatedStorage:
+    Default: 100
+    Description: Allocated storage size in GiB. For gp2 and gp3, must be an integer from 20 to 65536. For io1, must be an integer from 100 to 65536.
+    Type: Number
+    MinValue: 20
+    MaxValue: 65536
+    ConstraintDescription: Must be an integer from 20 to 65536 for gp2/gp3 and 100 to 65536 for io1.
+  DBAllocatedStorageEncrypted:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to encrypt the database.
+    Type: String
+  DBAutoMinorVersionUpgrade:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Select true to set up auto minor version upgrade."
+    Type: String
+  DBBackupRetentionPeriod:
+    Default: 35
+    Description: "The number of days for which automatic database snapshots are retained."
+    Type: Number
+    MinValue: 0
+    MaxValue: 35
+  DBEngineVersion:
+    Description: Select Database Engine Version
+    Type: String
+    Default: 15.2
+    AllowedValues:
+      - 10.17
+      - 10.18
+      - 10.19
+      - 10.20
+      - 10.21
+      - 10.22
+      - 10.23
+      - 11.12
+      - 11.13
+      - 11.14
+      - 11.15
+      - 11.16
+      - 11.17
+      - 11.18
+      - 11.19
+      - 12.7
+      - 12.8
+      - 12.9
+      - 12.10
+      - 12.11
+      - 12.12
+      - 12.13
+      - 12.14
+      - 13.3
+      - 13.4
+      - 13.5
+      - 13.6
+      - 13.7
+      - 13.8
+      - 13.9
+      - 13.10
+      - 14.1
+      - 14.2
+      - 14.3
+      - 14.4
+      - 14.5
+      - 14.6
+      - 14.7
+      - 15.2
+  DBExportLogToCloudwatch:
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Whether or not to export Database logs to CloudWatch
+    Type: String
+  DBInstanceClass:
+    Default: db.r5.large
+    Description: >-
+      The database instance type. 
+      Please see supported instance types for the PostgreSQL version selected https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.html.
+      For RDS Multi-AZ cluster supported instance class, please refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/create-multi-az-db-cluster.html#create-multi-az-db-cluster-settings.
+    Type: String
+    AllowedValues:
+      - db.m5.12xlarge
+      - db.m5.16xlarge
+      - db.m5.24xlarge
+      - db.m5.2xlarge
+      - db.m5.4xlarge
+      - db.m5.8xlarge
+      - db.m5.large
+      - db.m5.xlarge
+      - db.m5d.12xlarge
+      - db.m5d.16xlarge
+      - db.m5d.24xlarge
+      - db.m5d.2xlarge
+      - db.m5d.4xlarge
+      - db.m5d.8xlarge
+      - db.m5d.large
+      - db.m5d.xlarge
+      - db.m6g.12xlarge
+      - db.m6g.16xlarge
+      - db.m6g.2xlarge
+      - db.m6g.4xlarge
+      - db.m6g.8xlarge
+      - db.m6g.large
+      - db.m6g.xlarge
+      - db.m6gd.12xlarge
+      - db.m6gd.16xlarge
+      - db.m6gd.2xlarge
+      - db.m6gd.4xlarge
+      - db.m6gd.8xlarge
+      - db.m6gd.large
+      - db.m6gd.xlarge
+      - db.m6i.12xlarge
+      - db.m6i.16xlarge
+      - db.m6i.24xlarge
+      - db.m6i.2xlarge
+      - db.m6i.32xlarge
+      - db.m6i.4xlarge
+      - db.m6i.8xlarge
+      - db.m6i.large
+      - db.m6i.xlarge
+      - db.r5.12xlarge
+      - db.r5.16xlarge
+      - db.r5.24xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r5.8xlarge
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5b.12xlarge
+      - db.r5b.16xlarge
+      - db.r5b.24xlarge
+      - db.r5b.2xlarge
+      - db.r5b.4xlarge
+      - db.r5b.8xlarge
+      - db.r5b.large
+      - db.r5b.xlarge
+      - db.r5d.12xlarge
+      - db.r5d.16xlarge
+      - db.r5d.24xlarge
+      - db.r5d.2xlarge
+      - db.r5d.4xlarge
+      - db.r5d.8xlarge
+      - db.r5d.large
+      - db.r5d.xlarge
+      - db.r6g.12xlarge
+      - db.r6g.16xlarge
+      - db.r6g.2xlarge
+      - db.r6g.4xlarge
+      - db.r6g.8xlarge
+      - db.r6g.large
+      - db.r6g.xlarge
+      - db.r6gd.12xlarge
+      - db.r6gd.16xlarge
+      - db.r6gd.2xlarge
+      - db.r6gd.4xlarge
+      - db.r6gd.8xlarge
+      - db.r6gd.large
+      - db.r6gd.xlarge
+      - db.r6i.12xlarge
+      - db.r6i.16xlarge
+      - db.r6i.24xlarge
+      - db.r6i.2xlarge
+      - db.r6i.32xlarge
+      - db.r6i.4xlarge
+      - db.r6i.8xlarge
+      - db.r6i.large
+      - db.r6i.xlarge
+      - db.t3.2xlarge
+      - db.t3.large
+      - db.t3.medium
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.xlarge
+      - db.t4g.2xlarge
+      - db.t4g.large
+      - db.t4g.medium
+      - db.t4g.micro
+      - db.t4g.small
+      - db.t4g.xlarge
+      - db.x2g.12xlarge
+      - db.x2g.16xlarge
+      - db.x2g.2xlarge
+      - db.x2g.4xlarge
+      - db.x2g.8xlarge
+      - db.x2g.large
+      - db.x2g.xlarge
+      - db.x2iedn.16xlarge
+      - db.x2iedn.24xlarge
+      - db.x2iedn.2xlarge
+      - db.x2iedn.32xlarge
+      - db.x2iedn.4xlarge
+      - db.x2iedn.8xlarge
+      - db.x2iedn.xlarge
+  DBMasterUsername:
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+    ConstraintDescription: "Must begin with a letter and contain only alphanumeric characters."
+    Default: pgadmin
+    Description: "The database master username."
+    MaxLength: "16"
+    MinLength: "1"
+    Type: String
+  DBMasterUserPassword:
+    AllowedPattern: >-
+      ^(?=^.{8,255}$)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)((?=.*[^A-Za-z0-9])(?!.*[@/"'])).*$
+    ConstraintDescription: >-
+      Min 8 chars. Must include 1 uppercase, 1 lowercase, 1 number, 1 (non / @ " ') symbol
+    Default: "Gjht56Ft$"
+    Description: The database master user password. Required if "Manage DB master user password with AWS Secrets Manager" option is set to false.
+    MaxLength: "64"
+    MinLength: "8"
+    NoEcho: "True"
+    Type: String
+  DBMultiAZ:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "false"
+    Description: "Select true to deploy a RDS Multi-AZ DB instance."
+    Type: String
+  DBMultiAZCluster:
+    Description: "Select true to deploy a RDS Multi-AZ DB cluster with two readable standbys."
+    Type: String
+    Default: "false"
+    AllowedValues:
+        - "true"
+        - "false"
+  DBName:
+    AllowedPattern: "[a-zA-Z0-9]*"
+    Description: "Name of the initial PostgreSQL database to create."
+    MaxLength: "64"
+    MinLength: "0"
+    Default: 'sampleapp'
+    Type: String
+  DBPort:
+    Default: 5432
+    Description: "The port the instance will listen for connections on."
+    Type: Number
+    ConstraintDescription: 'Must be in the range [1150-65535].'
+    MinValue: 1150
+    MaxValue: 65535
+  DBStorageType:
+    Default: io1
+    Description: Select the EBS storage type for the RDS PostgreSQL database. RDS Multi-AZ DB Cluster deployment only supports io1 storage type.
+    Type: String
+    AllowedValues:
+      - gp2
+      - gp3
+      - io1
+  EnableEnhancedMonitoring:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables RDS Performance Insights"
+    Type: String
+  EnableEventSubscription:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables event subscription to Notification List"
+    Type: String
+  EnableIAMDBAuth:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables IAM Database Authentication"
+    Type: String
+  EnablePerformanceInsights:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Enables RDS Performance Insights"
+    Type: String
+  EnvironmentStage:
+    Type: String
+    Description: Designates the environment stage of the associated AWS resource. (Optional)
+    AllowedValues:
+      - dev
+      - test
+      - pre-prod
+      - prod
+      - none
+    Default: none
+  ManageMasterUserPassword:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "true"
+    Description: "Set to true to manage the master user password with AWS Secrets Manager."
+    Type: String
+  MonitoringInterval:
+    Default: 10
+    Description: "The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the database."
+    Type: Number
+    AllowedValues:
+      - 1
+      - 5
+      - 10
+      - 15
+      - 30
+      - 60
+    ConstraintDescription: Valid values are 0, 1, 5, 10, 15, 30, 60 seconds.
+  NotificationList:
+    Type: String
+    Default: 'db-ops@domain.com'
+    Description: The email notification used to configure an SNS topic for sending CloudWatch alarm and RDS event notifications.
+    AllowedPattern: '^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+    ConstraintDescription: Provide a valid email address.
+  PerformanceInsightsRetentionPeriod:
+    Default: 7
+    Description: "The number of days for which automatic database snapshots are retained. Specify days based on (month * 31), where month is a number of months from 1-23"
+    Type: Number
+    MinValue: 7
+    MaxValue: 713
+  ProjectCostCenter:
+    Type: String
+    Default: ''
+    Description: Designates the cost center associated with the project of the given AWS resource. (Optional) 
+  PubliclyAccessible:
+    AllowedValues:
+      - "true"
+      - "false"
+    Default: "false"
+    Description: "Indicates whether the DB instance is an internet-facing instance"
+    Type: String
+  StorageIOPS:
+    Default: '0'
+    Description: >-
+      If you choose gp3 (and allocate >= 400 GiB) or io1, you must specify provisioned IOPS. Leave at default value otherwise.
+      For io1, the ratio of provisioned IOPS to allocated storage (in GiB) must be from 0.5 to 50.
+      For gp3, the maximum ratio of provisioned IOPS to allocated storage (in GiB) is 500.
+      For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
+    Type: String
+  StorageThroughput:
+    Default: '0'
+    Description: >-
+      Provisioned throughput in MiBps. 
+      If you choose gp3 (and allocate >= 400 GiB) as storage type, you must specify provisioned throughput. Leave at default value otherwise.
+      The maximum ratio of provisioned storage throughput (in MiBps) to IOPS is 0.25.
+      For details, refer https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html
+    Type: String
+  Subnet1ID:
+    Description: The ID of the private subnet in Availability Zone 1.
+    Type: 'AWS::EC2::Subnet::Id'
+  Subnet2ID:
+    Description: The ID of the private subnet in Availability Zone 2.
+    Type: 'AWS::EC2::Subnet::Id'
+  Subnet3ID:
+    Description: The ID of the private subnet in Availability Zone 3.
+    Type: 'AWS::EC2::Subnet::Id'
+  VPCID:
+    Description: "ID of the VPC you are deploying RDS into (e.g., vpc-0343606e)."
+    Type: 'AWS::EC2::VPC::Id'
+    Default: ''
+
+Resources:
+  
+  RDSDBSubnetGroup:
+    Properties:
+      DBSubnetGroupDescription: "Subnets available for the Amazon RDS database instance"
+      SubnetIds:
+       - !Ref Subnet1ID
+       - !Ref Subnet2ID
+       - !Ref Subnet3ID
+    Type: "AWS::RDS::DBSubnetGroup"
+  
+  RDSSecurityGroup:
+    Condition: CreateSecurityGroup
+    Properties:
+      GroupDescription: "Allow access to database port"
+      SecurityGroupEgress:
+        -
+          CidrIp: 0.0.0.0/0
+          FromPort: -1
+          IpProtocol: '-1'
+          ToPort: -1
+      SecurityGroupIngress:
+        -
+          CidrIp: !Ref DBAccessCIDR
+          FromPort: !Ref DBPort
+          IpProtocol: tcp
+          ToPort: !Ref DBPort
+      VpcId: !Ref VPCID
+      Tags:
+      - Key: Name
+        Value: !Sub RDSSecurityGroup-${AWS::StackName}
+    Type: "AWS::EC2::SecurityGroup"
+  
+  RDSSecurityGroupIngress:
+    Condition: CreateSecurityGroup
+    Properties:
+      GroupId: !GetAtt 'RDSSecurityGroup.GroupId'
+      IpProtocol: '-1'
+      SourceSecurityGroupId: !Ref RDSSecurityGroup
+      Description: 'Self Reference'
+    Type: 'AWS::EC2::SecurityGroupIngress'
+  
+  DBSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+      - Endpoint: !Ref NotificationList
+        Protocol: email
+  
+  EncryptionKey:
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - EIAMPolicyActionWildcard
+          ignore_reasons:
+            - EIAMPolicyActionWildcard: "All KMS actions allowed by design"
+    DeletionPolicy: Retain
+    Type: AWS::KMS::Key
+    Condition: CreateKMSKey
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Id: !Ref AWS::StackName
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action: 'kms:*'
+            Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+  
+  EncryptionKeyAlias:
+    Type: AWS::KMS::Alias
+    Condition: CreateKMSKey
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}"
+      TargetKeyId: !Ref EncryptionKey
+  
+  MRole:
+    Type: AWS::IAM::Role
+    Condition: EnableEM
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "monitoring.rds.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole
+
+  RDSDBPG:
+    Type: AWS::RDS::DBParameterGroup
+    Condition: isDBInstance
+    Properties:
+      Description: !Join [ "- ", [ "RDS PG Database Instance Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
+      Parameters:
+        log_rotation_age: '1440'
+        log_rotation_size: '102400'
+  
+  RDSDBCPG:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Condition: isDBCluster
+    Properties:
+      Description: !Join [ "- ", [ "RDS PG Cluster Parameter Group for Cloudformation Stack ", !Ref AWS::StackName ] ]
+      Family: !FindInMap [DBFamilyMap, !Ref DBEngineVersion, "family"]
+      Parameters:
+        log_rotation_age: '1440'
+        log_rotation_size: '102400'
+  
+  MAZDBI:
+    Type: "AWS::RDS::DBInstance"
+    Condition: isDBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      AllocatedStorage: !Ref DBAllocatedStorage
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
+      DBName:
+        !If
+        - DoCreateDatabase
+        - !Ref DBName
+        - !Ref AWS::NoValue
+      DBInstanceClass: !Ref DBInstanceClass
+      DBParameterGroupName: !Ref RDSDBPG
+      DBSubnetGroupName: !Ref RDSDBSubnetGroup
+      EnableCloudwatchLogsExports:
+        - !If [EnableDBLogExport, postgresql, !Ref 'AWS::NoValue']
+      EnableIAMDatabaseAuthentication: !Ref EnableIAMDBAuth
+      EnablePerformanceInsights: !Ref EnablePerformanceInsights
+      Engine: postgres
+      EngineVersion: !Ref DBEngineVersion
+      #IOPS property is only valid for io1 and gp2 (>=400GB)
+      Iops: !If [isGP2, !Ref "AWS::NoValue", !If [NAStorageIOPS, !Ref 'AWS::NoValue', !Ref StorageIOPS]]
+      KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
+      MasterUsername: !Ref DBMasterUsername
+      ManageMasterUserPassword: !Ref ManageMasterUserPassword
+      MasterUserPassword: !If [UseSecretsManager, !Ref 'AWS::NoValue', !Ref DBMasterUserPassword]
+      MasterUserSecret:
+        KmsKeyId: !If [UseSecretsManager, !Ref EncryptionKey, !Ref 'AWS::NoValue']
+      MonitoringInterval: !If [EnableEM, !Ref MonitoringInterval, !Ref 'AWS::NoValue']
+      MonitoringRoleArn: !If [EnableEM, !GetAtt MRole.Arn, !Ref 'AWS::NoValue']
+      MultiAZ: !Ref DBMultiAZ
+      PerformanceInsightsKMSKeyId: !If [EnablePI, !Ref EncryptionKey, !Ref 'AWS::NoValue']
+      PerformanceInsightsRetentionPeriod: !If [EnablePI, !Ref PerformanceInsightsRetentionPeriod, !Ref 'AWS::NoValue']
+      Port: !Ref DBPort
+      PubliclyAccessible: !Ref PubliclyAccessible
+      StorageType: !Ref DBStorageType  
+      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
+      #StorageThroughput property is only valid for gp3 (>=400GB)
+      StorageThroughput: !If [isGP3, !If [NAStorageThrougput, !Ref "AWS::NoValue", !Ref StorageThroughput], !Ref "AWS::NoValue"]
+      Tags:
+        -
+          Key: Name
+          Value: !Sub MAZDBI-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
+      VPCSecurityGroups:
+        !If
+          - CreateSecurityGroup
+          - [!Ref RDSSecurityGroup]
+          - [!Ref CustomDBSecurityGroup] 
+  
+  MAZDBC:
+    Metadata:
+      cfn-lint:
+        config:
+          ignore_checks:
+            - ERDSStorageEncryptionEnabled
+          ignore_reasons:
+            - ERDSStorageEncryptionEnabled: "StorageEncryption is conditional"
+    Type: "AWS::RDS::DBCluster"
+    Condition: isDBCluster
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      AllocatedStorage: !Ref DBAllocatedStorage
+      AutoMinorVersionUpgrade: !Ref DBAutoMinorVersionUpgrade
+      BackupRetentionPeriod: !Ref DBBackupRetentionPeriod
+      DBClusterIdentifier: !Sub rdsmazc-${AWS::StackName}
+      DBClusterInstanceClass: !Ref DBInstanceClass
+      DBClusterParameterGroupName: !Ref RDSDBCPG
+      DBSubnetGroupName: !Ref RDSDBSubnetGroup
+      DatabaseName:
+        !If
+        - DoCreateDatabase
+        - !Ref DBName
+        - !Ref AWS::NoValue
+      EnableCloudwatchLogsExports:
+        - !If [EnableDBLogExport, postgresql, !Ref 'AWS::NoValue']
+      # IAM DB authentication currently not supported for RDS Multi AZ DB Cluster
+      # EnableIAMDatabaseAuthentication: !Ref EnableIAMDBAuth
+      Engine: postgres
+      EngineVersion: !Ref DBEngineVersion
+      Iops: !Ref StorageIOPS
+      KmsKeyId: !If [UseDatabaseEncryption, !GetAtt EncryptionKey.Arn, !Ref 'AWS::NoValue']
+      MasterUsername: !Ref DBMasterUsername
+      ManageMasterUserPassword: !Ref ManageMasterUserPassword
+      MasterUserPassword: !If [UseSecretsManager, !Ref 'AWS::NoValue', !Ref DBMasterUserPassword]
+      MasterUserSecret:
+        KmsKeyId: !If [UseSecretsManager, !Ref EncryptionKey, !Ref 'AWS::NoValue']
+      MonitoringInterval: !If [EnableEM, !Ref MonitoringInterval, !Ref 'AWS::NoValue']
+      MonitoringRoleArn: !If [EnableEM, !GetAtt MRole.Arn, !Ref 'AWS::NoValue']
+      PerformanceInsightsEnabled: !Ref EnablePerformanceInsights
+      PerformanceInsightsKmsKeyId: !If [EnablePI, !Ref EncryptionKey, !Ref 'AWS::NoValue']
+      PerformanceInsightsRetentionPeriod: !If [EnablePI, !Ref PerformanceInsightsRetentionPeriod, !Ref 'AWS::NoValue']
+      Port: !Ref DBPort
+      PubliclyAccessible: !Ref PubliclyAccessible
+      StorageEncrypted: !If [UseDatabaseEncryption, !Ref DBAllocatedStorageEncrypted, !Ref 'AWS::NoValue']
+      StorageType: io1
+      Tags:
+        -
+          Key: Name
+          Value: !Sub MAZDBC-${AWS::StackName}
+        -
+          Key: EnvironmentStage
+          Value: !Ref EnvironmentStage
+        -
+          Key: Application
+          Value: !Ref Application
+        -
+          Key: ApplicationVersion
+          Value: !Ref ApplicationVersion
+        -
+          Key: ProjectCostCenter
+          Value: !Ref ProjectCostCenter
+        -
+          Key: Confidentiality
+          Value: !Ref Confidentiality
+        -
+          Key: Compliance
+          Value: !Ref Compliance
+      VpcSecurityGroupIds:
+        !If
+          - CreateSecurityGroup
+          - [!Ref RDSSecurityGroup]
+          - [!Ref CustomDBSecurityGroup]
+  
+  CPUUtilizationAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          !If [isDBInstance, !Ref MAZDBI, !Sub '${MAZDBC}-instance-1']
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: 80
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: 60
+      EvaluationPeriods: 5
+      TreatMissingData: 'notBreaching'
+
+  CPUUtilizationAlarm2:
+    Type: "AWS::CloudWatch::Alarm"
+    Condition: isDBCluster
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          !Sub '${MAZDBC}-instance-2'
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: 80
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: 60
+      EvaluationPeriods: 5
+      TreatMissingData: 'notBreaching'
+
+  CPUUtilizationAlarm3:
+    Type: "AWS::CloudWatch::Alarm"
+    Condition: isDBCluster
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'CPU_Utilization'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          !Sub '${MAZDBC}-instance-3'
+      MetricName: CPUUtilization
+      Statistic: Maximum
+      Namespace: 'AWS/RDS'
+      Threshold: 80
+      Unit: Percent
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: 60
+      EvaluationPeriods: 5
+      TreatMissingData: 'notBreaching'
+
+  MaxUsedTxIDsAlarm1:
+    Type: "AWS::CloudWatch::Alarm"
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+      - Ref: DBSNSTopic
+      AlarmDescription: 'Maximum Used Transaction IDs'
+      Dimensions:
+      - Name: DBInstanceIdentifier
+        Value:
+          !If [isDBInstance, !Ref MAZDBI, !Sub '${MAZDBC}-instance-1']
+      MetricName: 'MaximumUsedTransactionIDs'
+      Statistic: Average
+      Namespace: 'AWS/RDS'
+      Threshold: 600000000
+      Unit: Count
+      ComparisonOperator: 'GreaterThanOrEqualToThreshold'
+      Period: 60
+      EvaluationPeriods: 5
+      TreatMissingData: 'notBreaching'
+
+  DatabaseClusterEventSubscription:
+    Condition: EventSubscriptionDBCluster
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - creation
+      - failover
+      - notification
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds: [!Ref MAZDBC]
+      SourceType: 'db-cluster'
+  
+  DatabaseInstanceEventSubscription:
+    Condition: EventSubscription
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - availability
+      - backup
+      - configuration change
+      - creation
+      - deletion
+      - failover
+      - failure
+      - low storage
+      - maintenance
+      - notification
+      - read replica
+      - recovery
+      - security patching
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds:
+      - !If [isDBCluster, !Sub '${MAZDBC}-instance-1', !Ref MAZDBI]
+      - !If [isDBCluster, !Sub '${MAZDBC}-instance-2', !Ref "AWS::NoValue"]
+      - !If [isDBCluster, !Sub '${MAZDBC}-instance-3', !Ref "AWS::NoValue"]
+      SourceType: 'db-instance'
+  
+  DBParameterGroupEventSubscription:
+    Condition: EventSubscriptionDBInstance
+    Type: 'AWS::RDS::EventSubscription'
+    Properties:
+      EventCategories:
+      - "configuration change"
+      SnsTopicArn: !Ref DBSNSTopic
+      SourceIds:
+      - !Ref RDSDBPG
+      SourceType: 'db-parameter-group'
