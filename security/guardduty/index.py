@@ -483,14 +483,14 @@ def create_s3_destination(sts_session):
     :param sts_session: STS sesion of the GuardDuty master account
     :return: properties for the GuardDuty publishing destination
     """
-    cloud_trail_client = sts_session.client('cloudtrail')
+    cloud_trail_client = session.client('cloudtrail')
     cloud_trail_response = cloud_trail_client.describe_trails(
         trailNameList=[
             'aws-controltower-BaselineCloudTrail',
         ]
     )
 
-    logger.debug(cloud_trail_response)
+    logger.info(cloud_trail_response)
 
     trail_bucket_name = cloud_trail_response['trailList'][0]['S3BucketName']
     bucket_name = trail_bucket_name.replace('logs', 'guardduty')

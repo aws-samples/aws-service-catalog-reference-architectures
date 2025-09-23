@@ -1,0 +1,45 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Marketplace IAM Setup for Enterprise Procurement - Procurement Admin'
+Resources:
+  mpprocadmin:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref 'AWS::AccountId'
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSPrivateMarketplaceAdminFullAccess
+        - arn:aws:iam::aws:policy/AWSMarketplaceFullAccess
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - aws-marketplace:Subscribe
+                  - aws-marketplace:ViewSubscriptions
+                  - aws-marketplace:StartBuild
+                  - license-manager:ListDistributedGrants
+                  - license-manager:ListLicenseConfigurations
+                  - license-manager:ListLicenseVersions
+                  - license-manager:ListLicenses
+                  - license-manager:ListReceivedGrants
+                  - license-manager:ListReceivedLicenses
+                  - license-manager:ListResourceInventory
+                Effect: Allow
+                Resource: '*'
+            Version: '2012-10-17'
+          PolicyName: mpprocadmin
+    Type: AWS::IAM::Role
+Outputs:
+  MPProcAdmin:
+    Description: 'Use this role for a Procurement Manager'
+    Value: !Sub 'https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${mpprocadmin}&displayName=MPProcAdmin'
+  MPProcAdminLinks:
+    Description: 'https://aws.amazon.com/marketplace/privatemarketplace#/ https://aws.amazon.com/marketplace/privatemarketplace/requests https://aws.amazon.com/marketplace/privatemarketplace#/dashboard'
+    Value: 'https://aws.amazon.com/marketplace/privatemarketplace#/ https://aws.amazon.com/marketplace/privatemarketplace/requests https://aws.amazon.com/marketplace/privatemarketplace#/dashboard'

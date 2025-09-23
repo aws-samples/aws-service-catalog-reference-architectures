@@ -24,7 +24,9 @@
           "VpcId" : {"Ref" : "VPC"},
           "SecurityGroupIngress" : [ 
               {"Description":"allow incoming HTTP", "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },
-              {"Description":"allow incoming HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" }
+              {"Description":"allow incoming HTTPS", "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0" },
+			  {"Description":"allow icmp", "IpProtocol": "icmp","FromPort": "-1","ToPort": "-1", "CidrIp": "0.0.0.0/0" },
+			  {"Description":"allow SSH", "IpProtocol": "tcp","FromPort": "22","ToPort": "22", "CidrIp": "0.0.0.0/0" }
           ],
           "SecurityGroupEgress" : [
               {"Description":"allow outgoing HTTP",  "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0" },

@@ -1,0 +1,38 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Marketplace IAM Setup for Enterprise Procurement - Software Manager'
+Resources:
+  mpsoftwaremanager:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Ref 'AWS::AccountId'
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSServiceCatalogEndUserFullAccess
+        - arn:aws:iam::aws:policy/AWSServiceCatalogEndUserReadOnlyAccess
+        - arn:aws:iam::aws:policy/AWSMarketplaceGetEntitlements
+      Path: /
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - aws-marketplace:ViewSubscriptions
+                  - aws-marketplace:RegisterUsage
+                  - servicecatalog:SearchProductsAsAdmin
+                  - servicecatalog:createProduct
+                  - license-manager:*
+                Effect: Allow
+                Resource: '*'
+            Version: '2012-10-17'
+          PolicyName: mpsoftwaremanager
+    Type: AWS::IAM::Role
+Outputs:
+  MPSoftwareManager:
+    Description: 'Use this role for a Software Manager'
+    Value: !Sub 'https://signin.aws.amazon.com/switchrole?account=${AWS::AccountId}&roleName=${mpsoftwaremanager}&displayName=MPSoftwareManager'

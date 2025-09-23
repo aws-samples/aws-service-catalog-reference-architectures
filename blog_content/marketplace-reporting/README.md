@@ -1,0 +1,4 @@
+**Introduction**
+
+In today's fast-paced business world, data-driven decision-making is paramount. AWS Marketplace enterprise reporting empowers businesses to gain invaluable insights into their cloud subscriptions, enabling them to optimize costs, manage subscriptions effectively, and enhance overall efficiency 
+Enterprises value transparency and security when it comes to their AWS Marketplace purchases. In response to this need, AWS Marketplace has introduced a feature that empowers customers to closely monitor all purchase activities within their AWS Marketplace accounts. With AWS CloudTrail logs, customers can now track the procurement activities associated with their AWS Marketplace subscriptions, which are also known as agreements. These logs capture actions when users subscribe to or unsubscribe from an AWS Marketplace SaaS, AMI, container, or professional services product.
