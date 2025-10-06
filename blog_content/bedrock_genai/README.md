@@ -15,3 +15,4 @@ With this solution, the team can simultaneously develop materials for multiple c
 
 The following sample application creates a scalable environment that streamlines the creative workflow. It helps product teams move seamlessly from initial concept to market-ready materials with automated systems handling compliance and consistency checks throughout the journey.
 
+![Image description](https://raw.https://github.com/aws-samples/aws-service-catalog-reference-architectures/edit/master/blog_content/bedrock_genai/ml-16351-1.png)
