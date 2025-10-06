@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fancy AI Assistant Interface</title>
+    <style>
+        :root {
+            --primary-color: #6200ee;
+            --secondary-color: #03dac6;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --card-background: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .left-section {
+            flex: 2;
+        }
+
+        .right-section {
+            flex: 1;
+        }
+
+        textarea, select, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus, select:focus, input[type="file"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        textarea {
+            height: 200px;
+            resize: vertical;
+        }
+
+        .fancy-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .fancy-button:hover {
+            background-color: #7c4dff;
+            transform: translateY(-2px);
+        }
+
+        .fancy-button:active {
+            transform: translateY(0);
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 4px solid var(--secondary-color);
+            background-color: #e0f7fa;
+        }
+
+        .fancy-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .fancy-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        .fancy-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+        summary {
+            cursor: pointer;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+
+        summary:hover {
+            background-color: #00bfa5;
+        }
+
+        .upload-form {
+            text-align: right;
+            margin-top: -10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="left-section section">
+   
+             <input type=hidden id=knowledge_base_id name=knowledge_base_id value=__knowledge_base_id__> 
+            <textarea id="query" placeholder="Enter your query here..."></textarea>
+            <button id="run-button" class="fancy-button">Run</button>
+            <div id="result" class="result-box fade-in" style="display: none;">
+                <h3>Result</h3>
+                <p id="result-content">Your results will appear here.</p>
+            </div>
+        </div>
+        <div class="right-section section">
+     
+            <label for="model-select">Select Model:</label>
+            <select id="model-select" class="fancy-select">
+                <option value="">Choose a model</option>
+            </select>
+            <div class="doc-list">
+                <h3>Documents</h3>
+                <ul class="fancy-list">
+                    <!-- Documents will be populated here -->
+                </ul>
+            </div>
+
+                <div class="section" style="margin-top: 20px;">
+        <details>
+            <summary>Manage Document</summary>
+            <form class="upload-form" id=uploadForm>
+                <input type="file" id="fileInput" class="file-input">
+                <button type="submit"   class="fancy-button">Upload</button>
+            </form>
+        </details>
+    </div>
+
+
+        </div>
+    </div>
+
+
+    <script>
+        async function populateModelAndDocuments() {
+            const modelSelect = document.getElementById('model-select');
+            const docList = document.querySelector('.fancy-list');
+            //const apiUrl = 'https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/bdkbinvoke/?prefix=uploads'; // Replace with your actual API Gateway URL
+            var glistdocurl = "kblistdoc";
+            //const imagemodels = ['Titan-premier-v1==amazon.titan-text-premier-v1:0', 'Claude-3-sonnet==anthropic.claude-3-sonnet-20240229-v1:0'];
+            var imagemodels = "___textkbmodel___";
+
+            try {
+                 
+                modelSelect.innerHTML = '<option value="">Choose a model</option>'; // Reset select
+                let i =0;
+                imagemodels.forEach(oppt => {
+                    const option = document.createElement('option');
+                    var _oppt = oppt.split('==');
+                    option.value = _oppt[1];
+                    option.textContent = _oppt[0];
+                    if (i === 0) {
+                        option.selected = true;
+                    }
+                    i =i +1;
+                    modelSelect.appendChild(option);
+                });
+               
+
+                const response = await fetch(glistdocurl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                console.log(data);
+
+                // Populate documents
+                docList.innerHTML = ''; // Clear existing list
+                data.forEach(doc => {
+                    var parts = doc.split('/');
+                    const li = document.createElement('li');
+                    li.textContent = parts[parts.length - 1];
+                    docList.appendChild(li);
+                });
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                alert('Failed to load models and documents. Please try again later.');
+            }
+        }
+
+        document.getElementById('run-button').addEventListener('click',async function() {
+            const resultBox = document.getElementById('result');
+            const resultContent = document.getElementById('result-content');
+            const button = document.getElementById('run-button');
+
+            button.textContent = 'Please wait..';
+            button.disabled = true;
+
+
+
+            //var kburl ='https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/bdkbinvoke/';
+            var kburl ='kbinvoke';
+
+              var formData = {
+                query: document.getElementById('query').value,
+                model_arn: document.getElementById('model-select').value,
+                knowledge_base_id: document.getElementById('knowledge_base_id').value
+            };
+             
+            const response = await fetch(kburl, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json', 
+                  },
+                  body :JSON.stringify(formData)
+              });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+  
+            resultBox.style.display = 'none';
+            setTimeout(() => {
+                resultContent.innerHTML = `<b>${formData.query}</b><br>${data}`;
+                resultBox.style.display = 'block';
+                resultBox.classList.add('fade-in');
+            }, 1000);
+            button.textContent = 'Run';
+            button.disabled = false;
+        });
+
+       document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Prevent the default form submission
+
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        //console.log(file.type);
+        var Content_Type = file.type;
+        var prefix = "uploads/"
+        //var uploadurl="https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/bd_kb_list/"
+        var uploadurl="-uploadurl"
+        var da_url = `${uploadurl}?prefix=${prefix}&Content-Type=${Content_Type}`
+ 
+
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        try {
+            // Fetch the presigned POST data from your server
+            const response = await fetch(da_url, { method: 'GET' });
+            const presignedData = await response.json();
+            //var presignedData = presignedData1.body;
+            console.log(presignedData);
+            //return 4;
+            //document.getElementById('tx').value += JSON.stringify(presignedData, undefined 4);
+
+            var ct ="Content-Type";
+            const formData = new FormData();
+            presignedData.fields.acl='private';
+            //#presignedData.fields.Content-Type =Content_Type;
+
+            Object.keys(presignedData.fields).forEach(key => {
+                formData.append(key, presignedData.fields[key]);
+            });
+            formData.append('Content-Type',Content_Type);
+            formData.append('file', file);
+            console.log(formData);
+ 
+
+ 
+            const uploadResponse = await fetch(presignedData.url, {
+                method: 'POST',
+                body: formData
+            }            );
+
+            if (uploadResponse.ok) {
+                alert('File uploaded successfully!');
+                location.reload();
+
+            } else {
+                alert('File upload failed.');
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('An error occurred during file upload.');
+        }
+    });
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', populateModelAndDocuments);
+    </script>
+</body>
+</html>

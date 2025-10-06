@@ -1,0 +1,2107 @@
+{
+    "Outputs":
+    {
+        "BedKBdatabucket":
+        {
+            "Description": "Bucket for Amazon Bedrock Knowledge Base data",
+            "Value":
+            {
+                "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+            }
+        },
+        "BedKBdatabucketex":
+        {
+            "Description": "BedKBdatabucketex",
+            "Export":
+            {
+                "Name": "BedKBdatabucketEX"
+            },
+            "Value":
+            {
+                "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+            }
+        },
+        "BedrockAossDemoKnowledgeBaseBucket38A3CB86":
+        {
+            "Description": "Bucket for Amazon Bedrock Knowledge Base data",
+            "Value":
+            {
+                "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+            }
+        },
+        "BedrockAossDemoKnowledgeBaseBucketURLD02D4E33":
+        {
+            "Description": "Bucket for Amazon Bedrock Knowledge Base data",
+            "Value":
+            {
+                "Fn::Join":
+                [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".console.aws.amazon.com/s3/buckets/",
+                        {
+                            "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+                        },
+                        "?region=",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "&bucketType=general&tab=objects"
+                    ]
+                ]
+            }
+        },
+        "BedrockAossDemoKnowledgeBaseConsoleURLB7D07E7E":
+        {
+            "Description": "Amazon Bedrock Knowledge Base Console URL",
+            "Value":
+            {
+                "Fn::Join":
+                [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".console.aws.amazon.com/bedrock/home?region=",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "#/knowledge-bases/",
+                        {
+                            "Ref": "AWS::StackName"
+                        },
+                        "-Demo/",
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKBDemoKnowledgeBase24881FDE",
+                                "KnowledgeBaseId"
+                            ]
+                        },
+                        "/0"
+                    ]
+                ]
+            }
+        },
+        "BedrockAossDemoKnowledgeBaseDataSourceConsoleURL421A6F4B":
+        {
+            "Description": "Amazon Bedrock Knowledge Base Data Source Console URL",
+            "Value":
+            {
+                "Fn::Join":
+                [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".console.aws.amazon.com/bedrock/home?region=",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "#/knowledge-bases/",
+                        {
+                            "Ref": "AWS::StackName"
+                        },
+                        "-Demo/",
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKBDemoKnowledgeBase24881FDE",
+                                "KnowledgeBaseId"
+                            ]
+                        },
+                        "/KBDemoDataSource/",
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKBDataSource555331C5",
+                                "DataSourceId"
+                            ]
+                        },
+                        "/0"
+                    ]
+                ]
+            }
+        },
+        "KnowledgeBaseId":
+        {
+            "Description": "KnowledgeBaseId",
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "BedrockAossDemoKBDemoKnowledgeBase24881FDE",
+                    "KnowledgeBaseId"
+                ]
+            }
+        }
+    },
+    "Parameters":
+    {
+        "SourceBucket":
+        {
+            "Description": "S3 bucket name where the content of cfn_install folder has been uploaded",
+            "Type": "String"
+        }
+    },
+    "Resources":
+    {
+        "BedrockAossDemoAccessPolicy3893CF42":
+        {
+            "Properties":
+            {
+                "Description": "Access policy for aosscollection",
+                "Name": "aossdemoaccesspolicy",
+                "Policy":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "[{\"Description\":\"Access for account-user\",\"Rules\":[{\"ResourceType\":\"index\",\"Resource\":[\"index/aosscollection/bedrock-knowledge-base-demo-default-index\"],\"Permission\":[\"aoss:*\"]},{\"ResourceType\":\"collection\",\"Resource\":[\"collection/aosscollection\"],\"Permission\":[\"aoss:*\"]}],\"Principal\":[\"",
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F",
+                                    "Arn"
+                                ]
+                            },
+                            "\",\"",
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoBedrockKBRoleE8675B56",
+                                    "Arn"
+                                ]
+                            },
+                            "\"]}]"
+                        ]
+                    ]
+                },
+                "Type": "data"
+            },
+            "Type": "AWS::OpenSearchServerless::AccessPolicy"
+        },
+        "BedrockAossDemoAossKBWaitConditionBAF0879A":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoaosscollection5F05B06A"
+            ],
+            "Properties":
+            {
+                "Count": 1,
+                "Handle":
+                {
+                    "Ref": "BedrockAossDemoAossKBWaitConditionHandleF769AD16"
+                },
+                "Timeout": "720"
+            },
+            "Type": "AWS::CloudFormation::WaitCondition"
+        },
+        "BedrockAossDemoAossKBWaitConditionHandleF769AD16":
+        {
+            "Type": "AWS::CloudFormation::WaitConditionHandle"
+        },
+        "BedrockAossDemoBedrockKBRoleE8675B56":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "bedrock.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Description": "Assumable IAM Role by Bedrock to access AOSS Collection and Knowledge Base S3 bucket",
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/AmazonBedrockFullAccess"
+                            ]
+                        ]
+                    }
+                ],
+                "RoleName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            "-bedrock-s3-aoss-role"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoBedrockOpenSearchPolicy98544CD1":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "aoss:APIAccessAll",
+                            "Effect": "Allow",
+                            "Resource":
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoaosscollection5F05B06A",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoBedrockOpenSearchPolicy98544CD1",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoBedrockKBRoleE8675B56"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B",
+                "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C.zip"
+                },
+                "Description": "AWS CDK resource provider framework - onEvent (BedrockKbAossStack/BedrockAossDemo/BuildLambdaLayerProvider)",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "USER_ON_EVENT_FUNCTION_ARN":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoCreateLambdaLayer123A6DFD",
+                                "Arn"
+                            ]
+                        }
+                    }
+                },
+                "Handler": "framework.onEvent",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventLogRetention23BB19D6":
+        {
+            "Properties":
+            {
+                "LogGroupName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "/aws/lambda/",
+                            {
+                                "Ref": "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C"
+                            }
+                        ]
+                    ]
+                },
+                "RetentionInDays": 30,
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::LogRetention"
+        },
+        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "lambda:InvokeFunction",
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoCreateLambdaLayer123A6DFD",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoCreateLambdaLayer123A6DFD",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoCreateIndexCustomResource445983D2":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "BedrockAossDemoaosscollection5F05B06A"
+            ],
+            "Properties":
+            {
+                "CollectionEndpoint":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoaosscollection5F05B06A",
+                        "CollectionEndpoint"
+                    ]
+                },
+                "PhysicalResourceId": "CreateIndex",
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE",
+                "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7.zip"
+                },
+                "Description": "AWS CDK resource provider framework - onEvent (BedrockKbAossStack/BedrockAossDemo/CreateIndexProvider)",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "USER_ON_EVENT_FUNCTION_ARN":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0",
+                                "Arn"
+                            ]
+                        }
+                    }
+                },
+                "Handler": "framework.onEvent",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BedrockAossDemoCreateIndexProviderframeworkonEventLogRetention28BA7AC0":
+        {
+            "Properties":
+            {
+                "LogGroupName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "/aws/lambda/",
+                            {
+                                "Ref": "BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7"
+                            }
+                        ]
+                    ]
+                },
+                "RetentionInDays": 30,
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::LogRetention"
+        },
+        "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "lambda:InvokeFunction",
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoCreateLambdaLayer123A6DFD":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19",
+                "BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/BedrockAossDemoCreateLambdaLayer123A6DFD.zip"
+                },
+                "EphemeralStorage":
+                {
+                    "Size": 10240
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            "-CreateLambdaLayer"
+                        ]
+                    ]
+                },
+                "Handler": "create_layer.on_event",
+                "MemorySize": 10240,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 600
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C",
+                        "Arn"
+                    ]
+                },
+                "libraries":
+                [
+                    "opensearch-py",
+                    "crhelper",
+                    "cfnresponse"
+                ],
+                "s3_bucket":
+                {
+                    "Ref": "BedrockAossDemoLambdaLayerBucketE577035B"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "s3:Abort*",
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:GetObject*",
+                                "s3:List*",
+                                "s3:PutObject",
+                                "s3:PutObjectLegalHold",
+                                "s3:PutObjectRetention",
+                                "s3:PutObjectTagging",
+                                "s3:PutObjectVersionTagging"
+                            ],
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoLambdaLayerBucketE577035B",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoLambdaLayerBucketE577035B",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoEncryptionPolicy736EB353":
+        {
+            "Properties":
+            {
+                "Description": "Encryption policy for aosscollection",
+                "Name": "aossdemoencryptionpolicy",
+                "Policy": "{\"Rules\":[{\"ResourceType\":\"collection\",\"Resource\":[\"collection/aosscollection\"]}],\"AWSOwnedKey\":true}",
+                "Type": "encryption"
+            },
+            "Type": "AWS::OpenSearchServerless::SecurityPolicy"
+        },
+        "BedrockAossDemoKBDataSource555331C5":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoAossKBWaitConditionBAF0879A"
+            ],
+            "Properties":
+            {
+                "DataDeletionPolicy": "RETAIN",
+                "DataSourceConfiguration":
+                {
+                    "S3Configuration":
+                    {
+                        "BucketArn":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                "Arn"
+                            ]
+                        }
+                    },
+                    "Type": "S3"
+                },
+                "Description": "My KB Demo Data Source",
+                "KnowledgeBaseId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoKBDemoKnowledgeBase24881FDE",
+                        "KnowledgeBaseId"
+                    ]
+                },
+                "Name": "KBDemoDataSource"
+            },
+            "Type": "AWS::Bedrock::DataSource"
+        },
+        "BedrockAossDemoKBDemoKnowledgeBase24881FDE":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoAossKBWaitConditionBAF0879A"
+            ],
+            "Properties":
+            {
+                "Description": "My Knowledge Base Demo",
+                "KnowledgeBaseConfiguration":
+                {
+                    "Type": "VECTOR",
+                    "VectorKnowledgeBaseConfiguration":
+                    {
+                        "EmbeddingModelArn":
+                        {
+                            "Fn::Join":
+                            [
+                                "",
+                                [
+                                    "arn:",
+                                    {
+                                        "Ref": "AWS::Partition"
+                                    },
+                                    ":bedrock:",
+                                    {
+                                        "Ref": "AWS::Region"
+                                    },
+                                    "::foundation-model/amazon.titan-embed-text-v1"
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "Name":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            "-Demo"
+                        ]
+                    ]
+                },
+                "RoleArn":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoBedrockKBRoleE8675B56",
+                        "Arn"
+                    ]
+                },
+                "StorageConfiguration":
+                {
+                    "OpensearchServerlessConfiguration":
+                    {
+                        "CollectionArn":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoaosscollection5F05B06A",
+                                "Arn"
+                            ]
+                        },
+                        "FieldMapping":
+                        {
+                            "MetadataField": "metadata",
+                            "TextField": "text",
+                            "VectorField": "bedrock-knowledge-base-demo-default-vector"
+                        },
+                        "VectorIndexName": "bedrock-knowledge-base-demo-default-index"
+                    },
+                    "Type": "OPENSEARCH_SERVERLESS"
+                }
+            },
+            "Type": "AWS::Bedrock::KnowledgeBase"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketA1235497":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "BucketEncryption":
+                {
+                    "ServerSideEncryptionConfiguration":
+                    [
+                        {
+                            "ServerSideEncryptionByDefault":
+                            {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "BucketName":
+                {
+                    "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                },
+                "CorsConfiguration":
+                {
+                    "CorsRules":
+                    [
+                        {
+                            "AllowedHeaders":
+                            [
+                                "*"
+                            ],
+                            "AllowedMethods":
+                            [
+                                "GET",
+                                "PUT",
+                                "POST"
+                            ],
+                            "AllowedOrigins":
+                            [
+                                "*"
+                            ]
+                        }
+                    ]
+                },
+                "PublicAccessBlockConfiguration":
+                {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags":
+                [
+                    {
+                        "Key": "aws-cdk:auto-delete-objects",
+                        "Value": "true"
+                    }
+                ]
+            },
+            "Type": "AWS::S3::Bucket",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketAllowBucketNotificationsToBedrockKbAossStackBedrockAossDemoStartIngestionJobsLambdaAFB4F05DC53A3399":
+        {
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoStartIngestionJobsLambdaD9B4C545",
+                        "Arn"
+                    ]
+                },
+                "Principal": "s3.amazonaws.com",
+                "SourceAccount":
+                {
+                    "Ref": "AWS::AccountId"
+                },
+                "SourceArn":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketAutoDeleteObjectsCustomResource308D6579":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "BedrockAossDemoKnowledgeBaseBucketPolicy29848C25"
+            ],
+            "Properties":
+            {
+                "BucketName":
+                {
+                    "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+                },
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::S3AutoDeleteObjects",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketNotifications89A4472C":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoKnowledgeBaseBucketAllowBucketNotificationsToBedrockKbAossStackBedrockAossDemoStartIngestionJobsLambdaAFB4F05DC53A3399",
+                "BedrockAossDemoKnowledgeBaseBucketPolicy29848C25"
+            ],
+            "Properties":
+            {
+                "BucketName":
+                {
+                    "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+                },
+                "Managed": true,
+                "NotificationConfiguration":
+                {
+                    "LambdaFunctionConfigurations":
+                    [
+                        {
+                            "Events":
+                            [
+                                "s3:ObjectCreated:*"
+                            ],
+                            "LambdaFunctionArn":
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoStartIngestionJobsLambdaD9B4C545",
+                                    "Arn"
+                                ]
+                            }
+                        },
+                        {
+                            "Events":
+                            [
+                                "s3:ObjectRemoved:*"
+                            ],
+                            "LambdaFunctionArn":
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoStartIngestionJobsLambdaD9B4C545",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::S3BucketNotifications"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketPolicy29848C25":
+        {
+            "Properties":
+            {
+                "Bucket":
+                {
+                    "Ref": "BedrockAossDemoKnowledgeBaseBucketA1235497"
+                },
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Condition":
+                            {
+                                "Bool":
+                                {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal":
+                            {
+                                "AWS": "*"
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action":
+                            [
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:PutBucketPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "AWS":
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                                        "Arn"
+                                    ]
+                                }
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "BedrockAossDemoKnowledgeBaseBucketPolicy4BC332DF":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "s3:PutObject",
+                                "s3:DeleteObject",
+                                "s3:DeleteObjectTagging",
+                                "s3:DeleteObjectVersion",
+                                "s3:DeleteObjectVersionTagging",
+                                "s3:Get*",
+                                "s3:List*"
+                            ],
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoKnowledgeBaseBucketPolicy4BC332DF",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoBedrockKBRoleE8675B56"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoLambdaLayerBucketAutoDeleteObjectsCustomResource3EFFB86C":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "BedrockAossDemoLambdaLayerBucketPolicy715193EC"
+            ],
+            "Properties":
+            {
+                "BucketName":
+                {
+                    "Ref": "BedrockAossDemoLambdaLayerBucketE577035B"
+                },
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::S3AutoDeleteObjects",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoLambdaLayerBucketE577035B":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "BucketEncryption":
+                {
+                    "ServerSideEncryptionConfiguration":
+                    [
+                        {
+                            "ServerSideEncryptionByDefault":
+                            {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "PublicAccessBlockConfiguration":
+                {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags":
+                [
+                    {
+                        "Key": "aws-cdk:auto-delete-objects",
+                        "Value": "true"
+                    }
+                ]
+            },
+            "Type": "AWS::S3::Bucket",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "BedrockAossDemoLambdaLayerBucketPolicy715193EC":
+        {
+            "Properties":
+            {
+                "Bucket":
+                {
+                    "Ref": "BedrockAossDemoLambdaLayerBucketE577035B"
+                },
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Condition":
+                            {
+                                "Bool":
+                                {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal":
+                            {
+                                "AWS": "*"
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoLambdaLayerBucketE577035B",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoLambdaLayerBucketE577035B",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action":
+                            [
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:PutBucketPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "AWS":
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                                        "Arn"
+                                    ]
+                                }
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoLambdaLayerBucketE577035B",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoLambdaLayerBucketE577035B",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "BedrockAossDemoNetworkPolicy17951670":
+        {
+            "Properties":
+            {
+                "Description": "Network policy for aosscollection",
+                "Name": "aossdemonetworkpolicy",
+                "Policy": "[{\"Rules\":[{\"ResourceType\":\"collection\",\"Resource\":[\"collection/aosscollection\"]}, {\"ResourceType\":\"dashboard\",\"Resource\":[\"collection/aosscollection\"]}],\"AllowFromPublic\":true}]",
+                "Type": "network"
+            },
+            "Type": "AWS::OpenSearchServerless::SecurityPolicy"
+        },
+        "BedrockAossDemoOpenSearchPyLayerD52DD652":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834"
+            ],
+            "Properties":
+            {
+                "CompatibleRuntimes":
+                [
+                    "python3.12"
+                ],
+                "Content":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "BedrockAossDemoLambdaLayerBucketE577035B"
+                    },
+                    "S3Key":
+                    {
+                        "Ref": "BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834"
+                    }
+                },
+                "Description": "OpenSearch Py Layer"
+            },
+            "Type": "AWS::Lambda::LayerVersion"
+        },
+        "BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB",
+                "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0.zip"
+                },
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "WAIT_CONDITION_HANDLE_URL":
+                        {
+                            "Ref": "BedrockAossDemoAossKBWaitConditionHandleF769AD16"
+                        }
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            "-create-aoss-index"
+                        ]
+                    ]
+                },
+                "Handler": "create_index.on_event",
+                "Layers":
+                [
+                    {
+                        "Ref": "BedrockAossDemoOpenSearchPyLayerD52DD652"
+                    }
+                ],
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 600
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BedrockAossDemoOpenSearchServerlessCustomResourceEventInvokeConfigE166F341":
+        {
+            "Properties":
+            {
+                "FunctionName":
+                {
+                    "Ref": "BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0"
+                },
+                "MaximumRetryAttempts": 2,
+                "Qualifier": "$LATEST"
+            },
+            "Type": "AWS::Lambda::EventInvokeConfig"
+        },
+        "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "aoss:APIAccessAll",
+                            "Effect": "Allow",
+                            "Resource":
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockAossDemoaosscollection5F05B06A",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoStartIngestionJobsLambdaD9B4C545":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoKBDataSource555331C5",
+                "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0",
+                "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/BedrockAossDemoStartIngestionJobsLambdaD9B4C545.zip"
+                },
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "DATA_SOURCE_ID":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKBDataSource555331C5",
+                                "DataSourceId"
+                            ]
+                        },
+                        "KNOWLEDGE_BASE_ID":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "BedrockAossDemoKBDemoKnowledgeBase24881FDE",
+                                "KnowledgeBaseId"
+                            ]
+                        }
+                    }
+                },
+                "Handler": "ingestion_management.lambda_handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoKBDataSource555331C5"
+            ],
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoKBDataSource555331C5"
+            ],
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "s3:DeleteObject",
+                                "s3:GetObject",
+                                "s3:ListBucket",
+                                "s3:PutObject"
+                            ],
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "BedrockAossDemoKnowledgeBaseBucketA1235497",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action": "bedrock:*",
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BedrockAossDemoaosscollection5F05B06A":
+        {
+            "DependsOn":
+            [
+                "BedrockAossDemoAccessPolicy3893CF42",
+                "BedrockAossDemoEncryptionPolicy736EB353",
+                "BedrockAossDemoNetworkPolicy17951670"
+            ],
+            "Properties":
+            {
+                "Description":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "Collection created by ",
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            " stack for Amazon Bedrock Knowledge base."
+                        ]
+                    ]
+                },
+                "Name": "aosscollection",
+                "StandbyReplicas": "ENABLED",
+                "Type": "VECTORSEARCH"
+            },
+            "Type": "AWS::OpenSearchServerless::Collection"
+        },
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691":
+        {
+            "DependsOn":
+            [
+                "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+                "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "ZipFile": "import boto3  # type: ignore\nimport json\nimport logging\nimport urllib.request\n\ns3 = boto3.client(\"s3\")\n\nEVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'\nCONFIGURATION_TYPES = [\"TopicConfigurations\", \"QueueConfigurations\", \"LambdaFunctionConfigurations\"]\n\ndef handler(event: dict, context):\n  response_status = \"SUCCESS\"\n  error_message = \"\"\n  try:\n    props = event[\"ResourceProperties\"]\n    notification_configuration = props[\"NotificationConfiguration\"]\n    managed = props.get('Managed', 'true').lower() == 'true'\n    stack_id = event['StackId']\n    old = event.get(\"OldResourceProperties\", {}).get(\"NotificationConfiguration\", {})\n    if managed:\n      config = handle_managed(event[\"RequestType\"], notification_configuration)\n    else:\n      config = handle_unmanaged(props[\"BucketName\"], stack_id, event[\"RequestType\"], notification_configuration, old)\n    s3.put_bucket_notification_configuration(Bucket=props[\"BucketName\"], NotificationConfiguration=config)\n  except Exception as e:\n    logging.exception(\"Failed to put bucket notification configuration\")\n    response_status = \"FAILED\"\n    error_message = f\"Error: {str(e)}. \"\n  finally:\n    submit_response(event, context, response_status, error_message)\n\ndef handle_managed(request_type, notification_configuration):\n  if request_type == 'Delete':\n    return {}\n  return notification_configuration\n\ndef handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):\n  def with_id(n):\n    n['Id'] = f\"{stack_id}-{hash(json.dumps(n, sort_keys=True))}\"\n    return n\n\n  external_notifications = {}\n  existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)\n  for t in CONFIGURATION_TYPES:\n    if request_type == 'Update':\n        ids = [with_id(n) for n in old.get(t, [])]\n        old_incoming_ids = [n['Id'] for n in ids]\n        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]\n    elif request_type == 'Delete':\n        external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f\"{stack_id}-\")]\n    elif request_type == 'Create':\n        external_notifications[t] = [n for n in existing_notifications.get(t, [])]\n  if EVENTBRIDGE_CONFIGURATION in existing_notifications:\n    external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]\n\n  if request_type == 'Delete':\n    return external_notifications\n\n  notifications = {}\n  for t in CONFIGURATION_TYPES:\n    external = external_notifications.get(t, [])\n    incoming = [with_id(n) for n in notification_configuration.get(t, [])]\n    notifications[t] = external + incoming\n\n  if EVENTBRIDGE_CONFIGURATION in notification_configuration:\n    notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]\n  elif EVENTBRIDGE_CONFIGURATION in external_notifications:\n    notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]\n\n  return notifications\n\ndef submit_response(event: dict, context, response_status: str, error_message: str):\n  response_body = json.dumps(\n    {\n      \"Status\": response_status,\n      \"Reason\": f\"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}\",\n      \"PhysicalResourceId\": event.get(\"PhysicalResourceId\") or event[\"LogicalResourceId\"],\n      \"StackId\": event[\"StackId\"],\n      \"RequestId\": event[\"RequestId\"],\n      \"LogicalResourceId\": event[\"LogicalResourceId\"],\n      \"NoEcho\": False,\n    }\n  ).encode(\"utf-8\")\n  headers = {\"content-type\": \"\", \"content-length\": str(len(response_body))}\n  try:\n    req = urllib.request.Request(url=event[\"ResponseURL\"], headers=headers, data=response_body, method=\"PUT\")\n    with urllib.request.urlopen(req) as response:\n      print(response.read().decode(\"utf-8\"))\n    print(\"Status code: \" + response.reason)\n  except Exception as e:\n      print(\"send(..) failed executing request.urlopen(..): \" + str(e))\n"
+                },
+                "Description": "AWS CloudFormation handler for \"Custom::S3BucketNotifications\" resources (@aws-cdk/aws-s3)",
+                "Handler": "index.handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.11",
+                "Timeout": 300
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:PutBucketNotification",
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+                "Roles":
+                [
+                    {
+                        "Ref": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F":
+        {
+            "DependsOn":
+            [
+                "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F.zip"
+                },
+                "Description":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "Lambda function for auto-deleting objects in ",
+                            {
+                                "Ref": "BedrockAossDemoLambdaLayerBucketE577035B"
+                            },
+                            " S3 bucket."
+                        ]
+                    ]
+                },
+                "Handler": "index.handler",
+                "MemorySize": 128,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A":
+        {
+            "DependsOn":
+            [
+                "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+                "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "content/genairacer/src/lambda_codes/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A.zip"
+                },
+                "Handler": "index.handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "logs:DeleteRetentionPolicy",
+                                "logs:PutRetentionPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+                "Roles":
+                [
+                    {
+                        "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        }
+    }
+}

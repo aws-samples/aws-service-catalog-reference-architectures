@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Bedrock Guardrails Manager</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+        .section {
+            flex: 1;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+
+
+        .guardrail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .guardrail-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .guardrail-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        .guardrail-card.selected {
+            border: 2px solid #3498db;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+        .guardrail-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .guardrail-description {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        .guardrail-version {
+            font-size: 12px;
+            color: #2ecc71;
+            margin-bottom: 10px;
+        }
+        .guardrail-arn {
+            font-size: 12px;
+            color: #e74c3c;
+            word-break: break-all;
+        }
+        .load-more {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .load-more:hover {
+            background-color: #2980b9;
+        }
+        .delete-button {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+        .guardrail-card.selected .delete-button {
+            display: block;
+        }
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .delete-selected {
+            padding: 10px 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .delete-selected:hover {
+            background-color: #c0392b;
+        }
+        .delete-selected:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+    </style>>
+ 
+</head>
+<body >
+    <div class="container">
+        <div class="section">
+            <h2>Create Guardrail</h2>
+               <form id="guardrailForm" >
+            <input type=hidden id='act' name='act' value='create'>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" required>Guardrail to protect Personally Identifiable Information</textarea>
+            </div>
+            <div class="form-group">
+                <label for="topicName">Topic Name:</label>
+                <input type="text" id="topicName" name="topicName" required>
+       
+                
+            </div>
+            <div class="form-group">
+                <label for="topicDefinition">Topic Definition:</label>
+                <textarea id="topicDefinition" name="topicDefinition"  required>Personally Identifiable Information</textarea>
+            </div>
+    
+            <div class="form-group">
+                <label for="contentFilterType">Content Filter Type:</label>
+                <select id="contentFilterType" name="contentFilterType">
+                    <option value="SEXUAL">Sexual</option>
+                    <option value="VIOLENCE">Violence</option>
+                    <option value="HATE">Hate</option>
+                    <option value="INSULTS">Insults</option>
+                    <option value="MISCONDUCT" selected>Misconduct</option>
+                    <option value="PROMPT_ATTACK">Prompt Attack</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="inputStrength">Input Strength:</label>
+                <select id="inputStrength" name="inputStrength">
+                    <option value="NONE">None</option>
+                    <option value="LOW" selected>Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="outputStrength">Output Strength:</label>
+                <select id="outputStrength" name="outputStrength">
+                    <option value="NONE">None</option>
+                    <option value="LOW" selected>Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                </select>
+            </div>
+            <button type="submit">Create Guardrail</button>
+        </form>
+        </div>
+        <div class="section">
+            <h2>Guardrails List</h2>
+                    <div class="action-bar">
+           
+            <span id="selectedCount">0 selected</span>
+        </div>
+        <div id=response></div>
+        <div id="guardrailGrid" class="guardrail-grid"></div>
+        <button id="loadMore" class="load-more" style="display: none;">Load More</button>
+    </div>
+
+
+            <script>
+         let nextToken = null;
+
+        let selectedGuardrails = new Set();
+
+        async function fetchGuardrails() {
+            try {
+                // Replace with your actual API endpoint
+                var  gurdurl = '__guardrailurl___';
+                //const gurdurl = 'https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/guardrail'
+
+
+                 const response = await fetch(gurdurl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching guardrails:', error);
+                return null;
+            }
+        }
+
+        function createGuardrailCard(guardrail) {
+            const card = document.createElement('div');
+            card.className = 'guardrail-card';
+            card.dataset.id = guardrail.id;
+            card.dataset.version = guardrail.version;
+            card.innerHTML = `
+                <div class="guardrail-name">${guardrail.name}</div>
+                <div class="guardrail-description">${guardrail.description}</div>
+                <div class="guardrail-version">Version: ${guardrail.version}</div>
+                <div class="guardrail-arn">${guardrail.arn}</div>
+                <button class="delete-button" onclick="deleteGuardrail(${guardrail.id},${guardrail.version})">×</button>
+            `;
+            card.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('delete-button')) {
+                    toggleCardSelection(card);
+                }
+            });
+            card.querySelector('.delete-button').addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteGuardrail(guardrail.id,guardrail.version);
+            });
+            return card;
+        }
+
+
+         function toggleCardSelection(card) {
+            card.classList.toggle('selected');
+            const guardrailId = card.dataset.id;
+            if (selectedGuardrails.has(guardrailId)) {
+                selectedGuardrails.delete(guardrailId);
+            } else {
+                selectedGuardrails.add(guardrailId);
+            }
+            updateDeleteButton();
+        }
+        function updateDeleteButton() {
+            const deleteButton = document.getElementById('deleteSelected');
+            const selectedCount = document.getElementById('selectedCount');
+      
+            selectedCount.textContent = `${selectedGuardrails.size} selected`;
+        }
+
+        async function deleteGuardrail(id,version) {
+            // Replace with your actual delete API call
+            console.log('vvv' +version);
+            ///
+            //const formData = new FormData(guardrailForm);
+            const guardrailData = {
+                act: 'delete',
+                gaurailid: id,
+                version: version
+                
+                }
+           
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Deleting guardrail...';
+            responseDiv.style.display = 'block';
+
+            try {
+                const gurdurl = '__guardrailurl___';
+                //const gurdurl = 'https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/guardrail'
+                const response = await fetch(gurdurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(guardrailData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('API Response:', result);
+                responseDiv.textContent = 'Guardrail deleted successfully!';
+                loadGuardrails();
+                // responseDiv.textContent =  JSON.stringify(guardrailData,undefined, 2);
+                //let lurl="tgrlist.html";
+                //window.location.href = lurl;
+
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.textContent = 'Error creating guardrail: ' + error.message;
+            }
+        
+            ///
+            console.log(`Deleting guardrail with ID: ${id}`);
+            // After successful deletion:
+            document.querySelector(`.guardrail-card[data-id="${id}"]`).remove();
+            selectedGuardrails.delete(id);
+            updateDeleteButton();
+            fetchGuardrails();
+        }
+
+        async function deleteSelectedGuardrails() {
+            for (const id of selectedGuardrails) {
+                await deleteGuardrail(id);
+            }
+            selectedGuardrails.clear();
+            updateDeleteButton();
+        }
+
+        async function loadGuardrails() {
+            const data = await fetchGuardrails();
+            if (data && data.guardrails) {
+                const grid = document.getElementById('guardrailGrid');
+                while (grid.firstChild) {
+                    grid.removeChild(grid.firstChild);
+                }
+                data.guardrails.forEach(guardrail => {
+                    grid.appendChild(createGuardrailCard(guardrail));
+                });
+
+                nextToken = data.nextToken;
+                const loadMoreButton = document.getElementById('loadMore');
+                loadMoreButton.style.display = nextToken ? 'block' : 'none';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const randomNumber = Math.floor(Math.random() * 10000); // Generate a random number between 0 and 9999
+            const guardrailName = `PIIPgr${randomNumber}`;
+            const topicName = `grtopic${randomNumber}`;
+            
+            document.getElementById('name').value = guardrailName;
+            document.getElementById('topicName').value = topicName;
+            fetchGuardrails();
+        
+            loadGuardrails();
+            document.getElementById('loadMore').addEventListener('click', loadGuardrails);
+   
+        });
+    </script>
+        </div>
+    </div>
+
+    <script>
+
+
+        document.getElementById('guardrailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const guardrailData = {
+                act: formData.get('act'),
+                name: formData.get('name'),
+                description: formData.get('description'),
+                topicPolicyConfig: {
+                    topicsConfig: [{
+                        name: formData.get('topicName'),
+                        definition: formData.get('topicDefinition'),
+    
+                        type: 'DENY'
+                    }]
+                },
+                contentPolicyConfig: {
+                    filtersConfig: [{
+                        type: formData.get('contentFilterType'),
+                        inputStrength: formData.get('inputStrength'),
+                        outputStrength: formData.get('outputStrength')
+                    }]
+                }
+            };
+
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Creating guardrail...';
+            responseDiv.style.display = 'block';
+
+            try {
+                const gurdurl = '__guardrailurl___';
+                //const gurdurl = 'https://758bo4u167.execute-api.us-east-1.amazonaws.com/mygpt/guardrail'
+                const response = await fetch(gurdurl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(guardrailData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('API Response:', result);
+                responseDiv.textContent = 'Guardrail created successfully!';
+                loadGuardrails();
+
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseDiv.textContent = 'Error creating guardrail: ' + error.message;
+            }
+        });
+        ///
+
+
+    
+        
+    </script>
+
+
+</body>
+</html>

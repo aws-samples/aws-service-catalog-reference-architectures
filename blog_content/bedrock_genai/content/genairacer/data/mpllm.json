@@ -1,0 +1,45 @@
+{
+    "modelarn":
+    [
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-premier-v1:0",
+            "modelId": "us.amazon.nova-premier-v1:0",
+            "modelName": "Nova-premier-v1",
+            "type": "kb"
+        },
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-7-sonnet-20250219-v1:0",
+            "modelId": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+            "modelName": "Claude-3-7-sonnet",
+            "type": "kb"
+        }
+    ],
+    "subscribed":
+    [
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-canvas-v1:0",
+            "modelId": "amazon.nova-canvas-v1:0",
+            "modelName": "Nova Canvas",
+            "type": "image"
+        },
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0",
+            "modelId": "amazon.nova-pro-v1:0",
+            "modelName": "Nova Pro",
+            "type": "text"
+        },
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0",
+            "modelId": "amazon.nova-pro-v1:0",
+            "modelName": "Nova Pro",
+            "type": "kb"
+        },
+
+        {
+            "modelArn": "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-7-sonnet-20250219-v1:0",
+           "modelId": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+            "modelName": "Claude-3-7-sonnet",
+            "type": "text"
+        }
+    ]
+}

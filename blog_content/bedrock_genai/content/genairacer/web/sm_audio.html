@@ -1,0 +1,126 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genertive AI</title>
+    <link rel=stylesheet href=tbstyle.css>
+
+
+
+     <script>
+     	function randomIntFromInterval() {  
+  			rr = Math.floor(Math.random() * (92939392 - 3434 + 1) + 3434);
+  			
+			}
+        function changeImage(state) {
+
+            if (state == 'wait')
+            {
+                 
+      
+                document.querySelector('run').innerHTML ="Please wait..";
+
+            }
+            if (state == 'run')
+            {
+                
+             
+                document.querySelector('run').innerHTML ="Run";
+
+            }
+        }
+     	function myloadit() {
+	        // JavaScript code to populate the dropdown list
+	        randomIntFromInterval(); 
+	         
+            ///
+             
+
+
+        }
+         
+         
+            function frmsubmit(event) {
+            event.preventDefault(); // Prevent the default form submission
+            changeImage('wait');
+
+            // Collect form data
+            var prompt = document.getElementById('text_prompt').value;
+            
+
+            var formData = {
+                text_prompt: document.getElementById('text_prompt').value
+            };
+
+            // Convert form data to JSON
+            var jsonData = JSON.stringify(formData);
+
+            // Make an AJAX request to the AWS API
+            var xhr = new XMLHttpRequest();
+            //xhr.open('POST', 'https://d91irkbty4.execute-api.us-east-2.amazonaws.com/mydep/audio', true);
+            //xhr.open('POST', 'https://xuvr39qcx0.execute-api.us-east-1.amazonaws.com/smsd01/mpcatmgt', true);
+            xhr.open('POST', 'apigwaudio', true);
+            
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle the response here
+                    var response = JSON.parse(xhr.responseText);
+                    
+                    
+                    var table = document.getElementById("myTable");
+                    var table = document.getElementById('showme');
+                    var row = table.insertRow(0);
+                    var cell1 = row.insertCell(0);
+                    //let itext ='';
+
+                    if (response.audio_file == "404")
+                    {
+                        let itext =  response.error  ;
+                        cell1.innerHTML = itext;
+                    }
+                    else 
+                    {
+                        let itext = "<audio controls autoplay><source src='"+response.audio_file+"' type='audio/mpeg'></audio>" ;
+                        cell1.innerHTML = itext;
+                    }
+                    changeImage('run');
+                    
+
+ 
+
+
+                }
+            };
+            xhr.send(jsonData);
+        };
+    </script>
+</head>
+<body onload="myloadit()" >
+    <form id="gptForm">
+        <table id=customers>
+            <tr>
+                <td >
+                    <input type=hidden id=actiontype name=actiontype value=audio>
+                    <button type="reset"> <img src="images/clearButton.svg" alt="Clear" /> </button>
+                     <br>
+                    <textarea name="text_prompt" id="text_prompt" rows="8" cols="100"></textarea>
+                    <br>
+                    <label for="text_prompt">Prompt:</label><button type="submit" id='run' onclick="frmsubmit(event);">Run</button>
+                     <br>Enter the text to create the <b>MP3</b> from then press [>]  
+                    
+
+                </td>
+                
+            </tr>
+            
+        </table>
+        <table id=showme name=shome>
+        </table>
+  
+        
+    </form>
+</body>
+</html>

@@ -1,0 +1,1049 @@
+Resources:
+  BedrockAossDemoBedrockKBRoleE8675B56:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: bedrock.amazonaws.com
+        Version: "2012-10-17"
+      Description: Assumable IAM Role by Bedrock to access AOSS Collection and Knowledge Base S3 bucket
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/AmazonBedrockFullAccess
+      RoleName:
+        Fn::Join:
+          - ""
+          - - Ref: AWS::StackName
+            - -bedrock-s3-aoss-role
+  BedrockAossDemoaosscollection5F05B06A:
+    Type: AWS::OpenSearchServerless::Collection
+    Properties:
+      Description:
+        Fn::Join:
+          - ""
+          - - "Collection created by "
+            - Ref: AWS::StackName
+            - " stack for Amazon Bedrock Knowledge base."
+      Name: aosscollection
+      StandbyReplicas: ENABLED
+      Type: VECTORSEARCH
+    DependsOn:
+      - BedrockAossDemoAccessPolicy3893CF42
+      - BedrockAossDemoEncryptionPolicy736EB353
+      - BedrockAossDemoNetworkPolicy17951670
+  BedrockAossDemoBedrockOpenSearchPolicy98544CD1:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: aoss:APIAccessAll
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - BedrockAossDemoaosscollection5F05B06A
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoBedrockOpenSearchPolicy98544CD1
+      Roles:
+        - Ref: BedrockAossDemoBedrockKBRoleE8675B56
+  BedrockAossDemoEncryptionPolicy736EB353:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Description: Encryption policy for aosscollection
+      Name: aossdemoencryptionpolicy
+      Policy: '{"Rules":[{"ResourceType":"collection","Resource":["collection/aosscollection"]}],"AWSOwnedKey":true}'
+      Type: encryption
+  BedrockAossDemoNetworkPolicy17951670:
+    Type: AWS::OpenSearchServerless::SecurityPolicy
+    Properties:
+      Description: Network policy for aosscollection
+      Name: aossdemonetworkpolicy
+      Policy: '[{"Rules":[{"ResourceType":"collection","Resource":["collection/aosscollection"]}, {"ResourceType":"dashboard","Resource":["collection/aosscollection"]}],"AllowFromPublic":true}]'
+      Type: network
+  BedrockAossDemoLambdaLayerBucketE577035B:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: aws-cdk:auto-delete-objects
+          Value: "true"
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoLambdaLayerBucketPolicy715193EC:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: BedrockAossDemoLambdaLayerBucketE577035B
+      PolicyDocument:
+        Statement:
+          - Action: s3:*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Effect: Deny
+            Principal:
+              AWS: "*"
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoLambdaLayerBucketE577035B
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoLambdaLayerBucketE577035B
+                        - Arn
+                    - /*
+          - Action:
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:PutBucketPolicy
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::GetAtt:
+                  - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+                  - Arn
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoLambdaLayerBucketE577035B
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoLambdaLayerBucketE577035B
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+  BedrockAossDemoLambdaLayerBucketAutoDeleteObjectsCustomResource3EFFB86C:
+    Type: Custom::S3AutoDeleteObjects
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F
+          - Arn
+      BucketName:
+        Ref: BedrockAossDemoLambdaLayerBucketE577035B
+    DependsOn:
+      - BedrockAossDemoLambdaLayerBucketPolicy715193EC
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoKnowledgeBaseBucketA1235497:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: aws-cdk:auto-delete-objects
+          Value: "true"
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoKnowledgeBaseBucketPolicy29848C25:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: BedrockAossDemoKnowledgeBaseBucketA1235497
+      PolicyDocument:
+        Statement:
+          - Action: s3:*
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+            Effect: Deny
+            Principal:
+              AWS: "*"
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoKnowledgeBaseBucketA1235497
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoKnowledgeBaseBucketA1235497
+                        - Arn
+                    - /*
+          - Action:
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:List*
+              - s3:PutBucketPolicy
+            Effect: Allow
+            Principal:
+              AWS:
+                Fn::GetAtt:
+                  - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+                  - Arn
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoKnowledgeBaseBucketA1235497
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoKnowledgeBaseBucketA1235497
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+  BedrockAossDemoKnowledgeBaseBucketAutoDeleteObjectsCustomResource308D6579:
+    Type: Custom::S3AutoDeleteObjects
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F
+          - Arn
+      BucketName:
+        Ref: BedrockAossDemoKnowledgeBaseBucketA1235497
+    DependsOn:
+      - BedrockAossDemoKnowledgeBaseBucketPolicy29848C25
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoKnowledgeBaseBucketNotifications89A4472C:
+    Type: Custom::S3BucketNotifications
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691
+          - Arn
+      BucketName:
+        Ref: BedrockAossDemoKnowledgeBaseBucketA1235497
+      NotificationConfiguration:
+        LambdaFunctionConfigurations:
+          - Events:
+              - s3:ObjectCreated:*
+            LambdaFunctionArn:
+              Fn::GetAtt:
+                - BedrockAossDemoStartIngestionJobsLambdaD9B4C545
+                - Arn
+          - Events:
+              - s3:ObjectRemoved:*
+            LambdaFunctionArn:
+              Fn::GetAtt:
+                - BedrockAossDemoStartIngestionJobsLambdaD9B4C545
+                - Arn
+      Managed: true
+    DependsOn:
+      - BedrockAossDemoKnowledgeBaseBucketAllowBucketNotificationsToBedrockKbAossStackBedrockAossDemoStartIngestionJobsLambdaAFB4F05DC53A3399
+      - BedrockAossDemoKnowledgeBaseBucketPolicy29848C25
+  BedrockAossDemoKnowledgeBaseBucketAllowBucketNotificationsToBedrockKbAossStackBedrockAossDemoStartIngestionJobsLambdaAFB4F05DC53A3399:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - BedrockAossDemoStartIngestionJobsLambdaD9B4C545
+          - Arn
+      Principal: s3.amazonaws.com
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn:
+        Fn::GetAtt:
+          - BedrockAossDemoKnowledgeBaseBucketA1235497
+          - Arn
+  BedrockAossDemoKnowledgeBaseBucketPolicy4BC332DF:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: s3:*
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoKnowledgeBaseBucketA1235497
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoKnowledgeBaseBucketA1235497
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoKnowledgeBaseBucketPolicy4BC332DF
+      Roles:
+        - Ref: BedrockAossDemoBedrockKBRoleE8675B56
+  BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:Abort*
+              - s3:DeleteObject*
+              - s3:GetBucket*
+              - s3:GetObject*
+              - s3:List*
+              - s3:PutObject
+              - s3:PutObjectLegalHold
+              - s3:PutObjectRetention
+              - s3:PutObjectTagging
+              - s3:PutObjectVersionTagging
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoLambdaLayerBucketE577035B
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoLambdaLayerBucketE577035B
+                        - Arn
+                    - /*
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19
+      Roles:
+        - Ref: BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15
+  BedrockAossDemoCreateLambdaLayer123A6DFD:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: 
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/BedrockAossDemoCreateLambdaLayer123A6DFD.zip
+      EphemeralStorage:
+        Size: 10240
+      FunctionName:
+        Fn::Join:
+          - ""
+          - - Ref: AWS::StackName
+            - -CreateLambdaLayer
+      Handler: create_layer.on_event
+      MemorySize: 10240
+      Role:
+        Fn::GetAtt:
+          - BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15
+          - Arn
+      Runtime: python3.12
+      Timeout: 600
+    DependsOn:
+      - BedrockAossDemoCreateLambdaLayerServiceRoleDefaultPolicy31368E19
+      - BedrockAossDemoCreateLambdaLayerServiceRoleE2807F15
+  BedrockAossDemoAossKBWaitConditionHandleF769AD16:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: lambda:InvokeFunction
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoCreateLambdaLayer123A6DFD
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoCreateLambdaLayer123A6DFD
+                        - Arn
+                    - :*
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B
+      Roles:
+        - Ref: BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F
+  BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C.zip
+      Description: AWS CDK resource provider framework - onEvent (BedrockKbAossStack/BedrockAossDemo/BuildLambdaLayerProvider)
+      Environment:
+        Variables:
+          USER_ON_EVENT_FUNCTION_ARN:
+            Fn::GetAtt:
+              - BedrockAossDemoCreateLambdaLayer123A6DFD
+              - Arn
+      Handler: framework.onEvent
+      Role:
+        Fn::GetAtt:
+          - BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F
+          - Arn
+      Runtime: nodejs18.x
+      Timeout: 900
+    DependsOn:
+      - BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicyC5A3A27B
+      - BedrockAossDemoBuildLambdaLayerProviderframeworkonEventServiceRoleA5ED510F
+  BedrockAossDemoBuildLambdaLayerProviderframeworkonEventLogRetention23BB19D6:
+    Type: Custom::LogRetention
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A
+          - Arn
+      LogGroupName:
+        Fn::Join:
+          - ""
+          - - /aws/lambda/
+            - Ref: BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C
+      RetentionInDays: 30
+  BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C
+          - Arn
+      s3_bucket:
+        Ref: BedrockAossDemoLambdaLayerBucketE577035B
+      libraries:
+        - opensearch-py
+        - crhelper
+        - cfnresponse
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoOpenSearchPyLayerD52DD652:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket:
+          Ref: BedrockAossDemoLambdaLayerBucketE577035B
+        S3Key:
+          Ref: BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834
+      Description: OpenSearch Py Layer
+    DependsOn:
+      - BedrockAossDemoCreateLambdaLayerCustomResourceE1F2D834
+  BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: aoss:APIAccessAll
+            Effect: Allow
+            Resource:
+              Fn::GetAtt:
+                - BedrockAossDemoaosscollection5F05B06A
+                - Arn
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB
+      Roles:
+        - Ref: BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F
+  BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0.zip
+      Environment:
+        Variables:
+          WAIT_CONDITION_HANDLE_URL:
+            Ref: BedrockAossDemoAossKBWaitConditionHandleF769AD16
+      FunctionName:
+        Fn::Join:
+          - ""
+          - - Ref: AWS::StackName
+            - -create-aoss-index
+      Handler: create_index.on_event
+      Layers:
+        - Ref: BedrockAossDemoOpenSearchPyLayerD52DD652
+      Role:
+        Fn::GetAtt:
+          - BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F
+          - Arn
+      Runtime: python3.12
+      Timeout: 600
+    DependsOn:
+      - BedrockAossDemoOpenSearchServerlessCustomResourceServiceRoleDefaultPolicyB3EAF0EB
+      - BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F
+  BedrockAossDemoOpenSearchServerlessCustomResourceEventInvokeConfigE166F341:
+    Type: AWS::Lambda::EventInvokeConfig
+    Properties:
+      FunctionName:
+        Ref: BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0
+      MaximumRetryAttempts: 2
+      Qualifier: $LATEST
+  BedrockAossDemoAccessPolicy3893CF42:
+    Type: AWS::OpenSearchServerless::AccessPolicy
+    Properties:
+      Description: Access policy for aosscollection
+      Name: aossdemoaccesspolicy
+      Policy:
+        Fn::Join:
+          - ""
+          - - '[{"Description":"Access for account-user","Rules":[{"ResourceType":"index","Resource":["index/aosscollection/bedrock-knowledge-base-demo-default-index"],"Permission":["aoss:*"]},{"ResourceType":"collection","Resource":["collection/aosscollection"],"Permission":["aoss:*"]}],"Principal":["'
+            - Fn::GetAtt:
+                - BedrockAossDemoOpenSearchServerlessCustomResourceServiceRole82DABA9F
+                - Arn
+            - '","'
+            - Fn::GetAtt:
+                - BedrockAossDemoBedrockKBRoleE8675B56
+                - Arn
+            - '"]}]'
+      Type: data
+  BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: lambda:InvokeFunction
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0
+                        - Arn
+                    - :*
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE
+      Roles:
+        - Ref: BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B
+  BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7.zip
+      Description: AWS CDK resource provider framework - onEvent (BedrockKbAossStack/BedrockAossDemo/CreateIndexProvider)
+      Environment:
+        Variables:
+          USER_ON_EVENT_FUNCTION_ARN:
+            Fn::GetAtt:
+              - BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0
+              - Arn
+      Handler: framework.onEvent
+      Role:
+        Fn::GetAtt:
+          - BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B
+          - Arn
+      Runtime: nodejs18.x
+      Timeout: 900
+    DependsOn:
+      - BedrockAossDemoCreateIndexProviderframeworkonEventServiceRoleDefaultPolicy333B51AE
+      - BedrockAossDemoCreateIndexProviderframeworkonEventServiceRole3FDF8F8B
+  BedrockAossDemoCreateIndexProviderframeworkonEventLogRetention28BA7AC0:
+    Type: Custom::LogRetention
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A
+          - Arn
+      LogGroupName:
+        Fn::Join:
+          - ""
+          - - /aws/lambda/
+            - Ref: BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7
+      RetentionInDays: 30
+  BedrockAossDemoCreateIndexCustomResource445983D2:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+        Fn::GetAtt:
+          - BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7
+          - Arn
+      CollectionEndpoint:
+        Fn::GetAtt:
+          - BedrockAossDemoaosscollection5F05B06A
+          - CollectionEndpoint
+      PhysicalResourceId: CreateIndex
+    DependsOn:
+      - BedrockAossDemoaosscollection5F05B06A
+    UpdateReplacePolicy: Delete
+    DeletionPolicy: Delete
+  BedrockAossDemoAossKBWaitConditionBAF0879A:
+    Type: AWS::CloudFormation::WaitCondition
+    Properties:
+      Count: 1
+      Handle:
+        Ref: BedrockAossDemoAossKBWaitConditionHandleF769AD16
+      Timeout: "720"
+    DependsOn:
+      - BedrockAossDemoaosscollection5F05B06A
+  BedrockAossDemoKBDemoKnowledgeBase24881FDE:
+    Type: AWS::Bedrock::KnowledgeBase
+    Properties:
+      Description: My Knowledge Base Demo
+      KnowledgeBaseConfiguration:
+        Type: VECTOR
+        VectorKnowledgeBaseConfiguration:
+          EmbeddingModelArn:
+            Fn::Join:
+              - ""
+              - - "arn:"
+                - Ref: AWS::Partition
+                - ":bedrock:"
+                - Ref: AWS::Region
+                - ::foundation-model/amazon.titan-embed-text-v1
+      Name:
+        Fn::Join:
+          - ""
+          - - Ref: AWS::StackName
+            - -Demo
+      RoleArn:
+        Fn::GetAtt:
+          - BedrockAossDemoBedrockKBRoleE8675B56
+          - Arn
+      StorageConfiguration:
+        OpensearchServerlessConfiguration:
+          CollectionArn:
+            Fn::GetAtt:
+              - BedrockAossDemoaosscollection5F05B06A
+              - Arn
+          FieldMapping:
+            MetadataField: metadata
+            TextField: text
+            VectorField: bedrock-knowledge-base-demo-default-vector
+          VectorIndexName: bedrock-knowledge-base-demo-default-index
+        Type: OPENSEARCH_SERVERLESS
+    DependsOn:
+      - BedrockAossDemoAossKBWaitConditionBAF0879A
+  BedrockAossDemoKBDataSource555331C5:
+    Type: AWS::Bedrock::DataSource
+    Properties:
+      DataDeletionPolicy: RETAIN
+      DataSourceConfiguration:
+        S3Configuration:
+          BucketArn:
+            Fn::GetAtt:
+              - BedrockAossDemoKnowledgeBaseBucketA1235497
+              - Arn
+        Type: S3
+      Description: My KB Demo Data Source
+      KnowledgeBaseId:
+        Fn::GetAtt:
+          - BedrockAossDemoKBDemoKnowledgeBase24881FDE
+          - KnowledgeBaseId
+      Name: KBDemoDataSource
+    DependsOn:
+      - BedrockAossDemoAossKBWaitConditionBAF0879A
+  BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    DependsOn:
+      - BedrockAossDemoKBDataSource555331C5
+  BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:DeleteObject
+              - s3:GetObject
+              - s3:ListBucket
+              - s3:PutObject
+            Effect: Allow
+            Resource:
+              - Fn::GetAtt:
+                  - BedrockAossDemoKnowledgeBaseBucketA1235497
+                  - Arn
+              - Fn::Join:
+                  - ""
+                  - - Fn::GetAtt:
+                        - BedrockAossDemoKnowledgeBaseBucketA1235497
+                        - Arn
+                    - /*
+          - Action: bedrock:*
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0
+      Roles:
+        - Ref: BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819
+    DependsOn:
+      - BedrockAossDemoKBDataSource555331C5
+  BedrockAossDemoStartIngestionJobsLambdaD9B4C545:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/BedrockAossDemoStartIngestionJobsLambdaD9B4C545.zip
+      Environment:
+        Variables:
+          DATA_SOURCE_ID:
+            Fn::GetAtt:
+              - BedrockAossDemoKBDataSource555331C5
+              - DataSourceId
+          KNOWLEDGE_BASE_ID:
+            Fn::GetAtt:
+              - BedrockAossDemoKBDemoKnowledgeBase24881FDE
+              - KnowledgeBaseId
+      Handler: ingestion_management.lambda_handler
+      Role:
+        Fn::GetAtt:
+          - BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819
+          - Arn
+      Runtime: python3.12
+      Timeout: 60
+    DependsOn:
+      - BedrockAossDemoKBDataSource555331C5
+      - BedrockAossDemoStartIngestionJobsLambdaServiceRoleDefaultPolicyEB9241B0
+      - BedrockAossDemoStartIngestionJobsLambdaServiceRoleDA24D819
+  CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src//lambda_codes/CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F.zip
+      Timeout: 900
+      MemorySize: 128
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+          - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+          - Arn
+      Runtime: nodejs18.x
+      Description:
+        Fn::Join:
+          - ""
+          - - "Lambda function for auto-deleting objects in "
+            - Ref: BedrockAossDemoLambdaLayerBucketE577035B
+            - " S3 bucket."
+    DependsOn:
+      - CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092
+  LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action:
+              - logs:DeleteRetentionPolicy
+              - logs:PutRetentionPolicy
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB
+      Roles:
+        - Ref: LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB
+  LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 900
+      Code:
+        S3Bucket:
+          Ref: SourceBucket
+        S3Key: content/genairacer/src/lambda_codes/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A.zip
+      Role:
+        Fn::GetAtt:
+          - LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB
+          - Arn
+    DependsOn:
+      - LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB
+      - LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB
+  BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Action: s3:PutBucketNotification
+            Effect: Allow
+            Resource: "*"
+        Version: "2012-10-17"
+      PolicyName: BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36
+      Roles:
+        - Ref: BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC
+  BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691:
+    Type: AWS::Lambda::Function
+    Properties:
+      Description: AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)
+      Code:
+        ZipFile: |
+          import boto3  # type: ignore
+          import json
+          import logging
+          import urllib.request
+
+          s3 = boto3.client("s3")
+
+          EVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'
+          CONFIGURATION_TYPES = ["TopicConfigurations", "QueueConfigurations", "LambdaFunctionConfigurations"]
+
+          def handler(event: dict, context):
+            response_status = "SUCCESS"
+            error_message = ""
+            try:
+              props = event["ResourceProperties"]
+              notification_configuration = props["NotificationConfiguration"]
+              managed = props.get('Managed', 'true').lower() == 'true'
+              stack_id = event['StackId']
+              old = event.get("OldResourceProperties", {}).get("NotificationConfiguration", {})
+              if managed:
+                config = handle_managed(event["RequestType"], notification_configuration)
+              else:
+                config = handle_unmanaged(props["BucketName"], stack_id, event["RequestType"], notification_configuration, old)
+              s3.put_bucket_notification_configuration(Bucket=props["BucketName"], NotificationConfiguration=config)
+            except Exception as e:
+              logging.exception("Failed to put bucket notification configuration")
+              response_status = "FAILED"
+              error_message = f"Error: {str(e)}. "
+            finally:
+              submit_response(event, context, response_status, error_message)
+
+          def handle_managed(request_type, notification_configuration):
+            if request_type == 'Delete':
+              return {}
+            return notification_configuration
+
+          def handle_unmanaged(bucket, stack_id, request_type, notification_configuration, old):
+            def with_id(n):
+              n['Id'] = f"{stack_id}-{hash(json.dumps(n, sort_keys=True))}"
+              return n
+
+            external_notifications = {}
+            existing_notifications = s3.get_bucket_notification_configuration(Bucket=bucket)
+            for t in CONFIGURATION_TYPES:
+              if request_type == 'Update':
+                  ids = [with_id(n) for n in old.get(t, [])]
+                  old_incoming_ids = [n['Id'] for n in ids]
+                  external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'] in old_incoming_ids]
+              elif request_type == 'Delete':
+                  external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
+              elif request_type == 'Create':
+                  external_notifications[t] = [n for n in existing_notifications.get(t, [])]
+            if EVENTBRIDGE_CONFIGURATION in existing_notifications:
+              external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]
+
+            if request_type == 'Delete':
+              return external_notifications
+
+            notifications = {}
+            for t in CONFIGURATION_TYPES:
+              external = external_notifications.get(t, [])
+              incoming = [with_id(n) for n in notification_configuration.get(t, [])]
+              notifications[t] = external + incoming
+
+            if EVENTBRIDGE_CONFIGURATION in notification_configuration:
+              notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]
+            elif EVENTBRIDGE_CONFIGURATION in external_notifications:
+              notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]
+
+            return notifications
+
+          def submit_response(event: dict, context, response_status: str, error_message: str):
+            response_body = json.dumps(
+              {
+                "Status": response_status,
+                "Reason": f"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}",
+                "PhysicalResourceId": event.get("PhysicalResourceId") or event["LogicalResourceId"],
+                "StackId": event["StackId"],
+                "RequestId": event["RequestId"],
+                "LogicalResourceId": event["LogicalResourceId"],
+                "NoEcho": False,
+              }
+            ).encode("utf-8")
+            headers = {"content-type": "", "content-length": str(len(response_body))}
+            try:
+              req = urllib.request.Request(url=event["ResponseURL"], headers=headers, data=response_body, method="PUT")
+              with urllib.request.urlopen(req) as response:
+                print(response.read().decode("utf-8"))
+              print("Status code: " + response.reason)
+            except Exception as e:
+                print("send(..) failed executing request.urlopen(..): " + str(e))
+      Handler: index.handler
+      Role:
+        Fn::GetAtt:
+          - BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC
+          - Arn
+      Runtime: python3.11
+      Timeout: 300
+    DependsOn:
+      - BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36
+      - BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC
+Outputs:
+  BedrockAossDemoKnowledgeBaseBucket38A3CB86:
+    Description: Bucket for Amazon Bedrock Knowledge Base data
+    Value:
+      Ref: BedrockAossDemoKnowledgeBaseBucketA1235497
+  BedrockAossDemoKnowledgeBaseBucketURLD02D4E33:
+    Description: Bucket for Amazon Bedrock Knowledge Base data
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: AWS::Region
+          - .console.aws.amazon.com/s3/buckets/
+          - Ref: BedrockAossDemoKnowledgeBaseBucketA1235497
+          - ?region=
+          - Ref: AWS::Region
+          - "&bucketType=general&tab=objects"
+  BedrockAossDemoKnowledgeBaseConsoleURLB7D07E7E:
+    Description: Amazon Bedrock Knowledge Base Console URL
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: AWS::Region
+          - .console.aws.amazon.com/bedrock/home?region=
+          - Ref: AWS::Region
+          - "#/knowledge-bases/"
+          - Ref: AWS::StackName
+          - -Demo/
+          - Fn::GetAtt:
+              - BedrockAossDemoKBDemoKnowledgeBase24881FDE
+              - KnowledgeBaseId
+          - /0
+  BedrockAossDemoKnowledgeBaseDataSourceConsoleURL421A6F4B:
+    Description: Amazon Bedrock Knowledge Base Data Source Console URL
+    Value:
+      Fn::Join:
+        - ""
+        - - https://
+          - Ref: AWS::Region
+          - .console.aws.amazon.com/bedrock/home?region=
+          - Ref: AWS::Region
+          - "#/knowledge-bases/"
+          - Ref: AWS::StackName
+          - -Demo/
+          - Fn::GetAtt:
+              - BedrockAossDemoKBDemoKnowledgeBase24881FDE
+              - KnowledgeBaseId
+          - /KBDemoDataSource/
+          - Fn::GetAtt:
+              - BedrockAossDemoKBDataSource555331C5
+              - DataSourceId
+          - /0
+Parameters:
+  SourceBucket:
+    Type: String
+    Description: S3 bucket name where the content of cfn_install folder has been uploaded

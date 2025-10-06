@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API to Polly </title>
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            color: white;
+        }
+        #runButton {
+            background-color: #3498db;
+        }
+        #runButton:hover {
+            background-color: #2980b9;
+        }
+        #resetButton {
+            background-color: #e74c3c;
+        }
+        #resetButton:hover {
+            background-color: #c0392b;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+       #contentContainer {
+            display: flex;
+            flex-direction: column;
+        }
+        .content-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .content-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        .content-item h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .content-item p {
+            margin-bottom: 0;
+            color: #34495e;
+        }
+        .separator {
+            height: 2px;
+            background: linear-gradient(to right, #3498db, #e74c3c);
+            margin: 10px 0;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="audioForm">
+        <div class="form-group">
+            <label for="inputText">Enter your input:</label>
+            <textarea  id="text_prompt" placeholder="Enter text here that will turned into audio"></textarea>
+        </div>
+        <div class="button-group">
+            <button id="runButton" type=submit>Run</button>
+            <button id="resetButton" onclick="bres()">Reset</button>
+        </div>
+       
+    </div>
+
+      </form>
+
+          <div class="container">
+        <div id="contentContainer"></div>
+ 
+
+    <script>
+         function lladdit(prompt,audio,)
+            {
+
+       
+                    const container = document.getElementById('contentContainer');
+                            const contentItem = document.createElement('div');
+                            contentItem.className = 'content-item';
+                            contentItem.innerHTML = `
+                                 <h3>${prompt}</h3>
+                                  ${audio}
+                                
+                            `;
+                            //contentItem.appendChild(img);
+
+                                const separator = document.createElement('div');
+                                separator.className = 'separator';
+                                container.appendChild(separator);
+                          
+
+                               container.insertBefore(contentItem, container.firstChild);
+                               //container.appendChild(contentItem);
+
+                            // Trigger animation
+                            setTimeout(() => {
+                                contentItem.style.opacity = '1';
+                                contentItem.style.transform = 'translateY(0)';
+                            }, 50);
+                        }
+
+      function bres()
+      {
+            document.getElementById('text_prompt')="";
+                    
+                 
+      }
+
+        document.getElementById('audioForm').addEventListener('submit', async function(e) 
+        {
+            e.preventDefault();
+
+                const API_ENDPOINT = 'apigwaudio';
+     
+                   runButton.disabled = true;
+                    runButton.textContent = 'Running...';
+
+                var prompt = document.getElementById('text_prompt').value;
+            
+
+                 var formData = {
+                text_prompt: prompt
+                 };
+
+
+                    try {
+                        const response = await fetch(API_ENDPOINT, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(formData)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const result = await response.json()
+                        let itext = "<audio controls autoplay><source src='"+result.audio_file+"' type='audio/mpeg'></audio>" ;
+                        lladdit(prompt,itext);
+                        //contentContainer.innerHTML = itext;
+                        //const result = await response.json();
+                        //contentContainer.textContent = JSON.stringify(result, null, 2);
+                    } catch (error) {
+                        console.error('Error:', error);
+                        contentContainer.textContent = 'An error occurred. Please try again.';
+                    } finally {
+                        runButton.disabled = false;
+                        runButton.textContent = 'Run';
+                    }
+                });
+
+                
+            
+    </script>
+</body>
+</html>

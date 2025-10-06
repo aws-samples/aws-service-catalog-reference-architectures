@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Upload</title>
+    <script>
+        // Function to fetch the pre-signed URL from the API Gateway
+        async function getPresignedUrl() {
+            const apiUrl = 'https://781puwo8rd.execute-api.us-east-1.amazonaws.com/mygpt/kbmgt';
+            const response = await fetch(apiUrl);
+            const data = await response.json();
+            return data;
+        }
+
+        async function uploadFile(event) {
+            event.preventDefault();
+            const file = document.getElementById('file-input').files[0];
+            if (!file) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            try {
+                const presignedData = await getPresignedUrl();
+                const formData = new FormData();
+                for (const key in presignedData.fields) {
+                    formData.append(key, presignedData.fields[key]);
+                }
+                formData.append('file', file);
+
+  
+
+                const response = await fetch(presignedData.url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+ 
+
+                if (response.ok) {
+                    alert('File uploaded successfully!');
+                } else {
+                    alert('Error uploading file.');
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred during file upload.');
+            }
+        }
+    </script>
+</head>
+<body>
+     <form onsubmit="uploadFile(event)">
+        <input type="file" id="file-input" name="file">
+        <button type="submit">Upload</button>
+    </form>
+ __kblist__
+</body>
+</html>

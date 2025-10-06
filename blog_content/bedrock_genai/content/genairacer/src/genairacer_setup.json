@@ -1,0 +1,3528 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Conditions":
+    {
+        "InitialUsernameIsBlank":
+        {
+            "Fn::Equals":
+            [
+                {
+                    "Ref": "InitialUsername"
+                },
+                ""
+            ]
+        }
+    },
+    "Description": "Marketplace GenAI Racer v1 ",
+    "Outputs":
+    {
+        "FrontendURL":
+        {
+            "Description": "Access the application",
+            "Value":
+            {
+                "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/wstream/"
+            }
+        },
+        "UserManagement":
+        {
+            "Description": "Use this link to create users",
+            "Value":
+            {
+                "Fn::Sub": "https://${AWS::Region}.console.aws.amazon.com/cognito/v2/idp/user-pools/${UserPool}/users/create/user?region=${AWS::Region}"
+            }
+        }
+    },
+    "Parameters":
+    {
+        "InitialUserEmail":
+        {
+            "Description": "Email address for initial Cognito user. Auto-generated password will be sent here.",
+            "Type": "String"
+        },
+        "InitialUsername":
+        {
+            "Default": "",
+            "Description": "Recommended to leave blank to auto-generate a username for the initial Cognito user.",
+            "Type": "String"
+        },
+        "SourceBucket":
+        {
+            "Default": "",
+            "Description": "The name of the bucket containing the Cloud Formation Template.",
+            "Type": "String"
+        }
+    },
+    "Resources":
+    {
+        "APICustomAuthorizer":
+        {
+            "Properties":
+            {
+                "AuthorizerResultTtlInSeconds": 0,
+                "AuthorizerUri":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FuncLambdaAuthorizer.Arn}/invocations"
+                },
+                "Name": "APICustomAuthorizer",
+                "RestApiId":
+                {
+                    "Fn::Sub": "${APIGateway.RestApiId}"
+                },
+                "Type": "REQUEST"
+            },
+            "Type": "AWS::ApiGateway::Authorizer"
+        },
+        "APIGateway":
+        {
+            "Properties":
+            {
+                "Description": "API Gateway to call bedrock API",
+                "EndpointConfiguration":
+                {
+                    "Types":
+                    [
+                        "REGIONAL"
+                    ]
+                },
+                "Name":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "bedmgtapi-",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::ApiGateway::RestApi"
+        },
+        "APIGatewayCORSMethod":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResource"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayCORSMethodPolly":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcePolly"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayCORSbdkbinvoke":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcebdkbinvoke"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayCORSbdkblist":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcebdkblist"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayCORSguardrail":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwguardrailRes"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayDeployment":
+        {
+            "DependsOn":
+            [
+                "APIGatewayPostMethod",
+                "APIGatewayGetMethod",
+                "APIGatewayCORSbdkblist",
+                "APIGatewayCORSbdkbinvoke",
+                "APIGatewayCORSMethod",
+                "APIGatewayCORSguardrail",
+                "APIGatewayGetMethoddkblist",
+                "APIGatewayPostMethodbdkbinvoke",
+                "APIGatewayGetMethodkbupload",
+                "APIGwguardrailResGet",
+                "APIGwStreamget",
+                "APIGwStreampost"
+            ],
+            "Properties":
+            {
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                },
+                "StageName": "mygpt"
+            },
+            "Type": "AWS::ApiGateway::Deployment"
+        },
+        "APIGatewayGetMethod":
+        {
+            "DependsOn":
+            [
+                "RoleFuncBedrockStream"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId":
+                {
+                    "Ref": "APICustomAuthorizer"
+                },
+                "HttpMethod": "GET",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncBedrockAPI}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "text/html": "Empty"
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResource"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayGetMethoddkblist":
+        {
+            "DependsOn":
+            [
+                "RoleFuncBedrockStream"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "GET",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Funcbdklistdoc}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "text/html": "Empty"
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcebdkbinvoke"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayGetMethodkbupload":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "GET",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Funcbdkbupload}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcebdkblist"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayPostMethod":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId":
+                {
+                    "Ref": "APICustomAuthorizer"
+                },
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncBedrockAPI}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResource"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayPostMethodPolly":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncAPIaudio}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcePolly"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayPostMethodbdkbinvoke":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${Funcbdkinvoke}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayResourcebdkbinvoke"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayResource":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "mpcatmgt",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGatewayRescanvas":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "canvas",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGwRescanvasCORS":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayRescanvas"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayPostcanvas":
+        {
+            "DependsOn":
+            [
+                "FuncbdkinvokeImg"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId":
+                {
+                    "Ref": "APICustomAuthorizer"
+                },
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncbdkinvokeImg}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGatewayRescanvas"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGatewayResourcePolly":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "polly",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGatewayResourcebdkbinvoke":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "bdkbinvoke",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGatewayResourcebdkblist":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "bd_kb_list",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGwResStream":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "wstream",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGwResStreamCORS":
+        {
+            "Properties":
+            {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration":
+                {
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS,POST'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Max-Age": "'3600'",
+                                "method.response.header.X-Requested-With": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates":
+                    {
+                        "application/json": "{\"statusCode\": 200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false,
+                            "method.response.header.Access-Control-Max-Age": false,
+                            "method.response.header.X-Requested-With": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwResStream"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGwStreamget":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId":
+                {
+                    "Ref": "APICustomAuthorizer"
+                },
+                "HttpMethod": "GET",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncBedrockStream}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwResStream"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGwStreampost":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId":
+                {
+                    "Ref": "APICustomAuthorizer"
+                },
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncBedrockStream}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwResStream"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGwguardrailRes":
+        {
+            "Properties":
+            {
+                "ParentId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "APIGateway",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "guardrail",
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        },
+        "APIGwguardrailResGet":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "GET",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncGuardrail}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwguardrailRes"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APIGwguardrailResPost":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "HttpMethod": "POST",
+                "Integration":
+                {
+                    "CacheKeyParameters":
+                    [],
+                    "CacheNamespace": "",
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationHttpMethod": "POST",
+                    "IntegrationResponses":
+                    [
+                        {
+                            "ResponseParameters":
+                            {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "ResponseTemplates":
+                            {
+                                "application/json": ""
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "TimeoutInMillis": 29000,
+                    "Type": "AWS_PROXY",
+                    "Uri":
+                    {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FuncGuardrail}/invocations"
+                    }
+                },
+                "MethodResponses":
+                [
+                    {
+                        "ResponseModels":
+                        {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters":
+                        {
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId":
+                {
+                    "Ref": "APIGwguardrailRes"
+                },
+                "RestApiId":
+                {
+                    "Ref": "APIGateway"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "APILambdaPermission":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncBedrockAPI"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/*/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APILambdaPermissionGetMethoddkblist":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "Funcbdklistdoc"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/GET/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APILambdaPermissionGetMethodkbupload":
+        {
+            "DependsOn":
+            [
+                "Funcbdkbupload"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "Funcbdkbupload"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/GET/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APILambdaPermissionPostPolly":
+        {
+            "DependsOn":
+            [
+                "FuncAPIaudio"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncAPIaudio"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/POST/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APILambdaPermissionPostbdkbinvoke":
+        {
+            "DependsOn":
+            [
+                "Funcbdkbupload"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "Funcbdkinvoke"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/POST/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APILambdaPermissionPostinvoke":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncBedrockAPI"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/POST/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APIpermissionguardrailResGet":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncGuardrail"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/GET/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APIpermissionguardrailResPost":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncGuardrail"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/POST/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "APIpermissionsFuncLambdaAuthorizer":
+        {
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Fn::Sub": "${FuncLambdaAuthorizer.Arn}"
+                },
+                "Principal": "apigateway.amazonaws.com"
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "AgwPerstreamget":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockStream"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncBedrockStream"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/*/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "AgwPerbdinvimg":
+        {
+            "DependsOn":
+            [
+                "FuncbdkinvokeImg"
+            ],
+            "Properties":
+            {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName":
+                {
+                    "Ref": "FuncbdkinvokeImg"
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn":
+                {
+                    "Fn::Sub": "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGateway}/*/*/*"
+                }
+            },
+            "Type": "AWS::Lambda::Permission"
+        },
+        "CFTKnowbase":
+        {
+            "DependsOn":
+            [
+                "FuncBedrockAPI",
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Parameters":
+                {
+                    "SourceBucket":
+                    {
+                        "Fn::Sub": "${StorageBucket}"
+                    }
+                },
+                "TemplateURL":
+                {
+                    "Fn::Sub": "https://${StorageBucket}.s3.amazonaws.com/content/genairacer/src/knowbase.json"
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "DynamoDB":
+        {
+            "Properties":
+            {
+                "AttributeDefinitions":
+                [
+                    {
+                        "AttributeName": "user",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "timestamp",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema":
+                [
+                    {
+                        "AttributeName": "user",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "timestamp",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput":
+                {
+                    "ReadCapacityUnits": "5",
+                    "WriteCapacityUnits": "5"
+                },
+                "TableName":
+                {
+                    "Fn::Sub": "genairacer-${AWS::StackName}"
+                }
+            },
+            "Type": "AWS::DynamoDB::Table"
+        },
+        "FuncAPIaudio":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_genai_polly.zip"
+                    }
+                },
+                "Description": "web-api-sagemaker lambda",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "polly_call_api_audio_",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncAPIaudio",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncBedrockAPI":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/bedrock_call_api.zip"
+                    }
+                },
+                "Description": "web-api-bedrock lambda",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "bedrock_call_api",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncBedrockAPI",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncBedrockStream":
+        {
+            "DependsOn":
+            [
+                "StorageRun",
+                "CFTKnowbase"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_bedrock_stream.zip"
+                    }
+                },
+                "Description": "Stream html content",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "KnowledgeBaseId":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "CFTKnowbase",
+                                "Outputs.KnowledgeBaseId"
+                            ]
+                        },
+                        "apigw":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/"
+                        },
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "guardrailurl":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/guardrail/"
+                        },
+                        "imgprefix": "web/images/out",
+                        "kbinvoke":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/bdkbinvoke/"
+                        },
+                        "kblistdoc":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/bdkbinvoke/?prefix=uploads"
+                        },
+                        "kbupload":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/bd_kb_list/"
+                        },
+                        "pollyapigw":
+                        {
+                            "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/polly/"
+                        },
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "bedrock_stream",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncBedrockStream",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncGuardrail":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_guard_rail.zip"
+                    }
+                },
+                "Description": "bd l_guard_rail.zip ",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "l_bd_guardrail_",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncBedrockguard",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncLambdaAuthorizer":
+        {
+            "DependsOn":
+            [
+                "StorageRun",
+                "FuncLambdaAuthorizerLogGroup"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_genai_auth.zip"
+                    }
+                },
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "ClientId":
+                        {
+                            "Fn::Sub": "${UserPoolClient.ClientId}"
+                        },
+                        "IdTokenCookieSameSite": "None",
+                        "OidcConfigurationUrl":
+                        {
+                            "Fn::Sub": "${UserPool.ProviderURL}/.well-known/openid-configuration"
+                        }
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Sub": "${AWS::StackName}-FuncLambdaAuthorizer"
+                },
+                "Handler": "index.handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "FuncLambdaAuthorizerRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs20.x",
+                "Timeout": 30
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncLambdaAuthorizerLogGroup":
+        {
+            "Properties":
+            {
+                "LogGroupName":
+                {
+                    "Fn::Sub": "/aws/lambda/${AWS::StackName}-FuncLambdaAuthorizer"
+                },
+                "RetentionInDays": 7
+            },
+            "Type": "AWS::Logs::LogGroup"
+        },
+        "FuncLambdaAuthorizerRole":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service":
+                                [
+                                    "lambda.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-FuncLambdaAuthorizer:log-stream:*"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "LambdaExecute"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "Funcbdkbupload":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_bd_kb_upload.zip"
+                    }
+                },
+                "Description": "bd kb upload lambda",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "l_bd_kb_upload_",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncbdkbupload",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "FuncbdkinvokeImg":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_bedinvoke_img.zip"
+                    }
+                },
+                "Description": "bd kb invoke image nova canvas",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "l_bd_kb_invoke_img",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncbdkbinvokeImg",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.13",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "Funcbdkinvoke":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_kb_bed_invoke.zip"
+                    }
+                },
+                "Description": "bd kb invoke kb agent lambda",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "l_bd_kb_invoke_",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncbdkbinvoke",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "Funcbdklistdoc":
+        {
+            "DependsOn":
+            [
+                "StorageRun"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "StorageBucket"
+                    },
+                    "S3Key":
+                    {
+                        "Fn::Sub": "content/genairacer/src/l_bd_kb_list_doc.zip"
+                    }
+                },
+                "Description": "bd kb list doc lambda",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "bdbucket":
+                        {
+                            "Fn::Sub": "bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                        },
+                        "bucket":
+                        {
+                            "Ref": "StorageBucket"
+                        },
+                        "imgprefix": "web/images/out/",
+                        "prefix": "content/genairacer/"
+                    }
+                },
+                "FunctionName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "l_bd_kb_list_doc_",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "Handler": "lambda_function.lambda_handler",
+                "MemorySize": 2048,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "RoleFuncbdkbupload",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "RoleFuncAPIaudio":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "polly:StartSpeechSynthesisTask"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        "*"
+                                    ],
+                                    "Sid": "Sspoll1"
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "pollmgt"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncBedrockAPI":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ApplyGuardrail"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:CreateGuardrail"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListGuardrails"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ],
+                                    "Sid": "Statffement1"
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListFoundationModels"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}::*/*"
+                                        }
+                                    ],
+                                    "Sid": "bedrockListmodels"
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:InvokeModel",
+                                        "bedrock:InvokeModelWithResponseStream",
+                                        "bedrock:RetrieveAndGenerate",
+                                        "bedrock:Retrieve"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:*::foundation-model/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*"
+                                        } 
+
+                                    ] 
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bedrockmgt3"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncBedrockStream":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListFoundationModels"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        "*"
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListKnowledgeBases",
+                                        "bedrock:ListFoundationModels"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:CreateGuardrail"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ],
+                                    "Sid": "Stafment1"
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListGuardrails"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        "*"
+                                    ],
+                                    "Sid": "Statffement1"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bds3mgt"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncBedrockguard":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:DeleteGuardrail"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ],
+                                    "Sid": "Statddment1"
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:CreateGuardrail"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListGuardrails"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        "*"
+                                    ],
+                                    "Sid": "Statffement1"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bgrat"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncbdkbinvokeImg":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Sid": "Statement1",
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "bedrock:InvokeModel"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:bedrock:*::foundation-model/amazon.nova-canvas*"
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                        }
+                                    ]
+                                }
+    ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bdkimg"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncbdkbinvoke":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:RetrieveAndGenerate",
+                                        "bedrock:Retrieve"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:*:${AWS::AccountId}:knowledge-base/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "bedrock:ListFoundationModels"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:${AWS::Region}::*/*"
+                                        }
+                                    ],
+                                    "Sid": "bohihils"
+                                },
+                                {
+                                "Action": [
+                                    "bedrock:InvokeModel",
+                                    "bedrock:InvokeModelWithResponseStream",
+                                    "bedrock:RetrieveAndGenerate",
+                                    "bedrock:Retrieve",
+                                    "bedrock:GetInferenceProfile"
+                                ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:*::foundation-model/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:bedrock:*:${AWS::AccountId}:inference-profile/*"
+                                        } 
+                                    ] 
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::bdkbdata-${AWS::Region}-${AWS::AccountId}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bdkjhnv"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "RoleFuncbdkbupload":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::bdkbdata-${AWS::Region}-${AWS::AccountId}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::bdkbdata-${AWS::Region}-${AWS::AccountId}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "bdkbmgt"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "StorageBucket":
+        {
+            "Properties":
+            {
+                "BucketEncryption":
+                {
+                    "ServerSideEncryptionConfiguration":
+                    [
+                        {
+                            "ServerSideEncryptionByDefault":
+                            {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "VersioningConfiguration":
+                {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "StorageBucketPolicy":
+        {
+            "Properties":
+            {
+                "Bucket":
+                {
+                    "Ref": "StorageBucket"
+                },
+                "PolicyDocument":
+                {
+                    "Id": "ExamplePolicy",
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Condition":
+                            {
+                                "Bool":
+                                {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                },
+                                {
+                                    "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                }
+                            ],
+                            "Sid": "AllowSSLRequestsOnly"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "StorageFunction":
+        {
+            "Properties":
+            {
+                "Code":
+                {
+                    "ZipFile": "import json\nimport logging\nimport threading\nimport boto3\nimport cfnresponse\n\n\n\ndef copy_objects(source_bucket, dest_bucket, prefix, objects):\n    s3 = boto3.client('s3')\n    for o in objects:\n        key = prefix + o\n        copy_source = {\n            'Bucket': source_bucket,\n            'Key': key\n        }\n        print('copy_source: %s' % copy_source)\n        print('dest_bucket = %s'%dest_bucket)\n        print('key = %s' %key)\n        s3.copy_object(CopySource=copy_source, Bucket=dest_bucket,\n              Key=key)\n\n    \ndef timeout(event, context):\n    logging.error('Execution is about to time out, sending failure response to CloudFormation')\n    cfnresponse.send(event, context, cfnresponse.FAILED, {}, None)\n\ndef romanscorch(bucket):\n  \n    s3_client = boto3.client('s3')\n    object_response_paginator = s3_client.get_paginator('list_object_versions')\n    \n    delete_marker_list = []\n    version_list = []\n    \n    for object_response_itr in object_response_paginator.paginate(Bucket=bucket):\n        if 'DeleteMarkers' in object_response_itr:\n            for delete_marker in object_response_itr['DeleteMarkers']:\n                delete_marker_list.append({'Key': delete_marker['Key'], 'VersionId': delete_marker['VersionId']})\n    \n        if 'Versions' in object_response_itr:\n            for version in object_response_itr['Versions']:\n                version_list.append({'Key': version['Key'], 'VersionId': version['VersionId']})\n    \n    for i in range(0, len(delete_marker_list), 1000):\n        response = s3_client.delete_objects(\n            Bucket=bucket,\n            Delete={\n                'Objects': delete_marker_list[i:i+1000],\n                'Quiet': True\n            }\n        )\n        print(response)\n    \n    for i in range(0, len(version_list), 1000):\n        response = s3_client.delete_objects(\n            Bucket=bucket,\n            Delete={\n                'Objects': version_list[i:i+1000],\n                'Quiet': True\n            }\n        )\n        print(response)\n        \n\ndef handler(event, context):\n    print(json.dumps(event))\n    _ret = {}\n    timer = threading.Timer((context.get_remaining_time_in_millis()\n              / 1000.00) - 0.5, timeout, args=[event, context])\n    timer.start()\n    status = cfnresponse.SUCCESS\n\n    \n    try:\n        source_bucket = event['ResourceProperties']['SourceBucket']\n        dest_bucket = event['ResourceProperties']['DestBucket']\n        prefix = event['ResourceProperties']['Prefix']\n        objects = event['ResourceProperties']['Objects']\n        if event['RequestType'] == 'Delete':\n\n            romanscorch(event['ResourceProperties']['DestBucket'])\n        else:\n            copy_objects(source_bucket, dest_bucket, prefix, objects)\n    except Exception as e:\n        logging.error('Exception: %s' % e, exc_info=True)\n        status = cfnresponse.FAILED\n    finally:\n        timer.cancel()\n        cfnresponse.send(event, context, status, {}, None)\n        return _ret"
+                },
+                "Description": "Copies objects from a source S3 bucket to a destination",
+                "Handler": "index.handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "StorageRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.11",
+                "Timeout": 240
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "StorageRole":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Path": "/",
+                "Policies":
+                [
+                    {
+                        "PolicyDocument":
+                        {
+                            "Statement":
+                            [
+                                {
+                                    "Action":
+                                    [
+                                        "s3:GetObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${SourceBucket}/*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Action":
+                                    [
+                                        "s3:PutObject",
+                                        "s3:DeleteObject",
+                                        "s3:DeleteObjectTagging",
+                                        "s3:DeleteObjectVersion",
+                                        "s3:DeleteObjectVersionTagging",
+                                        "s3:Get*",
+                                        "s3:List*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource":
+                                    [
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}/*"
+                                        },
+                                        {
+                                            "Fn::Sub": "arn:aws:s3:::${StorageBucket}"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "copy-s3-s3"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "StorageRun":
+        {
+            "Properties":
+            {
+                "DestBucket":
+                {
+                    "Ref": "StorageBucket"
+                },
+                "Objects":
+                [
+                    "data/mpllm.json",
+                    "src/Amazon-Bedrock-Knowledge-Bases-OpenSearch-Serverless.json",
+                    "src/bedrock_call_api.zip",
+                    "src/knowbase.json",
+                    "src/genairacer_setup.json",
+                    "src/l_bd_kb_list_doc.zip",
+                    "src/l_bd_kb_upload.zip",
+                    "src/l_genai_auth.zip",
+                    "src/l_bedinvoke_img.zip",
+                    "src/l_bedrock_stream.zip",
+                    "src/l_genai_polly.zip",
+                    "src/l_kb_bed_invoke.zip",
+                    "src/l_guard_rail.zip",
+                    "src/lambda_codes/BedrockAossDemoBuildLambdaLayerProviderframeworkonEventAEF9E51C.zip",
+                    "src/lambda_codes/BedrockAossDemoCreateIndexProviderframeworkonEvent98CB12B7.zip",
+                    "src/lambda_codes/BedrockAossDemoCreateLambdaLayer123A6DFD.zip",
+                    "src/lambda_codes/BedrockAossDemoOpenSearchServerlessCustomResource0A4A68B0.zip",
+                    "src/lambda_codes/BedrockAossDemoStartIngestionJobsLambdaD9B4C545.zip",
+                    "src/lambda_codes/CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F.zip",
+                    "src/lambda_codes/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A.zip",
+                    "web/awsgenai.html",
+                    "web/awsgenai_org.html",
+                    "web/bedrock01.html",
+                    "web/bedrock01_o.html",
+                    "web/css/tbstyle.css",
+                    "web/rag.html",
+                    "web/sm_audio_o.html",
+                    "web/sm_guardrail_o.html",
+                    "web/text.html",
+                    "web/text_bed_kb_o.html",
+                    "web/text_o.html",
+                    "web/awsgenai_org.html",
+                    "web/sm_image_o.html"
+                ],
+                "Prefix": "content/genairacer/",
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "StorageFunction",
+                        "Arn"
+                    ]
+                },
+                "SourceBucket":
+                {
+                    "Ref": "SourceBucket"
+                }
+            },
+            "Type": "Custom::StorageRun"
+        },
+        "UserPool":
+        {
+            "Properties":
+            {
+                "AdminCreateUserConfig":
+                {
+                    "AllowAdminCreateUserOnly": true
+                },
+                "AutoVerifiedAttributes":
+                [
+                    "email"
+                ],
+                "MfaConfiguration": "OFF",
+                "Schema":
+                [
+                    {
+                        "AttributeDataType": "String",
+                        "Mutable": false,
+                        "Name": "email",
+                        "Required": true
+                    }
+                ],
+                "UserPoolName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "genai-",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "-user-pool"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::Cognito::UserPool"
+        },
+        "UserPoolClient":
+        {
+            "Properties":
+            {
+                "AllowedOAuthFlows":
+                [
+                    "code"
+                ],
+                "AllowedOAuthFlowsUserPoolClient": true,
+                "AllowedOAuthScopes":
+                [
+                    "openid"
+                ],
+                "CallbackURLs":
+                [
+                    {
+                        "Fn::Sub": "https://${APIGateway}.execute-api.${AWS::Region}.amazonaws.com/mygpt/wstream/"
+                    }
+                ],
+                "ClientName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "auth",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "-client"
+                        ]
+                    ]
+                },
+                "ExplicitAuthFlows":
+                [
+                    "ALLOW_REFRESH_TOKEN_AUTH",
+                    "ALLOW_USER_SRP_AUTH"
+                ],
+                "GenerateSecret": false,
+                "SupportedIdentityProviders":
+                [
+                    "COGNITO"
+                ],
+                "UserPoolId":
+                {
+                    "Ref": "UserPool"
+                }
+            },
+            "Type": "AWS::Cognito::UserPoolClient"
+        },
+        "UserPoolDomain":
+        {
+            "Properties":
+            {
+                "Domain":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "genaidomain",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "UserPoolId":
+                {
+                    "Ref": "UserPool"
+                }
+            },
+            "Type": "AWS::Cognito::UserPoolDomain"
+        },
+        "UserPoolUser":
+        {
+            "Properties":
+            {
+                "UserAttributes":
+                [
+                    {
+                        "Name": "email",
+                        "Value":
+                        {
+                            "Ref": "InitialUserEmail"
+                        }
+                    },
+                    {
+                        "Name": "email_verified",
+                        "Value": "True"
+                    }
+                ],
+                "UserPoolId":
+                {
+                    "Fn::Sub": "${UserPool.UserPoolId}"
+                },
+                "Username":
+                {
+                    "Fn::If":
+                    [
+                        "InitialUsernameIsBlank",
+                        {
+                            "Ref": "AWS::NoValue"
+                        },
+                        {
+                            "Ref": "InitialUsername"
+                        }
+                    ]
+                }
+            },
+            "Type": "AWS::Cognito::UserPoolUser"
+        }
+    }
+}

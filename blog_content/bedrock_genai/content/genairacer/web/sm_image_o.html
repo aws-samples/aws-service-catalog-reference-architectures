@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator</title>
+  
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+.container {
+    max-width: 1200px; /* Increased width */
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-container {
+            display: flex;
+            gap: 20px;
+        }
+        .left-column {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+        }
+        .right-column {
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            height: 200px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        select {
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px top 50%;
+            background-size: 12px auto;
+        }
+            button {
+            background-color: #3498db; /* Button color */
+            color: white; /* Button text color */
+            padding: 12px 20px; /* Button padding */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            font-size: 16px; /* Font size */
+            transition: background-color 0.3s; /* Transition effect */
+            width: calc(100% + 40px); /* Full width of both columns with extra space for gap */
+            margin-left: -20px; /* Adjust left margin to align with left column */
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #ecf0f1;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <form id="imageForm">
+            <div class="form-container">
+                <div class="left-column">
+                    <div class="form-group">
+                        <label for="text_prompt">Enter your prompt:</label>
+                        <textarea id="text_prompt" name="text_prompt" required></textarea>
+                    </div>
+                    <button type="submit" id='generateButton'>Generate Image</button>
+                </div>
+                <div class="right-column">
+                    <div class="form-group">
+                        <label for="modelId">Select Model:</label>
+                        <select id="modelid" name="modelid" required>
+                          </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="style">Select Style:</label>
+                        <select id="pstyle" name="pstyle" required>
+      
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+             
+        
+            <input type="hidden" name="actiontype" id="actiontype"  value="image">
+
+            
+        </form>
+             <div class="container">
+        <div id="contentContainer"></div>
+    </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'apigwmygpt';
+        const styles =  ["  ","3d-model", "analog-film", "anime", "cinematic", "comic-book", "digital-art", "enhance", "fantasy-art", "isometric", "line-art", "low-poly", "modeling-compound", "neon-punk", "origami", "photographic", "pixel-art", "tile-texture"];
+
+        // Populate style select
+        const styleSelect = document.getElementById('pstyle');
+        styles.forEach(style => {
+            const option = document.createElement('option');
+            option.value = style.toLowerCase();
+            option.textContent = style;
+            styleSelect.appendChild(option);
+        });
+
+     var imagemodels =___imagellm___;
+            var modelid = document.getElementById('modelid');
+            for (var i = 0; i < imagemodels.length; i++) {
+                var ioption = document.createElement('option');
+                var optArray = imagemodels[i].split("==");
+                ioption.value = optArray[1];
+                ioption.text = optArray[0];
+                modelid.appendChild(ioption);
+            }
+
+            function lladdit(promp,img)
+            {
+
+       
+                    const container = document.getElementById('contentContainer');
+                            const contentItem = document.createElement('div');
+                            contentItem.className = 'content-item';
+                            contentItem.innerHTML = `
+                                <h3>${promp}</h3>
+                                
+                            `;
+                            contentItem.appendChild(img);
+
+                                const separator = document.createElement('div');
+                                separator.className = 'separator';
+                                container.appendChild(separator);
+                          
+
+                               container.insertBefore(contentItem, container.firstChild);
+                               //container.appendChild(contentItem);
+
+                            // Trigger animation
+                            setTimeout(() => {
+                                contentItem.style.opacity = '1';
+                                contentItem.style.transform = 'translateY(0)';
+                            }, 50);
+                        }
+
+
+        document.getElementById('imageForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var rseed = Math.floor(Math.random() * (92939392 - 3434 + 1) + 3434);
+    
+            const formData = new FormData(this);
+            formData.append('seed',+rseed);
+            const data = Object.fromEntries(formData.entries());
+            data.seed = rseed;
+            data.steps = 50;
+
+
+            const button = document.getElementById('generateButton');
+
+            // Change button text and disable it
+            button.textContent = 'Please wait...';
+            button.disabled = true;
+
+           
+            console.log(JSON.stringify(data));
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log(JSON.stringify(result, undefined, 2));
+
+                if (result.image_url) {
+                    const contentContainer = document.getElementById('contentContainer');
+                    contentContainer.innerHTML = ''; // Clear previous content
+
+                    if (Array.isArray(result.image_url)) {
+                        // If image_url is an array, create multiple images
+                        result.image_url.forEach(url => {
+                            const img = createImage(url);
+                            lladdit(data.text_prompt, img);
+                        });
+                    } else {
+                        // If image_url is not an array, create a single image
+                        const img = createImage(result.image_url);
+                        lladdit(data.text_prompt, img);
+                    }
+                } else {
+                    document.getElementById('contentContainer').textContent = 'No image URL received.';
+                }
+
+function createImage(url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.alt = 'Generated Image';
+    img.style.maxWidth = '100%';
+    return img;
+}
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('contentContainer').textContent = 'An error occurred. Please try again.';
+            }
+
+              finally {
+        // Change button text back and re-enable it
+        button.textContent = 'Generate Image';
+        button.disabled = false;
+    }
+        });
+    </script>
+</body>
+</html>

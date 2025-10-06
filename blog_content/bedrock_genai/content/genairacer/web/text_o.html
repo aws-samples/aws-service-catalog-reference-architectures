@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Interface</title>
+  
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            height: 400px;
+            resize: vertical;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .run-button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .run-button:hover {
+            background-color: #2980b9;
+        }
+
+
+        /////
+
+        #contentContainer {
+            display: flex;
+            flex-direction: column;
+        }
+        .content-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .content-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        .content-item h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .content-item p {
+            margin-bottom: 0;
+            color: #34495e;
+        }
+        .separator {
+            height: 2px;
+            background: linear-gradient(to right, #3498db, #e74c3c);
+            margin: 10px 0;
+            opacity: 0.5;
+        }
+        /////
+
+
+
+        <style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+    </style>
+
+        <script>
+            function lladdit(promp,resp)
+            {
+
+                            const container = document.getElementById('contentContainer');
+                            const contentItem = document.createElement('div');
+                            contentItem.className = 'content-item';
+                            contentItem.innerHTML = `
+                                <h3>${promp}</h3>
+                                <p>${resp}</p>
+                            `;
+
+                                const separator = document.createElement('div');
+                                separator.className = 'separator';
+                                container.appendChild(separator);
+                          
+
+                               container.insertBefore(contentItem, container.firstChild);
+                               //container.appendChild(contentItem);
+
+                            // Trigger animation
+                            setTimeout(() => {
+                                contentItem.style.opacity = '1';
+                                contentItem.style.transform = 'translateY(0)';
+                            }, 50);
+                     
+     
+
+
+            }
+
+        function randomIntFromInterval() {  
+            rr = Math.floor(Math.random() * (92939392 - 3434 + 1) + 3434);
+            //seeds = document.getElementById('seed');
+            //seeds.value = rr;
+            }
+          function changeImage(state) {
+
+            if (state == 'wait')
+            {
+                 
+      
+                document.getElementById('run').innerHTML ="Please wait..";
+
+            }
+            if (state == 'run')
+            {
+                
+             
+                document.getElementById('run').innerHTML ="Run";
+
+            }
+        }
+        function frmsubmit(event)  {
+            event.preventDefault(); // Prevent the default form submission
+            changeImage('wait');
+
+            // Collect form data
+            var att = document.getElementById('actiontype').value;
+            console.log(att);
+    
+
+            var formData = {
+                prompt: document.getElementById('prompt').value,
+                modelid: document.getElementById('modelid').value,
+                actiontype: document.getElementById('actiontype').value,
+                guardrailToggle: document.getElementById('status').textContent,
+                guardrail: document.getElementById('guardrail').value,
+                actiontype: 'text'
+            };
+
+            // Convert form data to JSON
+            var jsonData = JSON.stringify(formData);
+
+
+            // Make an AJAX request to the AWS API
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'apigwmygpt', true);
+            //xhr.setRequestHeader('Access-Control-Allow-Headers', '*');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle the response here
+                    var response = JSON.parse(xhr.responseText);
+
+                    respond = document.getElementById('respond');
+                    lladdit(document.getElementById('prompt').value,response.returntext);
+   
+                    
+
+
+                }
+                changeImage('run');
+            };
+            xhr.send(jsonData);
+        };
+
+        function myloadit() {
+            // JavaScript code to populate the dropdown list
+            
+            ///
+            var imagemodels =___textllm___;
+            var modelid = document.getElementById('modelid');
+            for (var i = 0; i < imagemodels.length; i++) {
+                var ioption = document.createElement('option');
+                var optArray = imagemodels[i].split("==");
+                ioption.value = optArray[1];
+                ioption.text = optArray[0];
+                modelid.appendChild(ioption);
+            }
+
+            
+    }
+
+    </script>
+</head>
+<body onload="myloadit()">
+    <div class="container">
+        
+        <form id="aiForm">
+             <input type=hidden id=actiontype name=actiontype value=text> 
+            <div class="form-group">
+                <label for="prompt">Prompt:</label>
+                <textarea id="prompt" name="prompt" placeholder="Enter your prompt here..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="modelId">Model ID:</label>
+                <select name="modelid" id="modelid"  onchange="randomIntFromInterval();"></select>
+
+                
+            </div>
+
+  
+
+
+            <div class="form-group">
+
+
+                    <label for="guardrailsSwitch">Guardrails:</label>
+                    <label class="switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider"></span>
+                </label>
+                <span id="status">Off</span>
+
+
+
+      
+
+
+            <div class="form-group" id="guardrailsSelectGroup" style="display: none;">
+                <label for="guardrailsSelect">Select Filter:</label>
+                __gselect__
+            </div>
+
+
+
+
+<br>
+
+
+            <button type="submit" class="run-button" id='run' onclick="frmsubmit(event);">Run</button>
+        </form>
+       
+    </div>
+     <div class="container">
+        <div id="contentContainer"></div>
+    </div>
+
+
+ 
+    <script>
+        const toggleSwitch = document.getElementById('toggleSwitch');
+        const status = document.getElementById('status');
+
+        toggleSwitch.addEventListener('click', function() {
+            if (this.checked) {
+                status.textContent = 'On';
+                document.getElementById('guardrailsSelectGroup').style.display = this.checked ? 'block' : 'none';
+            } else {
+                status.textContent = 'Off';
+                document.getElementById('guardrailsSelectGroup').style.display = this.checked ? 'block' : 'none';
+            }
+        });
+  
+
+ 
+
+        
+    </script>
+</body>
+</html>

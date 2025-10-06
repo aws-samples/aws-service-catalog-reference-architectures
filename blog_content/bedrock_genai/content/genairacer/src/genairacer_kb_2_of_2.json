@@ -1,0 +1,100 @@
+{
+    "Resources":
+    {
+        "KnowledgeDemoKBDataSource714188B7":
+        {
+            "Properties":
+            {
+                "DataDeletionPolicy": "DELETE",
+                "DataSourceConfiguration":
+                {
+                    "S3Configuration":
+                    {
+                        "BucketArn":
+                        {
+                            "Fn::ImportValue": "AoskbStack:ExportsOutputFnGetAttKnowledgeBaseBucketC011DD60Arn95976433"
+                        }
+                    },
+                    "Type": "S3"
+                },
+                "Description": "My KB Demo Data Source",
+                "KnowledgeBaseId":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "KnowledgeDemoKBDemoKnowledgeBase4C75B6A2",
+                        "KnowledgeBaseId"
+                    ]
+                },
+                "Name": "KBDemoDataSource"
+            },
+            "Type": "AWS::Bedrock::DataSource"
+        },
+        "KnowledgeDemoKBDemoKnowledgeBase4C75B6A2":
+        {
+            "Properties":
+            {
+                "Description": "My Knowledge Base Demo",
+                "KnowledgeBaseConfiguration":
+                {
+                    "Type": "VECTOR",
+                    "VectorKnowledgeBaseConfiguration":
+                    {
+                        "EmbeddingModelArn":{
+                            "Fn::Sub": "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1"
+                        }
+                        
+                    }
+                },
+                "Name":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "knowbname",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "RoleArn":
+                {
+                    "Fn::ImportValue": "AoskbStack:ExportsOutputFnGetAttBedrockKBRole10C55766ArnC6F1CB0C"
+                },
+                "StorageConfiguration":
+                {
+                    "OpensearchServerlessConfiguration":
+                    {
+                        "CollectionArn":
+                        {
+                            "Fn::ImportValue": "AoskbStack:ExportsOutputFnGetAttOpenSearchCollectionOpensearchDemoA6D933D6ArnD1FAC087"
+                        },
+                        "FieldMapping":
+                        {
+                            "MetadataField": "metadata",
+                            "TextField": "text",
+                            "VectorField": "bedrock-knowledge-base-demo-default-vector"
+                        },
+                        "VectorIndexName": "bedrock-knowledge-base-demo-default-index"
+                    },
+                    "Type": "OPENSEARCH_SERVERLESS"
+                }
+            },
+            "Type": "AWS::Bedrock::KnowledgeBase"
+        }
+    }
+}

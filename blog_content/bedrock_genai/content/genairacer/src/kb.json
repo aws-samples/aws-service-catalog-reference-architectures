@@ -1,0 +1,161 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources":
+    {
+        "Collection":
+        {
+            "DependsOn": "EncryptionPolicy",
+            "Properties":
+            {
+                "Description": "Search collection",
+                "Name": "test-collection",
+                "Type": "SEARCH"
+            },
+            "Type": "AWS::OpenSearchServerless::Collection"
+        },
+        "EncryptionPolicy":
+        {
+            "Properties":
+            {
+                "Description": "Encryption policy for test collection",
+                "Name": "test-encryption-policy",
+                "Policy": "{\"Rules\":[{\"ResourceType\":\"collection\",\"Resource\":[\"collection/test-collection\"]}],\"AWSOwnedKey\":true}",
+                "Type": "encryption"
+            },
+            "Type": "AWS::OpenSearchServerless::SecurityPolicy"
+        },
+        "KnowledgeBaseWithAoss":
+        {
+            "Properties":
+            {
+                "Description":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "Knowledgebase desc ",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "KnowledgeBaseConfiguration":
+                {
+                    "Type": "VECTOR",
+                    "VectorKnowledgeBaseConfiguration":
+                    {
+                        "EmbeddingModelArn":
+                        {
+                            "Fn::Sub": "arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/amazon.titan-embed-text-v1"
+                        }
+                    }
+                },
+                "Name":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "knowbname",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                },
+                "RoleArn": "arn:aws:iam::${AWS::AccountId}:role/cfn-local-test-role",
+                "StorageConfiguration":
+                {
+                    "OpensearchServerlessConfiguration":
+                    {
+                        "CollectionArn": "arn:aws:aoss:${AWS::Region}:${AWS::AccountId}:collection/abcdefghij1234567890",
+                        "FieldMapping":
+                        {
+                            "MetadataField": "metadata",
+                            "TextField": "text",
+                            "VectorField": "cfn-test-vector-field"
+                        },
+                        "VectorIndexName": "cfn-test-index"
+                    },
+                    "Type": "OPENSEARCH_SERVERLESS"
+                }
+            },
+            "Type": "AWS::Bedrock::KnowledgeBase"
+        },
+        "SampleDataSource":
+        {
+            "Properties":
+            {
+                "DataSourceConfiguration":
+                {
+                    "S3Configuration":
+                    {
+                        "BucketArn": "arn:aws:s3:::kb-test-aws",
+                        "InclusionPrefixes":
+                        [
+                            "aws-overview.pdf"
+                        ]
+                    },
+                    "Type": "S3"
+                },
+                "Description": "DataSource Description",
+                "KnowledgeBaseId":
+                {
+                    "Ref": "KnowledgeBaseWithAoss"
+                },
+                "Name":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "datasource",
+                            {
+                                "Fn::Select":
+                                [
+                                    6,
+                                    {
+                                        "Fn::Split":
+                                        [
+                                            "-",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::Bedrock::DataSource"
+        }
+    }
+}

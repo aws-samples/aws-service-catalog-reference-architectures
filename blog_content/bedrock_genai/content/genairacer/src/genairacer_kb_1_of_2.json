@@ -1,0 +1,1486 @@
+{
+    "Outputs":
+    {
+        "ExportsOutputFnGetAttBedrockKBRole10C55766ArnC6F1CB0C":
+        {
+            "Export":
+            {
+                "Name": "AoskbStack:ExportsOutputFnGetAttBedrockKBRole10C55766ArnC6F1CB0C"
+            },
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "BedrockKBRole10C55766",
+                    "Arn"
+                ]
+            }
+        },
+        "ExportsOutputFnGetAttKnowledgeBaseBucketC011DD60Arn95976433":
+        {
+            "Export":
+            {
+                "Name": "AoskbStack:ExportsOutputFnGetAttKnowledgeBaseBucketC011DD60Arn95976433"
+            },
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "KnowledgeBaseBucketC011DD60",
+                    "Arn"
+                ]
+            }
+        },
+        "ExportsOutputFnGetAttOpenSearchCollectionOpensearchDemoA6D933D6ArnD1FAC087":
+        {
+            "Export":
+            {
+                "Name": "AoskbStack:ExportsOutputFnGetAttOpenSearchCollectionOpensearchDemoA6D933D6ArnD1FAC087"
+            },
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "OpenSearchCollectionOpensearchDemoA6D933D6",
+                    "Arn"
+                ]
+            }
+        },
+        "OpenSearchEndpoint":
+        {
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "OpenSearchCollectionOpensearchDemoA6D933D6",
+                    "CollectionEndpoint"
+                ]
+            }
+        },
+        "OpenSearchRoleArn":
+        {
+            "Value":
+            {
+                "Fn::GetAtt":
+                [
+                    "OpenSearchCollectionOpensearchRole5A78755F",
+                    "Arn"
+                ]
+            }
+        }
+    },
+    "Parameters":
+    {
+        "SourceBucket":
+        {
+            "Description": "Source bucket for the lambda functions and templates",
+            "Type": "String"
+        }
+    },
+    "Resources":
+    {
+        "BedrockKBRole10C55766":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "bedrock.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/AmazonBedrockFullAccess"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BedrockOpenSearchPolicy99988A21":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "KnowledgeBaseBucketC011DD60",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "KnowledgeBaseBucketC011DD60",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BedrockOpenSearchPolicy99988A21",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockKBRole10C55766"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "BuildLambdaLayerProviderframeworkonEvent66B86B5B":
+        {
+            "DependsOn":
+            [
+                "BuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicy6DEDFC36",
+                "BuildLambdaLayerProviderframeworkonEventServiceRole185BCE8D"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/BuildLambdaLayerProviderframeworkonEvent66B86B5B.zip"
+                },
+                "Description": "AWS CDK resource provider framework - onEvent (AoskbStack/BuildLambdaLayerProvider)",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "USER_ON_EVENT_FUNCTION_ARN":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "CreateLambdaLayer47566964",
+                                "Arn"
+                            ]
+                        }
+                    }
+                },
+                "Handler": "framework.onEvent",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BuildLambdaLayerProviderframeworkonEventServiceRole185BCE8D",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "BuildLambdaLayerProviderframeworkonEventLogRetentionE4818B4E":
+        {
+            "Properties":
+            {
+                "LogGroupName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "/aws/lambda/",
+                            {
+                                "Ref": "BuildLambdaLayerProviderframeworkonEvent66B86B5B"
+                            }
+                        ]
+                    ]
+                },
+                "RetentionInDays": 30,
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::LogRetention"
+        },
+        "BuildLambdaLayerProviderframeworkonEventServiceRole185BCE8D":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "BuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicy6DEDFC36":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "lambda:InvokeFunction",
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "CreateLambdaLayer47566964",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "CreateLambdaLayer47566964",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "BuildLambdaLayerProviderframeworkonEventServiceRoleDefaultPolicy6DEDFC36",
+                "Roles":
+                [
+                    {
+                        "Ref": "BuildLambdaLayerProviderframeworkonEventServiceRole185BCE8D"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "CreateIndexCustomResource":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "OpenSearchCollectionAccessPolicyE359877E",
+                "OpenSearchCollectionBedrockOpenSearchPolicyE27330D7",
+                "OpenSearchCollectionEncryptionPolicy507973E4",
+                "OpenSearchCollectionNetworkPolicy8F9F33F7",
+                "OpenSearchCollectionOpensearchDemoA6D933D6",
+                "OpenSearchCollectionOpensearchRole5A78755F"
+            ],
+            "Properties":
+            {
+                "CollectionEndpoint":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "OpenSearchCollectionOpensearchDemoA6D933D6",
+                        "CollectionEndpoint"
+                    ]
+                },
+                "PhysicalResourceId": "CreateIndex",
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CreateIndexProviderframeworkonEvent04AF6F7C",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "CreateIndexProviderframeworkonEvent04AF6F7C":
+        {
+            "DependsOn":
+            [
+                "CreateIndexProviderframeworkonEventServiceRoleDefaultPolicy5437EA86",
+                "CreateIndexProviderframeworkonEventServiceRole3A222387"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/CreateIndexProviderframeworkonEvent04AF6F7C.zip"
+                },
+                "Description": "AWS CDK resource provider framework - onEvent (AoskbStack/CreateIndexProvider)",
+                "Environment":
+                {
+                    "Variables":
+                    {
+                        "USER_ON_EVENT_FUNCTION_ARN":
+                        {
+                            "Fn::GetAtt":
+                            [
+                                "OpenSearchServerlessCustomResourceD5D5ECE9",
+                                "Arn"
+                            ]
+                        }
+                    }
+                },
+                "Handler": "framework.onEvent",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CreateIndexProviderframeworkonEventServiceRole3A222387",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CreateIndexProviderframeworkonEventLogRetention341FFF2F":
+        {
+            "Properties":
+            {
+                "LogGroupName":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "/aws/lambda/",
+                            {
+                                "Ref": "CreateIndexProviderframeworkonEvent04AF6F7C"
+                            }
+                        ]
+                    ]
+                },
+                "RetentionInDays": 30,
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::LogRetention"
+        },
+        "CreateIndexProviderframeworkonEventServiceRole3A222387":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CreateIndexProviderframeworkonEventServiceRoleDefaultPolicy5437EA86":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "lambda:InvokeFunction",
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "OpenSearchServerlessCustomResourceD5D5ECE9",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "OpenSearchServerlessCustomResourceD5D5ECE9",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            ":*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "CreateIndexProviderframeworkonEventServiceRoleDefaultPolicy5437EA86",
+                "Roles":
+                [
+                    {
+                        "Ref": "CreateIndexProviderframeworkonEventServiceRole3A222387"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "CreateLambdaLayer47566964":
+        {
+            "DependsOn":
+            [
+                "CreateLambdaLayerServiceRoleDefaultPolicyECD4D42E",
+                "CreateLambdaLayerServiceRole0F3555D0"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/CreateLambdaLayer47566964.zip"
+                },
+                "EphemeralStorage":
+                {
+                    "Size": 10240
+                },
+                "Handler": "create_layer.on_event",
+                "MemorySize": 10240,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CreateLambdaLayerServiceRole0F3555D0",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 600
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CreateLambdaLayerCustomResource":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "BuildLambdaLayerProviderframeworkonEvent66B86B5B",
+                        "Arn"
+                    ]
+                },
+                "libraries":
+                [
+                    "opensearch-py",
+                    "crhelper",
+                    "cfnresponse"
+                ],
+                "s3_bucket":
+                {
+                    "Ref": "LambdaLayerBucket3217AB23"
+                }
+            },
+            "Type": "AWS::CloudFormation::CustomResource",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "CreateLambdaLayerServiceRole0F3555D0":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "CreateLambdaLayerServiceRoleDefaultPolicyECD4D42E":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "s3:Abort*",
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:GetObject*",
+                                "s3:List*",
+                                "s3:PutObject",
+                                "s3:PutObjectLegalHold",
+                                "s3:PutObjectRetention",
+                                "s3:PutObjectTagging",
+                                "s3:PutObjectVersionTagging"
+                            ],
+                            "Effect": "Allow",
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "LambdaLayerBucket3217AB23",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "LambdaLayerBucket3217AB23",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "CreateLambdaLayerServiceRoleDefaultPolicyECD4D42E",
+                "Roles":
+                [
+                    {
+                        "Ref": "CreateLambdaLayerServiceRole0F3555D0"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F":
+        {
+            "DependsOn":
+            [
+                "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F.zip"
+                },
+                "Description":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "Lambda function for auto-deleting objects in ",
+                            {
+                                "Ref": "LambdaLayerBucket3217AB23"
+                            },
+                            " S3 bucket."
+                        ]
+                    ]
+                },
+                "Handler": "index.handler",
+                "MemorySize": 128,
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "KnowledgeBaseBucketAutoDeleteObjectsCustomResource69389698":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "KnowledgeBaseBucketPolicyB9428EE4"
+            ],
+            "Properties":
+            {
+                "BucketName":
+                {
+                    "Ref": "KnowledgeBaseBucketC011DD60"
+                },
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::S3AutoDeleteObjects",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "KnowledgeBaseBucketC011DD60":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "BucketEncryption":
+                {
+                    "ServerSideEncryptionConfiguration":
+                    [
+                        {
+                            "ServerSideEncryptionByDefault":
+                            {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "PublicAccessBlockConfiguration":
+                {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags":
+                [
+                    {
+                        "Key": "aws-cdk:auto-delete-objects",
+                        "Value": "true"
+                    }
+                ]
+            },
+            "Type": "AWS::S3::Bucket",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "KnowledgeBaseBucketPolicyB9428EE4":
+        {
+            "Properties":
+            {
+                "Bucket":
+                {
+                    "Ref": "KnowledgeBaseBucketC011DD60"
+                },
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Condition":
+                            {
+                                "Bool":
+                                {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal":
+                            {
+                                "AWS": "*"
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "KnowledgeBaseBucketC011DD60",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "KnowledgeBaseBucketC011DD60",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action":
+                            [
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:PutBucketPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "AWS":
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                                        "Arn"
+                                    ]
+                                }
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "KnowledgeBaseBucketC011DD60",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "KnowledgeBaseBucketC011DD60",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "LambdaLayerBucket3217AB23":
+        {
+            "DeletionPolicy": "Delete",
+            "Properties":
+            {
+                "BucketEncryption":
+                {
+                    "ServerSideEncryptionConfiguration":
+                    [
+                        {
+                            "ServerSideEncryptionByDefault":
+                            {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "PublicAccessBlockConfiguration":
+                {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                },
+                "Tags":
+                [
+                    {
+                        "Key": "aws-cdk:auto-delete-objects",
+                        "Value": "true"
+                    }
+                ]
+            },
+            "Type": "AWS::S3::Bucket",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "LambdaLayerBucketAutoDeleteObjectsCustomResourceDBA43EFB":
+        {
+            "DeletionPolicy": "Delete",
+            "DependsOn":
+            [
+                "LambdaLayerBucketPolicyCAAAA2FF"
+            ],
+            "Properties":
+            {
+                "BucketName":
+                {
+                    "Ref": "LambdaLayerBucket3217AB23"
+                },
+                "ServiceToken":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "Custom::S3AutoDeleteObjects",
+            "UpdateReplacePolicy": "Delete"
+        },
+        "LambdaLayerBucketPolicyCAAAA2FF":
+        {
+            "Properties":
+            {
+                "Bucket":
+                {
+                    "Ref": "LambdaLayerBucket3217AB23"
+                },
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "s3:*",
+                            "Condition":
+                            {
+                                "Bool":
+                                {
+                                    "aws:SecureTransport": "false"
+                                }
+                            },
+                            "Effect": "Deny",
+                            "Principal":
+                            {
+                                "AWS": "*"
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "LambdaLayerBucket3217AB23",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "LambdaLayerBucket3217AB23",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action":
+                            [
+                                "s3:DeleteObject*",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:PutBucketPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "AWS":
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                                        "Arn"
+                                    ]
+                                }
+                            },
+                            "Resource":
+                            [
+                                {
+                                    "Fn::GetAtt":
+                                    [
+                                        "LambdaLayerBucket3217AB23",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt":
+                                                [
+                                                    "LambdaLayerBucket3217AB23",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A":
+        {
+            "DependsOn":
+            [
+                "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+                "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+            ],
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A.zip"
+                },
+                "Handler": "index.handler",
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs18.x",
+                "Timeout": 900
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action":
+                            [
+                                "logs:DeleteRetentionPolicy",
+                                "logs:PutRetentionPolicy"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+                "Roles":
+                [
+                    {
+                        "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "NestedStack":
+        {
+            "DependsOn":
+            [
+                "CreateLambdaLayerCustomResource",
+                "CreateIndexCustomResource"
+            ],
+            "Properties":
+            {
+                "TemplateURL":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "https://s3.",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ".",
+                            {
+                                "Ref": "AWS::URLSuffix"
+                            },
+                            "/",
+                            {
+                                "Ref": "SourceBucket"
+                            },
+                            "/abkb.yaml"
+                        ]
+                    ]
+                }
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "OpenSearchCollectionAccessPolicyE359877E":
+        {
+            "Properties":
+            {
+                "Description": "Access policy for test OpenSearchDemoBlog Collection",
+                "Name": "access-policy",
+                "Policy":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "[{\"Description\":\"Access for account-user\",\"Rules\":[{\"ResourceType\":\"index\",\"Resource\":[\"index/*/*\"],\"Permission\":[\"aoss:*\"]},{\"ResourceType\":\"collection\",\"Resource\":[\"collection/open-search-demo-blog\"],\"Permission\":[\"aoss:*\"]}],\"Principal\":[\"",
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "OpenSearchCollectionOpensearchRole5A78755F",
+                                    "Arn"
+                                ]
+                            },
+                            "\",\"",
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "BedrockKBRole10C55766",
+                                    "Arn"
+                                ]
+                            },
+                            "\"]}]"
+                        ]
+                    ]
+                },
+                "Type": "data"
+            },
+            "Type": "AWS::OpenSearchServerless::AccessPolicy"
+        },
+        "OpenSearchCollectionBedrockOpenSearchPolicyE27330D7":
+        {
+            "Properties":
+            {
+                "PolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "aoss:APIAccessAll",
+                            "Effect": "Allow",
+                            "Resource":
+                            {
+                                "Fn::GetAtt":
+                                [
+                                    "OpenSearchCollectionOpensearchDemoA6D933D6",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "OpenSearchCollectionBedrockOpenSearchPolicyE27330D7",
+                "Roles":
+                [
+                    {
+                        "Ref": "BedrockKBRole10C55766"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "OpenSearchCollectionEncryptionPolicy507973E4":
+        {
+            "Properties":
+            {
+                "Description": "Encryption policy for test OpenSearchDemoBlog Collection",
+                "Name": "encryption-policy",
+                "Policy": "{\"Rules\":[{\"ResourceType\":\"collection\",\"Resource\":[\"collection/open-search-demo-blog\"]}],\"AWSOwnedKey\":true}",
+                "Type": "encryption"
+            },
+            "Type": "AWS::OpenSearchServerless::SecurityPolicy"
+        },
+        "OpenSearchCollectionNetworkPolicy8F9F33F7":
+        {
+            "Properties":
+            {
+                "Description": "Network policy for test OpenSearchDemoBlog Collection",
+                "Name": "network-policy",
+                "Policy": "[{\"Rules\":[{\"ResourceType\":\"collection\",\"Resource\":[\"collection/open-search-demo-blog\"]}, {\"ResourceType\":\"dashboard\",\"Resource\":[\"collection/open-search-demo-blog\"]}],\"AllowFromPublic\":true}]",
+                "Type": "network"
+            },
+            "Type": "AWS::OpenSearchServerless::SecurityPolicy"
+        },
+        "OpenSearchCollectionOpensearchDemoA6D933D6":
+        {
+            "DependsOn":
+            [
+                "OpenSearchCollectionAccessPolicyE359877E",
+                "OpenSearchCollectionEncryptionPolicy507973E4",
+                "OpenSearchCollectionNetworkPolicy8F9F33F7"
+            ],
+            "Properties":
+            {
+                "Description":
+                {
+                    "Fn::Join":
+                    [
+                        "",
+                        [
+                            "Collection created by ",
+                            {
+                                "Ref": "AWS::StackName"
+                            },
+                            " stack for Amazon Bedrock Knowledge base."
+                        ]
+                    ]
+                },
+                "Name": "open-search-demo-blog",
+                "StandbyReplicas": "ENABLED",
+                "Type": "VECTORSEARCH"
+            },
+            "Type": "AWS::OpenSearchServerless::Collection"
+        },
+        "OpenSearchCollectionOpensearchRole5A78755F":
+        {
+            "Properties":
+            {
+                "AssumeRolePolicyDocument":
+                {
+                    "Statement":
+                    [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal":
+                            {
+                                "AWS":
+                                {
+                                    "Fn::Join":
+                                    [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":root"
+                                        ]
+                                    ]
+                                },
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns":
+                [
+                    {
+                        "Fn::Join":
+                        [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/AdministratorAccess"
+                            ]
+                        ]
+                    }
+                ],
+                "RoleName": "opensearch-demo-role"
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "OpenSearchServerlessCustomResourceD5D5ECE9":
+        {
+            "Properties":
+            {
+                "Code":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "SourceBucket"
+                    },
+                    "S3Key": "src/lambda_codes/OpenSearchServerlessCustomResourceD5D5ECE9.zip"
+                },
+                "Handler": "create_index.on_event",
+                "Layers":
+                [
+                    {
+                        "Ref": "OpenSearchServerlessLayer375DB39E"
+                    }
+                ],
+                "Role":
+                {
+                    "Fn::GetAtt":
+                    [
+                        "OpenSearchCollectionOpensearchRole5A78755F",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "python3.12",
+                "Timeout": 60
+            },
+            "Type": "AWS::Lambda::Function"
+        },
+        "OpenSearchServerlessCustomResourceEventInvokeConfig125718C9":
+        {
+            "Properties":
+            {
+                "FunctionName":
+                {
+                    "Ref": "OpenSearchServerlessCustomResourceD5D5ECE9"
+                },
+                "MaximumRetryAttempts": 2,
+                "Qualifier": "$LATEST"
+            },
+            "Type": "AWS::Lambda::EventInvokeConfig"
+        },
+        "OpenSearchServerlessLayer375DB39E":
+        {
+            "DependsOn":
+            [
+                "CreateLambdaLayerCustomResource"
+            ],
+            "Properties":
+            {
+                "CompatibleRuntimes":
+                [
+                    "python3.12"
+                ],
+                "Content":
+                {
+                    "S3Bucket":
+                    {
+                        "Ref": "LambdaLayerBucket3217AB23"
+                    },
+                    "S3Key":
+                    {
+                        "Ref": "CreateLambdaLayerCustomResource"
+                    }
+                }
+            },
+            "Type": "AWS::Lambda::LayerVersion"
+        }
+    }
+}

@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Genertive AI MY Way</title>
+    <link rel=stylesheet href=tbstyle.css>
+
+
+
+     <script>
+     	function randomIntFromInterval() {  
+  			rr = Math.floor(Math.random() * (92939392 - 3434 + 1) + 3434);
+  			seeds = document.getElementById('seed');
+  			seeds.value = rr;
+			}
+          function changeImage(state) {
+
+            if (state == 'wait')
+            {
+                 
+      
+                document.getElementById('run').innerHTML ="Please wait..";
+
+            }
+            if (state == 'run')
+            {
+                
+             
+                document.getElementById('run').innerHTML ="Run";
+
+            }
+        }
+
+        function frmsubmit(event)  {
+            event.preventDefault(); // Prevent the default form submission
+            changeImage('wait');
+
+            // Collect form data
+            var att = document.getElementById('actiontype').value;
+            //console.log(att);
+            var prompt = document.getElementById('text_prompt').value;
+            var p_stye = document.getElementById('pstyle').value;
+    
+
+            var formData = {
+                text_prompt: document.getElementById('text_prompt').value,
+                seed: parseInt(document.getElementById('seed').value),
+                steps: parseInt(document.getElementById('steps').value),
+                pstyle: document.getElementById('pstyle').value,
+                modelid: document.getElementById('modelid').value,
+                actiontype: document.getElementById('actiontype').value
+            };
+
+            // Convert form data to JSON
+            var jsonData = JSON.stringify(formData);
+
+            // Make an AJAX request to the AWS API
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'apigwmygpt', true);
+            //xhr.setRequestHeader('Access-Control-Allow-Headers', '*');
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle the response here
+                    var response = JSON.parse(xhr.responseText);
+                    
+                    // Update the image source with the URL received from the server
+                    //document.getElementById('resultImage').src = response.image_url;
+
+                    //
+                    var table = document.getElementById("myTable");
+                    var table = document.getElementById('showme');
+                    var row = table.insertRow(0);
+                    var cell1 = row.insertCell(0);
+                    //let itext ='';
+
+                    if (response.image_url == "404")
+                    {
+                        let itext =  response.error  ;
+                        cell1.innerHTML = itext;
+                    }
+                    else 
+                    {
+                        let itext = "<img src='" + response.image_url +"' width=600 height=600><br><textarea name='test' rows=2 cols=80>" +  prompt + " - " + p_stye +"</textarea>" ;
+                        cell1.innerHTML = itext;
+
+                    }
+
+                }
+                changeImage('run');
+            };
+            xhr.send(jsonData);
+        }
+
+     	function myloadit() {
+	        // JavaScript code to populate the dropdown list
+	        randomIntFromInterval();
+	        var styles = ["  ","3d-model", "analog-film", "anime", "cinematic", "comic-book", "digital-art", "enhance", "fantasy-art", "isometric", "line-art", "low-poly", "modeling-compound", "neon-punk", "origami", "photographic", "pixel-art", "tile-texture"];
+	        var select = document.getElementById('pstyle');
+
+	        for (var i = 0; i < styles.length; i++) {
+	            var option = document.createElement('option');
+	            option.value = styles[i];
+	            option.text = styles[i];
+	            select.appendChild(option);
+	        }
+            ///
+            var imagemodels =___imagellm___;
+            var modelid = document.getElementById('modelid');
+            for (var i = 0; i < imagemodels.length; i++) {
+                var ioption = document.createElement('option');
+                var optArray = imagemodels[i].split("==");
+                ioption.value = optArray[1];
+                ioption.text = optArray[0];
+                modelid.appendChild(ioption);
+            }
+            ///
+            var custom_styles =["none","anime-custom","anime-custom-2","realistic-portrait-custom"];
+            var custom = document.getElementById('custom');
+            for (var i = 0; i < custom_styles.length; i++) {
+                var ioption = document.createElement('option');
+                ioption.value = custom_styles[i];
+                ioption.text = custom_styles[i];
+                custom.appendChild(ioption);
+            }
+
+
+        }
+        function jazzuptheprompt() {
+            var customvalue =  document.getElementById('custom').value;
+            var oprompt     = document.getElementById('text_prompt').value;
+            var CUSTOM_STYLES = {
+                    "anime-custom": {
+                        "prompt_template":"Highly stylized digital artwork of -P-, trending on artstation, incredible vibrant colors, dynamic epic composition, stylized, ray tracing, traditional art by studio ghibli",
+                        "predefined_style":"digital-art"
+                    },
+                    "anime-custom-2": {
+                        "prompt_template":"Highly stylized digital artwork of -P-, trending on artstation, incredible vibrant colors, dynamic epic composition, stylized, ray tracing, traditional art by studio ghibli",
+                        "predefined_style":""
+                    },
+                    "realistic-portrait-custom": {
+                        "prompt_template":"-P- portrait photography, film photography photo Canon EOS 5D, Sony Alpha, Nikon contrast , texture, realism, high quality, film grain, Fujifilm XT3, insane details, intricate details, hyperdetailed, soft cinematic light, intricate, highly detailed, insane details, intricate details, hyperdetailed",
+                        "predefined_style":"photographic"
+                    }
+                };
+            var cstyle = CUSTOM_STYLES[customvalue]['prompt_template'];
+
+            console.log(oprompt);
+            console.log(customvalue);
+            console.log(cstyle);
+            var cprompt = cstyle.replace('-P-',oprompt);
+            console.log(cprompt);
+            document.getElementById('pstyle').value = CUSTOM_STYLES[customvalue]['predefined_style'];
+            document.getElementById('text_prompt').value = cprompt;
+
+        }
+    </script>
+</head>
+<body onload="myloadit();">
+    <form id="gptForm">
+        <table id=customers>
+            <tr>
+                <td >
+                    <input type=hidden id=actiontype name=actiontype value=image>
+                    
+                        <div class="button-container">
+ 
+                      <button type="reset" class="fancy-button" >Clear</button>
+                    </div>
+                    
+                    <textarea name="text_prompt" id="text_prompt" rows="6" cols="100" onchange="randomIntFromInterval();"></textarea>
+                    <br>
+                    <label for="text_prompt">Prompt:</label>
+
+                    <button type="submit" id="run" onclick="frmsubmit(event);">Run</button>
+
+                    <br>Enter a text to image prompt then press [>] e.g [a red rose in the background is a park and a city skyline]
+
+
+
+                </td>
+                <td valign="top">
+                    <b>Configuration</b><br>
+                    
+        
+                 
+                     <div class="select-container">
+                      <label for="Style" class="fancy-label">Style</label>
+                      <div class="select-wrapper">
+                       <select name="pstyle" id="pstyle" class="fancy-select" onchange="randomIntFromInterval();"></select>
+                      </div>
+                    </div>
+
+
+                     <div class="select-container">
+                      <label for="fancySelect" class="fancy-label">Customize</label>
+                      <div class="select-wrapper">
+                        <select name="custom" id="custom" class="fancy-select"  onchange="jazzuptheprompt();"></select>
+                      </div>
+                    </div>
+
+
+                     <div class="select-container">
+                      <label for="Modelid" class="fancy-label">Modelid</label>
+                      <div class="select-wrapper">
+                        <select name="modelid" id="modelid" class="fancy-select" onchange="randomIntFromInterval();"></select></div>
+                    </div>
+                    <input type="hidden" name="seed" id="seed" > 
+
+                    <div class="input-container">
+                      <label for="Steps" class="fancy-label">Steps</label>
+                      <div class="input-wrapper">
+                        <input type="number" id="steps" class="fancy-number" min="0" max="100" step="1" value="50">
+                        <div class="number-controls">
+                          <button class="number-control" data-action="increment">+</button>
+                          <button class="number-control" data-action="decrement">-</button>
+                        </div>
+                      </div>
+                    </div>
+ 
+                </td>
+            </tr>
+            
+        </table>
+        <table id=showme name=shome>
+        </table>
+  
+        
+    </form>
+
+ 
+</body>
+</html>
