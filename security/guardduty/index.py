@@ -300,7 +300,7 @@ def enable_gd_member(session, region, properties, accounts):
         for b in details_batch:
             unprocessed_accounts = delegated_admin_client.create_members(
                 DetectorId=detector_id,
-                AccountDetails=details
+                AccountDetails=b
             )['UnprocessedAccounts']
             if (len(unprocessed_accounts) > 0):
                 failed_accounts.append(unprocessed_accounts)
